@@ -1,0 +1,20 @@
+<div class="home-page">
+  <header class="home-header">
+    <div class="header-brand">
+      <img src="daam-logo.png" alt="DAAM" class="header-logo" />
+      <span>DAAM RH</span>
+    </div>
+    <button nz-button nzType="default" (click)="logout()">
+      <span nz-icon nzType="logout" nzTheme="outline"></span>
+      Déconnexion
+    </button>
+  </header>
+
+  <main class="home-content" *ngIf="currentUser">
+    <div class="welcome-card">
+      <h1>Bienvenue, {{ currentUser.firstName }} !</h1>
+      <p>Votre espace candidat DAAM est prêt. Bientôt vous pourrez consulter les offres d'emploi et postuler.</p>
+      <nz-tag [nzColor]="'green'">{{ currentUser.role === 'ROLE_USER' ? 'Candidat' : currentUser.role }}</nz-tag>
+    </div>
+  </main>
+</div>

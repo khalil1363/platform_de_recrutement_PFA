@@ -1,0 +1,54 @@
+.home-page {
+  min-height: 100vh;
+  background: #f5f8f6;
+}
+
+.home-header {
+  background: linear-gradient(90deg, #35654d, #40a070);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.header-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.home-content {
+  max-width: 800px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+.welcome-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(53, 101, 77, 0.1);
+  border-top: 4px solid #40a070;
+}
+
+.welcome-card h1 {
+  color: #35654d;
+  margin-bottom: 16px;
+}
+
+.welcome-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}

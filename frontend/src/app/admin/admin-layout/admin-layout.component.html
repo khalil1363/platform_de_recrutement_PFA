@@ -1,0 +1,53 @@
+<nz-layout class="admin-layout">
+  <nz-sider
+    class="admin-sider"
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+    nzWidth="260px"
+    nzTheme="dark"
+  >
+    <div class="sider-logo" [class.collapsed]="isCollapsed">
+      <img src="daam-logo.png" alt="DAAM" class="sider-logo-img" />
+      <span *ngIf="!isCollapsed" class="sider-logo-text">DAAM RH</span>
+    </div>
+
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      <li nz-menu-item nzSelected routerLink="/admin/users" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="team" nzTheme="outline"></span>
+        <span>Utilisateurs</span>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout>
+    <nz-header class="admin-header">
+      <div class="header-left">
+        <button nz-button nzType="text" class="trigger-btn" (click)="isCollapsed = !isCollapsed">
+          <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" nzTheme="outline"></span>
+        </button>
+        <h3 class="page-title">Administration</h3>
+      </div>
+
+      <div class="header-right">
+        <a nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-dropdown">
+          <nz-avatar nzIcon="user" [nzSize]="36" class="user-avatar"></nz-avatar>
+          <span class="user-name" *ngIf="currentUser">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+          <span nz-icon nzType="down" nzTheme="outline"></span>
+        </a>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Déconnexion
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </nz-header>
+
+    <nz-content class="admin-content">
+      <router-outlet></router-outlet>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

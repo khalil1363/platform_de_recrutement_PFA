@@ -1,0 +1,23 @@
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.users-header h2 {
+  margin: 0 0 4px;
+  color: #35654d;
+  font-size: 1.5rem;
+}
+
+.users-header p {
+  margin: 0;
+  color: #888;
+}
+
+.modal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}

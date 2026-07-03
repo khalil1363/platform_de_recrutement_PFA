@@ -6,6 +6,8 @@ package com.example.auth.enumeration;
 public enum Role {
 
     ADMIN("ROLE_ADMIN"),
+    RH("ROLE_RH"),
+    DEVELOPER("ROLE_DEVELOPER"),
     USER("ROLE_USER");
 
     private final String authority;

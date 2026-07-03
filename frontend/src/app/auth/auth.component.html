@@ -1,0 +1,123 @@
+<div class="auth-page">
+  <div class="brand-panel">
+    <div class="brand-content">
+      <p class="welcome-ar">مرحبا بيك في</p>
+      <img src="daam-logo.png" alt="DAAM Logo" class="brand-logo" />
+      <h1 class="brand-title">DAAM RH</h1>
+      <p class="brand-subtitle">Plateforme de recrutement</p>
+      <p class="brand-description">
+        Rejoignez l'équipe DAAM et participez à l'inclusion financière des entrepreneurs tunisiens.
+      </p>
+    </div>
+    <div class="brand-decoration"></div>
+  </div>
+
+  <div class="form-panel" [class.flipped]="isRegisterMode">
+    <div class="flip-container" [class.flipping]="isFlipping">
+      <div class="flip-inner">
+        <!-- Login side -->
+        <div class="flip-face flip-front">
+          <div class="form-card">
+            <div class="form-header">
+              <h2>Connexion</h2>
+              <p>Accédez à votre espace personnel</p>
+            </div>
+
+            <form nz-form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+              <nz-form-item>
+                <nz-form-control nzErrorTip="Nom d'utilisateur requis">
+                  <nz-input-group nzPrefixIcon="user">
+                    <input nz-input formControlName="username" placeholder="Nom d'utilisateur" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-control nzErrorTip="Mot de passe requis (min. 6 caractères)">
+                  <nz-input-group nzPrefixIcon="lock">
+                    <input nz-input type="password" formControlName="password" placeholder="Mot de passe" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <button nz-button nzType="primary" nzBlock nzSize="large" [nzLoading]="loginLoading" type="submit">
+                Se connecter
+              </button>
+            </form>
+
+            <div class="form-footer">
+              <span>Pas encore de compte ?</span>
+              <a (click)="toggleMode()">Créer un compte</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Register side -->
+        <div class="flip-face flip-back">
+          <div class="form-card">
+            <div class="form-header">
+              <h2>Inscription</h2>
+              <p>Créez votre compte candidat</p>
+            </div>
+
+            <form nz-form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+              <div class="form-row">
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Prénom requis">
+                    <input nz-input formControlName="firstName" placeholder="Prénom" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                  <nz-form-control nzErrorTip="Nom requis">
+                    <input nz-input formControlName="lastName" placeholder="Nom" />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+
+              <nz-form-item>
+                <nz-form-control nzErrorTip="Nom d'utilisateur requis (min. 3 caractères)">
+                  <nz-input-group nzPrefixIcon="user">
+                    <input nz-input formControlName="username" placeholder="Nom d'utilisateur" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-control nzErrorTip="Email invalide">
+                  <nz-input-group nzPrefixIcon="mail">
+                    <input nz-input formControlName="email" placeholder="Email" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-control nzErrorTip="Mot de passe requis (min. 6 caractères)">
+                  <nz-input-group nzPrefixIcon="lock">
+                    <input nz-input type="password" formControlName="password" placeholder="Mot de passe" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-control>
+                  <nz-input-group nzPrefixIcon="phone">
+                    <input nz-input formControlName="phoneNumber" placeholder="Téléphone (optionnel)" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <button nz-button nzType="primary" nzBlock nzSize="large" [nzLoading]="registerLoading" type="submit">
+                S'inscrire
+              </button>
+            </form>
+
+            <div class="form-footer">
+              <span>Déjà un compte ?</span>
+              <a (click)="toggleMode()">Se connecter</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

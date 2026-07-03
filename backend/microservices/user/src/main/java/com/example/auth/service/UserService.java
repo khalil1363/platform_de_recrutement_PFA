@@ -1,5 +1,6 @@
 package com.example.auth.service;
 
+import com.example.auth.dto.AdminCreateUserRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.entity.User;
 
@@ -24,6 +25,23 @@ public interface UserService {
      * @return user profile response
      */
     UserResponse getCurrentUser(String username);
+
+    /**
+     * Creates a new user account with a specific role (admin only).
+     *
+     * @param request admin create user payload
+     * @return created user profile response
+     */
+    UserResponse createUserByAdmin(AdminCreateUserRequest request);
+
+    /**
+     * Updates the active status of a user account.
+     *
+     * @param userId the user identifier
+     * @param active whether the account should be active
+     * @return updated user profile response
+     */
+    UserResponse updateUserStatus(String userId, boolean active);
 
     /**
      * Maps a User entity to a UserResponse DTO.

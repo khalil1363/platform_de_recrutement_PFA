@@ -1,0 +1,127 @@
+<div class="users-page">
+  <div class="users-header">
+    <div>
+      <h2>Gestion des utilisateurs</h2>
+      <p>Créez et gérez les comptes RH, développeurs et candidats</p>
+    </div>
+    <button nz-button nzType="primary" (click)="openCreateModal()">
+      <span nz-icon nzType="plus" nzTheme="outline"></span>
+      Ajouter un utilisateur
+    </button>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-table
+      #usersTable
+      [nzData]="users"
+      [nzPageSize]="10"
+      nzShowSizeChanger
+      [nzFrontPagination]="true"
+    >
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Nom d'utilisateur</th>
+          <th>Rôle</th>
+          <th>Date d'inscription</th>
+          <th>Statut</th>
+          <th nzWidth="120px">Actif</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of usersTable.data">
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.username }}</td>
+          <td>
+            <nz-tag [nzColor]="getRoleColor(user.role)">{{ getRoleLabel(user.role) }}</nz-tag>
+          </td>
+          <td>{{ user.joinDate | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            <nz-tag [nzColor]="user.active ? 'success' : 'error'">
+              {{ user.active ? 'Actif' : 'Inactif' }}
+            </nz-tag>
+          </td>
+          <td>
+            <nz-switch
+              [ngModel]="user.active"
+              (ngModelChange)="onStatusChange(user, $event)"
+              nzCheckedChildren="ON"
+              nzUnCheckedChildren="OFF"
+            ></nz-switch>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <nz-empty *ngIf="!loading && users.length === 0" nzNotFoundContent="Aucun utilisateur"></nz-empty>
+  </nz-spin>
+</div>
+
+<nz-modal
+  [(nzVisible)]="isModalVisible"
+  nzTitle="Créer un utilisateur"
+  (nzOnCancel)="closeCreateModal()"
+  (nzOnOk)="onCreateUser()"
+  [nzOkLoading]="createLoading"
+  nzOkText="Créer"
+  nzCancelText="Annuler"
+  nzWidth="520px"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="createForm" nzLayout="vertical">
+      <div class="modal-row">
+        <nz-form-item>
+          <nz-form-label nzRequired>Prénom</nz-form-label>
+          <nz-form-control nzErrorTip="Prénom requis">
+            <input nz-input formControlName="firstName" placeholder="Prénom" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label nzRequired>Nom</nz-form-label>
+          <nz-form-control nzErrorTip="Nom requis">
+            <input nz-input formControlName="lastName" placeholder="Nom" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Nom d'utilisateur</nz-form-label>
+        <nz-form-control nzErrorTip="Nom d'utilisateur requis">
+          <input nz-input formControlName="username" placeholder="Nom d'utilisateur" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Email</nz-form-label>
+        <nz-form-control nzErrorTip="Email invalide">
+          <input nz-input formControlName="email" placeholder="email@daam.tn" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Mot de passe</nz-form-label>
+        <nz-form-control nzErrorTip="Mot de passe requis (min. 6 caractères)">
+          <input nz-input type="password" formControlName="password" placeholder="Mot de passe" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Rôle</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="role" nzPlaceHolder="Sélectionner un rôle">
+            <nz-option *ngFor="let role of roleOptions" [nzValue]="role.value" [nzLabel]="role.label"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Téléphone</nz-form-label>
+        <nz-form-control>
+          <input nz-input formControlName="phoneNumber" placeholder="Téléphone" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>
