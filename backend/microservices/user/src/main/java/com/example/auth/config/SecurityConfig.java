@@ -1,5 +1,6 @@
 package com.example.auth.config;
 
+import com.example.auth.security.InternalApiKeyFilter;
 import com.example.auth.security.JwtAccessDeniedHandler;
 import com.example.auth.security.JwtAuthenticationEntryPoint;
 import com.example.auth.security.JwtAuthenticationFilter;
@@ -20,8 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.example.auth.constant.SecurityConstant.LOGIN_PATH;
-import static com.example.auth.constant.SecurityConstant.REGISTER_PATH;
+import static com.example.auth.constant.SecurityConstant.PUBLIC_ENDPOINTS;
 
 /**
  * Spring Security configuration using SecurityFilterChain.
@@ -33,6 +33,7 @@ import static com.example.auth.constant.SecurityConstant.REGISTER_PATH;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final InternalApiKeyFilter internalApiKeyFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final UserDetailsServiceImpl userDetailsService;
@@ -56,9 +57,10 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(LOGIN_PATH, REGISTER_PATH).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

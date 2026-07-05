@@ -1,0 +1,73 @@
+<nz-card nzTitle="Candidatures reçues">
+  <button nz-button nzType="link" (click)="back()">← Retour aux recrutements</button>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-table [nzData]="applications">
+      <thead>
+        <tr>
+          <th>Candidat</th>
+          <th>Email</th>
+          <th>Score QCM</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of applications">
+          <td>
+            <div class="candidate-cell">
+              <nz-avatar
+                [nzSrc]="authService.resolveImageUrl(app.candidate?.profileImageUrl) || undefined"
+                nzIcon="user"
+              ></nz-avatar>
+              <span>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</span>
+            </div>
+          </td>
+          <td>{{ app.candidate?.email }}</td>
+          <td>{{ app.qcmScore }}/{{ app.qcmTotalQuestions }}</td>
+          <td>{{ app.appliedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <button nz-button nzSize="small" nzType="primary" (click)="openDetails(app)">Détails</button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-spin>
+</nz-card>
+
+<nz-modal
+  [(nzVisible)]="detailVisible"
+  nzTitle="Détail de la candidature"
+  [nzFooter]="null"
+  (nzOnCancel)="detailVisible = false"
+  nzWidth="760px"
+>
+  <div *nzModalContent>
+    <ng-container *ngIf="selectedApplication">
+      <nz-descriptions nzBordered [nzColumn]="2">
+        <nz-descriptions-item nzTitle="Candidat">
+          {{ selectedApplication.candidate?.firstName }} {{ selectedApplication.candidate?.lastName }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email">{{ selectedApplication.candidate?.email }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Téléphone">{{ selectedApplication.candidate?.phoneNumber || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Score QCM">
+          {{ selectedApplication.qcmScore }}/{{ selectedApplication.qcmTotalQuestions }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+
+      <div class="cv-link" *ngIf="selectedApplication.cvFileUrl">
+        <a [href]="cvUrl(selectedApplication.cvFileUrl)!" target="_blank" rel="noopener">
+          Télécharger le CV
+        </a>
+      </div>
+
+      <h4>Réponses QCM</h4>
+      <div class="answer-block" *ngFor="let answer of selectedApplication.answers">
+        <p><strong>{{ answer.questionText }}</strong></p>
+        <p>Réponse : {{ answer.selectedOption }}
+          <nz-tag [nzColor]="answer.correct ? 'green' : 'red'">{{ answer.correct ? 'Correct' : 'Incorrect' }}</nz-tag>
+        </p>
+      </div>
+    </ng-container>
+  </div>
+</nz-modal>

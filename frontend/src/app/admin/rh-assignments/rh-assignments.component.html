@@ -1,0 +1,34 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Affectation RH</h2>
+    <p>Assignez chaque responsable RH à sa zone géographique</p>
+  </div>
+</div>
+
+<div class="assign-card">
+  <form nz-form [formGroup]="assignForm" (ngSubmit)="assignRh()">
+    <div class="form-grid">
+      <nz-form-item>
+        <nz-form-label nzRequired>Responsable RH</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="rhUserId" nzPlaceHolder="Sélectionner un RH">
+            <nz-option
+              *ngFor="let rh of rhUsers"
+              [nzValue]="rh.userId"
+              [nzLabel]="rh.firstName + ' ' + rh.lastName + ' (' + rh.username + ')'"
+            ></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired>Zone</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="zoneId" nzPlaceHolder="Sélectionner une zone">
+            <nz-option *ngFor="let zone of zones" [nzValue]="zone.zoneId" [nzLabel]="zone.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <button nz-button nzType="primary" [nzLoading]="modalLoading" type="submit">Assigner</button>
+  </form>
+</div>

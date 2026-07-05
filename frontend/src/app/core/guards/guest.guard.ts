@@ -10,5 +10,5 @@ export const guestGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree([authService.isAdmin() ? '/admin/users' : '/home']);
+  return router.createUrlTree([authService.isAdmin() ? '/admin/users' : '/profile']);
 };

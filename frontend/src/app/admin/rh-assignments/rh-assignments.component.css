@@ -1,0 +1,20 @@
+.assign-card {
+  background: var(--daam-surface);
+  border: 1px solid var(--daam-border);
+  border-radius: var(--daam-radius-md);
+  padding: 28px;
+  max-width: 720px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,52 @@
+<div class="jobs-page">
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <span class="hero-badge">Carrières DAAM</span>
+      <h1>Trouvez votre prochaine opportunité</h1>
+      <p>Rejoignez une institution de microfinance engagée pour l'inclusion financière des entrepreneurs tunisiens.</p>
+      <div class="page-hero-stats" *ngIf="recruitments.length">
+        <div class="stat-pill">
+          <strong>{{ recruitments.length }}</strong>
+          <span>offres actives</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <nz-spin [nzSpinning]="loading">
+    <div class="jobs-grid" *ngIf="recruitments.length; else emptyState">
+      <article
+        *ngFor="let job of recruitments; let i = index"
+        class="job-card-modern"
+        [style.animation-delay.ms]="i * 60"
+        (click)="viewJob(job.recruitmentId)"
+      >
+        <div class="job-card-top">
+          <h3>{{ job.title }}</h3>
+          <nz-tag nzColor="green">{{ job.region || 'Tunisie' }}</nz-tag>
+        </div>
+        <p class="job-company">
+          <span nz-icon nzType="bank" nzTheme="outline"></span>
+          {{ job.companyName }}
+        </p>
+        <div class="job-meta-row">
+          <span class="job-meta-chip" *ngIf="job.availability">{{ job.availability }}</span>
+          <span class="job-meta-chip" *ngIf="job.salaryMin && job.salaryMax">
+            {{ job.salaryMin }} – {{ job.salaryMax }} {{ job.salaryPeriod || 'DT' }}
+          </span>
+          <span class="job-meta-chip" *ngIf="job.experienceLevel">{{ job.experienceLevel }}</span>
+        </div>
+        <p class="job-excerpt">{{ job.description | slice:0:140 }}{{ (job.description?.length || 0) > 140 ? '…' : '' }}</p>
+        <div class="job-card-footer">
+          <span class="job-meta-chip">{{ job.city || job.zoneName || 'Tunisie' }}</span>
+          <button nz-button nzType="primary" nzSize="small" (click)="viewJob(job.recruitmentId); $event.stopPropagation()">
+            Voir l'offre
+          </button>
+        </div>
+      </article>
+    </div>
+    <ng-template #emptyState>
+      <nz-empty nzNotFoundContent="Aucune offre publiée pour le moment"></nz-empty>
+    </ng-template>
+  </nz-spin>
+</div>

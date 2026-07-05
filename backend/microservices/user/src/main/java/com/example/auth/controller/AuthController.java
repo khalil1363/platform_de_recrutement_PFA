@@ -1,14 +1,18 @@
 package com.example.auth.controller;
 
 import com.example.auth.dto.AdminCreateUserRequest;
+import com.example.auth.dto.AdminUpdateUserRequest;
 import com.example.auth.dto.AuthenticationResponse;
+import com.example.auth.dto.FileUploadResponse;
 import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.RegisterRequest;
+import com.example.auth.dto.UpdateProfileRequest;
 import com.example.auth.dto.UpdateUserStatusRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.response.ApiResponse;
 import com.example.auth.security.CustomUserDetails;
 import com.example.auth.service.AuthenticationService;
+import com.example.auth.service.FileStorageService;
 import com.example.auth.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +20,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,6 +44,7 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final FileStorageService fileStorageService;
 
     /**
      * Registers a new user account.
@@ -62,6 +71,22 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthenticationResponse response = authenticationService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response, HttpStatus.OK.value()));
+    }
+
+    /**
+     * Uploads a profile image and returns its public URL.
+     *
+     * @param file profile image file
+     * @return uploaded file URL
+     */
+    @PostMapping("/upload/profile-image")
+    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadProfileImage(
+            @RequestParam("file") MultipartFile file) {
+        String profileImageUrl = fileStorageService.storeProfileImage(file);
+        FileUploadResponse response = FileUploadResponse.builder()
+                .profileImageUrl(profileImageUrl)
+                .build();
+        return ResponseEntity.ok(ApiResponse.success("Profile image uploaded", response, HttpStatus.OK.value()));
     }
 
     /**
@@ -108,6 +133,38 @@ public class AuthController {
     }
 
     /**
+     * Updates a user account (admin only).
+     *
+     * @param userId the user identifier
+     * @param request admin update payload
+     * @return updated user profile
+     */
+    @PutMapping("/users/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+            @PathVariable String userId,
+            @Valid @RequestBody AdminUpdateUserRequest request) {
+        UserResponse user = userService.updateUserByAdmin(userId, request);
+        return ResponseEntity.ok(ApiResponse.success("User updated successfully", user, HttpStatus.OK.value()));
+    }
+
+    /**
+     * Deletes a user account (admin only).
+     *
+     * @param userId the user identifier
+     * @param userDetails the authenticated admin
+     * @return empty success response
+     */
+    @DeleteMapping("/users/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable String userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUser(userId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null, HttpStatus.OK.value()));
+    }
+
+    /**
      * Returns the currently authenticated user's profile information.
      *
      * @param userDetails the authenticated user details
@@ -118,5 +175,20 @@ public class AuthController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UserResponse response = userService.getCurrentUser(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("User profile retrieved", response, HttpStatus.OK.value()));
+    }
+
+    /**
+     * Updates the currently authenticated user's profile.
+     *
+     * @param userDetails the authenticated user details
+     * @param request profile update payload
+     * @return updated user profile
+     */
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> updateCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UpdateProfileRequest request) {
+        UserResponse response = userService.updateProfile(userDetails.getUsername(), request);
+        return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", response, HttpStatus.OK.value()));
     }
 }

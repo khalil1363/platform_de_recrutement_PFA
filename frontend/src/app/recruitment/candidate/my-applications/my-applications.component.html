@@ -1,0 +1,34 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Mes candidatures</h2>
+    <p>Suivez l'état de vos demandes de recrutement</p>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="applications" [nzShowPagination]="false" *ngIf="applications.length; else emptyState">
+    <thead>
+      <tr>
+        <th>Offre</th>
+        <th>Date</th>
+        <th>Score QCM</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let app of applications">
+        <td><strong>{{ app.recruitmentTitle }}</strong></td>
+        <td>{{ app.appliedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <span class="score-badge">{{ app.qcmScore }}/{{ app.qcmTotalQuestions }}</span>
+        </td>
+        <td><nz-tag [nzColor]="statusColor(app.status)">{{ statusLabel(app.status) }}</nz-tag></td>
+      </tr>
+    </tbody>
+  </nz-table>
+  <ng-template #emptyState>
+    <nz-empty nzNotFoundContent="Aucune candidature pour le moment">
+      <button nz-button nzType="primary" routerLink="/jobs">Voir les offres</button>
+    </nz-empty>
+  </ng-template>
+</nz-spin>

@@ -1,0 +1,55 @@
+<nz-card nzTitle="Entreprises de ma zone">
+  <div class="toolbar">
+    <button nz-button nzType="primary" (click)="openModal()">Nouvelle entreprise</button>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-table [nzData]="companies" [nzShowPagination]="false">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Zone</th>
+          <th>Adresse</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let company of companies">
+          <td>{{ company.name }}</td>
+          <td>{{ company.zoneName }}</td>
+          <td>{{ company.address || '-' }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-spin>
+</nz-card>
+
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  nzTitle="Nouvelle entreprise"
+  (nzOnCancel)="modalVisible = false"
+  (nzOnOk)="saveCompany()"
+  [nzOkLoading]="modalLoading"
+>
+  <form nz-form [formGroup]="companyForm" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label nzRequired>Nom</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="name" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired>Zone</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="zoneId" nzPlaceHolder="Sélectionner une zone">
+          <nz-option *ngFor="let zone of zones" [nzValue]="zone.zoneId" [nzLabel]="zone.name"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Adresse</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="address" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

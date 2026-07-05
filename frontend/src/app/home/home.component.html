@@ -12,6 +12,12 @@
 
   <main class="home-content" *ngIf="currentUser">
     <div class="welcome-card">
+      <nz-avatar
+        [nzSize]="96"
+        [nzSrc]="authService.resolveImageUrl(currentUser.profileImageUrl) || undefined"
+        nzIcon="user"
+        class="welcome-avatar"
+      ></nz-avatar>
       <h1>Bienvenue, {{ currentUser.firstName }} !</h1>
       <p>Votre espace candidat DAAM est prêt. Bientôt vous pourrez consulter les offres d'emploi et postuler.</p>
       <nz-tag [nzColor]="'green'">{{ currentUser.role === 'ROLE_USER' ? 'Candidat' : currentUser.role }}</nz-tag>

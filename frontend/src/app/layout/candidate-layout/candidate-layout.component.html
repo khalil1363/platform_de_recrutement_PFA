@@ -1,0 +1,64 @@
+<nz-layout class="app-shell candidate-layout">
+  <nz-sider
+    class="shell-sider"
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+    [nzWidth]="268"
+    nzTheme="dark"
+  >
+    <div class="sider-brand" [class.collapsed]="isCollapsed">
+      <img src="daam-logo.png" alt="DAAM" />
+      <div class="sider-brand-text" *ngIf="!isCollapsed">
+        DAAM RH
+        <small>Espace candidat</small>
+      </div>
+    </div>
+
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      <li nz-menu-item routerLink="/jobs" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{ exact: true }">
+        <span nz-icon nzType="solution" nzTheme="outline"></span>
+        <span>Offres d'emploi</span>
+      </li>
+      <li nz-menu-item routerLink="/jobs/applications" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="file-text" nzTheme="outline"></span>
+        <span>Mes candidatures</span>
+      </li>
+      <li nz-menu-item routerLink="/jobs/profile" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="idcard" nzTheme="outline"></span>
+        <span>Mon profil</span>
+      </li>
+    </ul>
+
+    <div class="sider-footer" *ngIf="!isCollapsed">
+      <p>Plateforme de recrutement DAAM — Trouvez votre place dans la microfinance tunisienne.</p>
+    </div>
+  </nz-sider>
+
+  <nz-layout class="shell-main">
+    <nz-header class="shell-header">
+      <div class="header-left">
+        <button nz-button nzType="text" class="trigger-btn" (click)="isCollapsed = !isCollapsed">
+          <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" nzTheme="outline"></span>
+        </button>
+        <h3 class="page-title">Carrières &amp; Candidatures</h3>
+      </div>
+      <div class="header-right">
+        <span class="role-pill">Candidat</span>
+        <ng-container *ngIf="currentUser; else guestActions">
+          <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+          <button nz-button nzType="default" nzSize="small" (click)="logout()">Déconnexion</button>
+        </ng-container>
+        <ng-template #guestActions>
+          <button nz-button nzType="primary" routerLink="/login">Se connecter</button>
+        </ng-template>
+      </div>
+    </nz-header>
+
+    <nz-content class="shell-content">
+      <div class="content-panel">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

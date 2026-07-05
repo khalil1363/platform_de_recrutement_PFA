@@ -45,4 +45,7 @@ public class RegisterRequest {
 
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
+
+    @Size(max = 500, message = "Profile image URL must not exceed 500 characters")
+    private String profileImageUrl;
 }

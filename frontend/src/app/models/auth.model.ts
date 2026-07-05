@@ -11,6 +11,7 @@ export interface RegisterRequest {
   password: string;
   phoneNumber?: string;
   address?: string;
+  profileImageUrl?: string;
 }
 
 export interface AuthenticationResponse {
@@ -37,6 +38,27 @@ export interface UserProfile {
   notLocked: boolean;
 }
 
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  address?: string;
+  profileImageUrl?: string;
+  password?: string;
+}
+
+export interface AdminUpdateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  phoneNumber?: string;
+  address?: string;
+  profileImageUrl?: string;
+  password?: string;
+}
+
 export interface AdminCreateUserRequest {
   firstName: string;
   lastName: string;
@@ -46,6 +68,11 @@ export interface AdminCreateUserRequest {
   role: string;
   phoneNumber?: string;
   address?: string;
+  profileImageUrl?: string;
+}
+
+export interface FileUploadResponse {
+  profileImageUrl: string;
 }
 
 export type UserRole = 'ROLE_USER' | 'ROLE_ADMIN' | 'ROLE_RH' | 'ROLE_DEVELOPER';

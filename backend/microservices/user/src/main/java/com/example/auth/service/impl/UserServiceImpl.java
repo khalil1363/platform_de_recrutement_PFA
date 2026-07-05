@@ -1,11 +1,14 @@
 package com.example.auth.service.impl;
 
 import com.example.auth.dto.AdminCreateUserRequest;
+import com.example.auth.dto.AdminUpdateUserRequest;
+import com.example.auth.dto.UpdateProfileRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.entity.User;
 import com.example.auth.enumeration.Role;
 import com.example.auth.exception.EmailAlreadyExistsException;
 import com.example.auth.exception.InvalidRoleException;
+import com.example.auth.exception.OperationNotAllowedException;
 import com.example.auth.exception.UserNotFoundException;
 import com.example.auth.exception.UsernameAlreadyExistsException;
 import com.example.auth.repository.UserRepository;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -47,8 +51,22 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(String username) {
+        return getUserByUsername(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        return mapToUserResponse(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         return mapToUserResponse(user);
     }
 
@@ -77,6 +95,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
+                .profileImageUrl(request.getProfileImageUrl())
                 .joinDate(now)
                 .role(roleAuthority)
                 .authorities(resolveAuthoritiesForRole(roleAuthority))
@@ -97,6 +116,82 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         user.setActive(active);
         return mapToUserResponse(userRepository.save(user));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public UserResponse updateProfile(String username, UpdateProfileRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+
+        if (userRepository.existsByEmailAndUserIdNot(request.getEmail(), user.getUserId())) {
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
+
+        applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
+                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl());
+
+        if (StringUtils.hasText(request.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return mapToUserResponse(userRepository.save(user));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public UserResponse updateUserByAdmin(String userId, AdminUpdateUserRequest request) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        if (userRepository.existsByEmailAndUserIdNot(request.getEmail(), userId)) {
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
+
+        String roleAuthority = resolveRoleAuthority(request.getRole());
+        applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
+                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl());
+
+        user.setRole(roleAuthority);
+        user.setAuthorities(resolveAuthoritiesForRole(roleAuthority));
+
+        if (StringUtils.hasText(request.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return mapToUserResponse(userRepository.save(user));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteUser(String userId, String requestingUsername) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        if (user.getUsername().equals(requestingUsername)) {
+            throw new OperationNotAllowedException("You cannot delete your own account");
+        }
+
+        userRepository.delete(user);
+    }
+
+    private void applyProfileFields(User user, String firstName, String lastName, String email,
+                                    String phoneNumber, String address, String profileImageUrl) {
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPhoneNumber(phoneNumber);
+        user.setAddress(address);
+        user.setProfileImageUrl(profileImageUrl);
     }
 
     private String resolveRoleAuthority(String role) {

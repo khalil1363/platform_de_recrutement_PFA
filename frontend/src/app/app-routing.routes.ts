@@ -1,14 +1,8 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { HomeComponent } from './home/home.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  {
-    path: 'home',
-    component: HomeComponent,
-    canActivate: [authGuard]
-  },
+  { path: 'home', redirectTo: 'jobs', pathMatch: 'full' },
   {
     path: 'login',
     loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule)
@@ -20,6 +14,14 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then((m) => m.AdminModule)
+  },
+  {
+    path: 'jobs',
+    loadChildren: () => import('./recruitment/recruitment.module').then((m) => m.RecruitmentModule)
+  },
+  {
+    path: 'rh',
+    loadChildren: () => import('./recruitment/rh.module').then((m) => m.RhModule)
   },
   { path: '**', redirectTo: 'login' }
 ];

@@ -13,7 +13,7 @@ export class AdminLayoutComponent implements OnInit {
   currentUser: UserProfile | null = null;
 
   constructor(
-    private readonly authService: AuthService,
+    readonly authService: AuthService,
     private readonly router: Router
   ) {}
 

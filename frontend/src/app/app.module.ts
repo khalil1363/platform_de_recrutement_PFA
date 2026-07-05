@@ -17,13 +17,25 @@ import {
   TeamOutline,
   LogoutOutline,
   PlusOutline,
-  DownOutline
+  DownOutline,
+  CameraOutline,
+  EnvironmentOutline,
+  EditOutline,
+  DeleteOutline,
+  SaveOutline,
+  IdcardOutline,
+  SettingOutline,
+  SolutionOutline,
+  BankOutline,
+  FileTextOutline,
+  UsergroupAddOutline,
+  ArrowLeftOutline,
+  SendOutline
 } from '@ant-design/icons-angular/icons';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
-import { HomeComponent } from './home/home.component';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 registerLocaleData(fr);
@@ -38,11 +50,24 @@ const icons: IconDefinition[] = [
   TeamOutline,
   LogoutOutline,
   PlusOutline,
-  DownOutline
+  DownOutline,
+  CameraOutline,
+  EnvironmentOutline,
+  EditOutline,
+  DeleteOutline,
+  SaveOutline,
+  IdcardOutline,
+  SettingOutline,
+  SolutionOutline,
+  BankOutline,
+  FileTextOutline,
+  UsergroupAddOutline,
+  ArrowLeftOutline,
+  SendOutline
 ];
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent],
+  declarations: [AppComponent],
   imports: [BrowserModule, BrowserAnimationsModule, AppRoutingModule, SharedModule],
   providers: [
     provideClientHydration(),

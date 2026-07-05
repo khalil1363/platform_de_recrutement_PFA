@@ -1,0 +1,120 @@
+<div class="apply-page">
+  <button class="back-link" type="button" (click)="back()">
+    <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+    Retour à l'offre
+  </button>
+
+  <nz-spin [nzSpinning]="loading">
+    <ng-container *ngIf="recruitment">
+      <section class="apply-hero">
+        <div class="apply-hero-content">
+          <span class="hero-badge">Candidature</span>
+          <h1>{{ recruitment.title }}</h1>
+          <p>{{ recruitment.companyName }} · Complétez les étapes ci-dessous pour envoyer votre dossier</p>
+        </div>
+      </section>
+
+      <div class="apply-card">
+        <nz-steps [nzCurrent]="currentStep" nzSize="small" class="apply-steps">
+          <nz-step nzTitle="CV" nzDescription="Téléversement"></nz-step>
+          <nz-step nzTitle="QCM" nzDescription="Questions"></nz-step>
+          <nz-step nzTitle="Envoi" nzDescription="Confirmation"></nz-step>
+        </nz-steps>
+
+        <div class="step-content" *ngIf="currentStep === 0">
+          <div class="step-intro">
+            <span nz-icon nzType="file-text" nzTheme="outline" class="step-icon"></span>
+            <div>
+              <h3>Votre curriculum vitae</h3>
+              <p>Format PDF ou Word · Taille maximale 5 Mo</p>
+            </div>
+          </div>
+          <nz-upload
+            nzType="drag"
+            class="cv-upload"
+            [nzMultiple]="false"
+            [nzShowUploadList]="true"
+            [nzCustomRequest]="customCvUpload"
+            [nzBeforeUpload]="beforeCvUpload"
+            [nzDisabled]="cvUploading"
+          >
+            <p class="ant-upload-drag-icon">
+              <span nz-icon nzType="inbox" nzTheme="outline"></span>
+            </p>
+            <p class="ant-upload-text">Cliquez ou glissez votre CV ici</p>
+            <p class="ant-upload-hint">Un CV à jour augmente vos chances d'être sélectionné</p>
+          </nz-upload>
+          <div class="cv-success-banner" *ngIf="cvFileUrl">
+            <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+            CV prêt à être envoyé
+          </div>
+        </div>
+
+        <div class="step-content" *ngIf="currentStep === 1">
+          <div class="step-intro">
+            <span nz-icon nzType="solution" nzTheme="outline" class="step-icon"></span>
+            <div>
+              <h3>Questionnaire de compétences</h3>
+              <p>{{ recruitment.questions?.length || 0 }} question(s) · Choisissez la meilleure réponse</p>
+            </div>
+          </div>
+          <div class="question-block" *ngFor="let question of recruitment.questions; let i = index">
+            <div class="question-number">{{ i + 1 }}</div>
+            <div class="question-body">
+              <h4>{{ question.questionText }}</h4>
+              <nz-radio-group [(ngModel)]="answers[question.questionId!]" class="answer-group">
+                <label nz-radio nzValue="A" class="answer-option">{{ question.optionA }}</label>
+                <label nz-radio nzValue="B" class="answer-option">{{ question.optionB }}</label>
+                <label nz-radio nzValue="C" class="answer-option" *ngIf="question.optionC">{{ question.optionC }}</label>
+                <label nz-radio nzValue="D" class="answer-option" *ngIf="question.optionD">{{ question.optionD }}</label>
+              </nz-radio-group>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-content" *ngIf="currentStep === 2">
+          <div class="step-intro">
+            <span nz-icon nzType="send" nzTheme="outline" class="step-icon"></span>
+            <div>
+              <h3>Vérification finale</h3>
+              <p>Relisez votre dossier avant l'envoi définitif</p>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Poste</span>
+              <strong>{{ recruitment.title }}</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Entreprise</span>
+              <strong>{{ recruitment.companyName }}</strong>
+            </div>
+            <div class="summary-item" [class.ok]="cvFileUrl" [class.warn]="!cvFileUrl">
+              <span class="summary-label">CV</span>
+              <strong>{{ cvFileUrl ? 'Téléchargé' : 'Manquant' }}</strong>
+            </div>
+            <div class="summary-item ok">
+              <span class="summary-label">QCM</span>
+              <strong>{{ recruitment.questions?.length || 0 }} réponse(s)</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button nz-button *ngIf="currentStep > 0" (click)="prevStep()">
+            <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+            Précédent
+          </button>
+          <button nz-button nzType="primary" *ngIf="currentStep < 2" (click)="nextStep()">
+            Suivant
+            <span nz-icon nzType="right" nzTheme="outline"></span>
+          </button>
+          <button nz-button nzType="primary" *ngIf="currentStep === 2" [nzLoading]="submitting" (click)="submit()">
+            <span nz-icon nzType="send" nzTheme="outline"></span>
+            Envoyer ma candidature
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </nz-spin>
+</div>

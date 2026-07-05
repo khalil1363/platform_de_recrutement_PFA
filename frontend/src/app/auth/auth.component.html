@@ -1,4 +1,4 @@
-<div class="auth-page">
+<div class="auth-page" [class.register-mode]="isRegisterMode">
   <div class="brand-panel">
     <div class="brand-content">
       <p class="welcome-ar">مرحبا بيك في</p>
@@ -10,6 +10,7 @@
       </p>
     </div>
     <div class="brand-decoration"></div>
+    <div class="brand-decoration-2"></div>
   </div>
 
   <div class="form-panel" [class.flipped]="isRegisterMode">
@@ -54,13 +55,33 @@
 
         <!-- Register side -->
         <div class="flip-face flip-back">
-          <div class="form-card">
+          <div class="form-card register-card">
             <div class="form-header">
               <h2>Inscription</h2>
               <p>Créez votre compte candidat</p>
             </div>
 
-            <form nz-form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+            <form nz-form [formGroup]="registerForm" (ngSubmit)="onRegister()" nzLayout="vertical" class="register-form">
+              <div class="profile-upload">
+                <nz-avatar
+                  [nzSize]="80"
+                  [nzSrc]="profileImagePreview || undefined"
+                  nzIcon="user"
+                  class="profile-avatar"
+                ></nz-avatar>
+                <nz-upload
+                  [nzShowUploadList]="false"
+                  [nzBeforeUpload]="beforeProfileUpload"
+                  [nzCustomRequest]="handleProfileUpload"
+                  nzAccept="image/*"
+                >
+                  <button nz-button nzType="default" type="button" [nzLoading]="imageUploading">
+                    <span nz-icon nzType="camera" nzTheme="outline"></span>
+                    <span>Photo de profil</span>
+                  </button>
+                </nz-upload>
+              </div>
+
               <div class="form-row">
                 <nz-form-item>
                   <nz-form-control nzErrorTip="Prénom requis">
@@ -102,6 +123,14 @@
                 <nz-form-control>
                   <nz-input-group nzPrefixIcon="phone">
                     <input nz-input formControlName="phoneNumber" placeholder="Téléphone (optionnel)" />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-control>
+                  <nz-input-group nzPrefixIcon="environment">
+                    <input nz-input formControlName="address" placeholder="Adresse (optionnel)" />
                   </nz-input-group>
                 </nz-form-control>
               </nz-form-item>

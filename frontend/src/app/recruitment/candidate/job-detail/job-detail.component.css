@@ -1,0 +1,22 @@
+.detail-page {
+  padding: 0;
+}
+
+.meta-block {
+  margin-bottom: 24px;
+  border-radius: var(--daam-radius-md);
+  overflow: hidden;
+}
+
+.detail-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-actions-row {
+  margin-top: 20px;
+}
+
+.detail-hero .hero-badge {
+  margin-bottom: 12px;
+}

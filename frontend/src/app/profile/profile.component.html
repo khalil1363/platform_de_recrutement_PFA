@@ -1,0 +1,131 @@
+<nz-spin [nzSpinning]="loading">
+  <div class="profile-page" *ngIf="currentUser">
+    <div class="profile-hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="hero-avatar-wrap">
+          <nz-avatar
+            [nzSize]="120"
+            [nzSrc]="profileImagePreview || undefined"
+            nzIcon="user"
+            class="hero-avatar"
+          ></nz-avatar>
+          <nz-upload
+            *ngIf="editMode"
+            class="avatar-upload"
+            [nzShowUploadList]="false"
+            [nzBeforeUpload]="beforeProfileUpload"
+            [nzCustomRequest]="handleProfileUpload"
+            nzAccept="image/*"
+          >
+            <button nz-button nzType="primary" nzShape="circle" type="button" [nzLoading]="imageUploading">
+              <span nz-icon nzType="camera" nzTheme="outline"></span>
+            </button>
+          </nz-upload>
+        </div>
+        <div class="hero-info">
+          <h1>{{ currentUser.firstName }} {{ currentUser.lastName }}</h1>
+          <p class="username">&#64;{{ currentUser.username }}</p>
+          <div class="hero-tags">
+            <nz-tag [nzColor]="'green'">{{ getRoleLabel(currentUser.role) }}</nz-tag>
+            <nz-tag [nzColor]="currentUser.active ? 'success' : 'error'">
+              {{ currentUser.active ? 'Compte actif' : 'Compte inactif' }}
+            </nz-tag>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button *ngIf="!editMode" nz-button nzType="primary" (click)="enableEdit()">
+            <span nz-icon nzType="edit" nzTheme="outline"></span>
+            <span>Modifier</span>
+          </button>
+          <ng-container *ngIf="editMode">
+            <button nz-button (click)="cancelEdit()">Annuler</button>
+            <button nz-button nzType="primary" [nzLoading]="saving" (click)="onSave()">
+              <span nz-icon nzType="save" nzTheme="outline"></span>
+              <span>Enregistrer</span>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <div class="info-card stats-card">
+        <h3>Informations du compte</h3>
+        <nz-descriptions nzBordered [nzColumn]="1" nzSize="small">
+          <nz-descriptions-item nzTitle="Membre depuis">
+            {{ currentUser.joinDate | date: 'dd MMMM yyyy' }}
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Dernière connexion">
+            {{ currentUser.lastLoginDate ? (currentUser.lastLoginDate | date: 'dd/MM/yyyy HH:mm') : '—' }}
+          </nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Email">{{ currentUser.email }}</nz-descriptions-item>
+        </nz-descriptions>
+      </div>
+
+      <div class="info-card form-card">
+        <h3>Informations personnelles</h3>
+        <form nz-form [formGroup]="profileForm" nzLayout="vertical">
+          <div class="form-row">
+            <nz-form-item>
+              <nz-form-label nzRequired>Prénom</nz-form-label>
+              <nz-form-control nzErrorTip="Prénom requis">
+                <input nz-input formControlName="firstName" [readonly]="!editMode" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label nzRequired>Nom</nz-form-label>
+              <nz-form-control nzErrorTip="Nom requis">
+                <input nz-input formControlName="lastName" [readonly]="!editMode" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Email</nz-form-label>
+            <nz-form-control nzErrorTip="Email invalide">
+              <nz-input-group nzPrefixIcon="mail">
+                <input nz-input formControlName="email" [readonly]="!editMode" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Téléphone</nz-form-label>
+            <nz-form-control>
+              <nz-input-group nzPrefixIcon="phone">
+                <input nz-input formControlName="phoneNumber" [readonly]="!editMode" placeholder="Optionnel" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Adresse</nz-form-label>
+            <nz-form-control>
+              <nz-input-group nzPrefixIcon="environment">
+                <input nz-input formControlName="address" [readonly]="!editMode" placeholder="Optionnel" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-divider nzText="Sécurité" nzOrientation="left"></nz-divider>
+
+          <nz-form-item>
+            <nz-form-label>Nouveau mot de passe</nz-form-label>
+            <nz-form-control nzErrorTip="Minimum 6 caractères">
+              <nz-input-group nzPrefixIcon="lock">
+                <input
+                  nz-input
+                  type="password"
+                  formControlName="password"
+                  [readonly]="!editMode"
+                  placeholder="Laisser vide pour ne pas changer"
+                />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </div>
+    </div>
+  </div>
+</nz-spin>

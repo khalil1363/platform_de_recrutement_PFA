@@ -1,0 +1,115 @@
+.user-layout {
+  min-height: 100vh;
+}
+
+.user-sider {
+  background: linear-gradient(180deg, #35654d 0%, #2a5240 100%) !important;
+}
+
+.user-sider ::ng-deep .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
+
+.sider-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sider-logo.collapsed {
+  justify-content: center;
+  padding: 20px 8px;
+}
+
+.sider-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.sider-logo-text {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.user-sider ::ng-deep .ant-menu-dark {
+  background: transparent;
+}
+
+.user-sider ::ng-deep .ant-menu-dark .ant-menu-item-selected {
+  background: rgba(64, 160, 112, 0.35) !important;
+}
+
+.user-header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: 64px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trigger-btn {
+  font-size: 18px;
+  color: #35654d;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #35654d;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.user-dropdown:hover {
+  background: #f5f8f6;
+}
+
+.user-avatar {
+  background-color: #40a070;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.user-content {
+  margin: 24px;
+  min-height: calc(100vh - 112px);
+}
+
+@media (max-width: 768px) {
+  .user-content {
+    margin: 16px;
+  }
+
+  .user-name {
+    display: none;
+  }
+}

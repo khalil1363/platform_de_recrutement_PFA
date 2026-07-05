@@ -19,6 +19,12 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzStepsModule } from 'ng-zorro-antd/steps';
+import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 
 const NG_ZORRO_MODULES = [
   NzButtonModule,
@@ -38,7 +44,13 @@ const NG_ZORRO_MODULES = [
   NzToolTipModule,
   NzDividerModule,
   NzSpinModule,
-  NzEmptyModule
+  NzEmptyModule,
+  NzUploadModule,
+  NzPopconfirmModule,
+  NzDescriptionsModule,
+  NzRadioModule,
+  NzStepsModule,
+  NzCollapseModule
 ];
 
 @NgModule({

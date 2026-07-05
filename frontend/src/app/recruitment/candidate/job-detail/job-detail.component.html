@@ -1,0 +1,65 @@
+<div class="detail-page" *ngIf="recruitment || loading">
+  <button class="back-link" type="button" (click)="back()">
+    <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+    Retour aux offres
+  </button>
+
+  <nz-spin [nzSpinning]="loading">
+    <ng-container *ngIf="recruitment">
+      <section class="detail-hero">
+        <div class="detail-hero-inner">
+          <span class="hero-badge">Offre d'emploi</span>
+          <h1>{{ recruitment.title }}</h1>
+          <p class="subtitle">{{ recruitment.companyName }} · {{ recruitment.zoneName }}</p>
+          <div class="hero-actions-row">
+            <button nz-button nzType="primary" nzSize="large" (click)="apply()">
+              <span nz-icon nzType="send" nzTheme="outline"></span>
+              Postuler maintenant
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <nz-descriptions nzBordered [nzColumn]="2" class="meta-block">
+        <nz-descriptions-item nzTitle="Disponibilité">{{ recruitment.availability || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Salaire">
+          <span *ngIf="recruitment.salaryMin && recruitment.salaryMax">
+            {{ recruitment.salaryMin }} – {{ recruitment.salaryMax }} ({{ recruitment.salaryPeriod || 'Mois' }})
+          </span>
+          <span *ngIf="!recruitment.salaryMin">—</span>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Étude">{{ recruitment.educationLevel || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Expérience">{{ recruitment.experienceLevel || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Région">{{ recruitment.region || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Ville">{{ recruitment.city || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Langues">{{ recruitment.languages?.join(', ') || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Référence">{{ recruitment.internalReference || recruitment.keejobReference || '—' }}</nz-descriptions-item>
+      </nz-descriptions>
+
+      <section class="detail-section" *ngIf="recruitment.description">
+        <h3>Description</h3>
+        <p>{{ recruitment.description }}</p>
+      </section>
+      <section class="detail-section" *ngIf="recruitment.responsibilities">
+        <h3>Responsabilités</h3>
+        <p>{{ recruitment.responsibilities }}</p>
+      </section>
+      <section class="detail-section" *ngIf="recruitment.technicalSkills">
+        <h3>Compétences techniques</h3>
+        <p>{{ recruitment.technicalSkills }}</p>
+      </section>
+      <section class="detail-section" *ngIf="recruitment.personalSkills">
+        <h3>Compétences personnelles</h3>
+        <p>{{ recruitment.personalSkills }}</p>
+      </section>
+      <section class="detail-section" *ngIf="recruitment.educationRequirements">
+        <h3>Formation</h3>
+        <p>{{ recruitment.educationRequirements }}</p>
+      </section>
+      <section class="detail-section" *ngIf="recruitment.experienceRequirements">
+        <h3>Expérience</h3>
+        <p>{{ recruitment.experienceRequirements }}</p>
+      </section>
+    </ng-container>
+  </nz-spin>
+</div>

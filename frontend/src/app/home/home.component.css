@@ -42,6 +42,11 @@
   border-top: 4px solid #40a070;
 }
 
+.welcome-avatar {
+  margin-bottom: 20px;
+  background-color: #40a070;
+}
+
 .welcome-card h1 {
   color: #35654d;
   margin-bottom: 16px;

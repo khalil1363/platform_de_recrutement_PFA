@@ -1,0 +1,8 @@
+.score-badge {
+  background: var(--daam-gradient-soft);
+  color: var(--daam-primary-dark);
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}

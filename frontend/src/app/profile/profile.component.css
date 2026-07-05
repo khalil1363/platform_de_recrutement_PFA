@@ -1,0 +1,142 @@
+.profile-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-hero {
+  position: relative;
+  border-radius: var(--daam-radius-lg);
+  overflow: hidden;
+  margin-bottom: 24px;
+  background: #fff;
+  box-shadow: var(--daam-shadow-md);
+  border: 1px solid var(--daam-border);
+}
+
+.hero-bg {
+  height: 140px;
+  background: var(--daam-gradient);
+}
+
+.hero-content {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 32px 28px;
+  margin-top: -60px;
+  flex-wrap: wrap;
+}
+
+.hero-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hero-avatar {
+  border: 4px solid #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: #40a070;
+}
+
+.avatar-upload {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+
+.hero-info {
+  flex: 1;
+  min-width: 200px;
+  padding-top: 68px;
+}
+
+.hero-info h1 {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+.username {
+  margin: 0 0 10px;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 68px;
+  margin-left: auto;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.info-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(53, 101, 77, 0.08);
+  border-top: 3px solid #40a070;
+}
+
+.info-card h3 {
+  margin: 0 0 18px;
+  color: #35654d;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-card ::ng-deep .ant-form-item {
+  margin-bottom: 14px;
+}
+
+.form-card input[readonly] {
+  background: #f8faf9;
+  cursor: default;
+}
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-content {
+    padding: 0 20px 24px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-info,
+  .hero-actions {
+    padding-top: 12px;
+    margin-left: 0;
+  }
+
+  .hero-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -10,7 +10,7 @@ import { UserProfile } from '../models/auth.model';
 export class HomeComponent implements OnInit {
   currentUser: UserProfile | null = null;
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(readonly authService: AuthService) {}
 
   ngOnInit(): void {
     this.authService.loadCurrentUser().subscribe({

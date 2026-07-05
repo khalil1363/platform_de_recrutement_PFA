@@ -1,0 +1,35 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Mes recrutements</h2>
+    <p>Créez et publiez des offres d'emploi pour votre zone</p>
+  </div>
+  <button nz-button nzType="primary" (click)="create()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    Nouveau recrutement
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="recruitments" nzSize="middle">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Entreprise</th>
+        <th>Zone</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of recruitments">
+        <td><strong>{{ item.title }}</strong></td>
+        <td>{{ item.companyName }}</td>
+        <td>{{ item.zoneName }}</td>
+        <td><nz-tag [nzColor]="statusColor(item.status)">{{ item.status }}</nz-tag></td>
+        <td>
+          <button nz-button nzSize="small" (click)="edit(item.recruitmentId)">Modifier</button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-spin>

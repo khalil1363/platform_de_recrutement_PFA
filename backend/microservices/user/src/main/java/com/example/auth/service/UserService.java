@@ -1,6 +1,8 @@
 package com.example.auth.service;
 
 import com.example.auth.dto.AdminCreateUserRequest;
+import com.example.auth.dto.AdminUpdateUserRequest;
+import com.example.auth.dto.UpdateProfileRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.entity.User;
 
@@ -27,6 +29,16 @@ public interface UserService {
     UserResponse getCurrentUser(String username);
 
     /**
+     * Retrieves a user by username for internal service-to-service calls.
+     */
+    UserResponse getUserByUsername(String username);
+
+    /**
+     * Retrieves a user by id for internal service-to-service calls.
+     */
+    UserResponse getUserById(String userId);
+
+    /**
      * Creates a new user account with a specific role (admin only).
      *
      * @param request admin create user payload
@@ -42,6 +54,32 @@ public interface UserService {
      * @return updated user profile response
      */
     UserResponse updateUserStatus(String userId, boolean active);
+
+    /**
+     * Updates the authenticated user's profile.
+     *
+     * @param username the authenticated username
+     * @param request profile update payload
+     * @return updated user profile response
+     */
+    UserResponse updateProfile(String username, UpdateProfileRequest request);
+
+    /**
+     * Updates a user account (admin only).
+     *
+     * @param userId the user identifier
+     * @param request admin update payload
+     * @return updated user profile response
+     */
+    UserResponse updateUserByAdmin(String userId, AdminUpdateUserRequest request);
+
+    /**
+     * Deletes a user account (admin only).
+     *
+     * @param userId the user identifier to delete
+     * @param requestingUsername the admin performing the deletion
+     */
+    void deleteUser(String userId, String requestingUsername);
 
     /**
      * Maps a User entity to a UserResponse DTO.

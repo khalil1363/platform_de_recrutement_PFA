@@ -1,115 +1,14 @@
-.admin-layout {
-  min-height: 100vh;
-}
-
-.admin-sider {
-  background: linear-gradient(180deg, #35654d 0%, #2d5540 100%) !important;
-}
-
-.admin-sider ::ng-deep .ant-layout-sider-children {
-  display: flex;
-  flex-direction: column;
-}
-
-.sider-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.sider-logo.collapsed {
-  justify-content: center;
-  padding: 20px 8px;
-}
-
-.sider-logo-img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.sider-logo-text {
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  white-space: nowrap;
-  letter-spacing: 1px;
-}
-
-.admin-sider ::ng-deep .ant-menu-dark {
-  background: transparent;
-}
-
-.admin-sider ::ng-deep .ant-menu-dark .ant-menu-item-selected {
-  background-color: rgba(64, 160, 112, 0.4) !important;
-}
-
-.admin-header {
-  background: #fff;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  height: 64px;
-  line-height: 64px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.trigger-btn {
-  font-size: 18px;
-  color: #35654d;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #35654d;
-  font-weight: 600;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
 .user-dropdown {
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  color: #333;
-  padding: 4px 8px;
-  border-radius: 8px;
+  color: var(--daam-text);
+  padding: 6px 10px;
+  border-radius: 10px;
   transition: background 0.2s;
 }
 
 .user-dropdown:hover {
-  background: #f5f8f6;
-}
-
-.user-avatar {
-  background-color: #40a070;
-}
-
-.user-name {
-  font-weight: 500;
-}
-
-.admin-content {
-  margin: 24px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 12px;
-  min-height: calc(100vh - 112px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--daam-gradient-soft);
 }

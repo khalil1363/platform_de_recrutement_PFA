@@ -59,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
+                .profileImageUrl(request.getProfileImageUrl())
                 .joinDate(now)
                 .role(Role.USER.getAuthority())
                 .authorities(List.of("read", "edit"))

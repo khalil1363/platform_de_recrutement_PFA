@@ -1,0 +1,4 @@
+/* Layout uses global .app-shell styles */
+:host {
+  display: block;
+}

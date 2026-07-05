@@ -1,0 +1,59 @@
+<nz-layout class="app-shell rh-layout">
+  <nz-sider
+    class="shell-sider"
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+    [nzWidth]="268"
+    nzTheme="dark"
+  >
+    <div class="sider-brand" [class.collapsed]="isCollapsed">
+      <img src="daam-logo.png" alt="DAAM" />
+      <div class="sider-brand-text" *ngIf="!isCollapsed">
+        DAAM RH
+        <small>Espace RH</small>
+      </div>
+    </div>
+
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      <li nz-menu-item routerLink="/rh/recruitments" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="solution" nzTheme="outline"></span>
+        <span>Recrutements</span>
+      </li>
+      <li nz-menu-item routerLink="/rh/candidates" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="team" nzTheme="outline"></span>
+        <span>Candidatures</span>
+      </li>
+      <li nz-menu-item routerLink="/rh/profile" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="idcard" nzTheme="outline"></span>
+        <span>Mon profil</span>
+      </li>
+    </ul>
+
+    <div class="sider-footer" *ngIf="!isCollapsed">
+      <p>Publiez des offres et suivez les candidatures de votre zone.</p>
+    </div>
+  </nz-sider>
+
+  <nz-layout class="shell-main">
+    <nz-header class="shell-header">
+      <div class="header-left">
+        <button nz-button nzType="text" class="trigger-btn" (click)="isCollapsed = !isCollapsed">
+          <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" nzTheme="outline"></span>
+        </button>
+        <h3 class="page-title">Ressources Humaines</h3>
+      </div>
+      <div class="header-right" *ngIf="currentUser">
+        <span class="role-pill">RH</span>
+        <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+        <button nz-button nzType="default" nzSize="small" (click)="logout()">Déconnexion</button>
+      </div>
+    </nz-header>
+
+    <nz-content class="shell-content">
+      <div class="content-panel">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

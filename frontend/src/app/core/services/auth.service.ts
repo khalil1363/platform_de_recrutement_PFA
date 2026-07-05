@@ -8,8 +8,11 @@ import { ApiResponse } from '../../models/api-response.model';
 import {
   AdminCreateUserRequest,
   AuthenticationResponse,
+  FileUploadResponse,
   LoginRequest,
   RegisterRequest,
+  UpdateProfileRequest,
+  AdminUpdateUserRequest,
   UserProfile
 } from '../../models/auth.model';
 
@@ -61,6 +64,44 @@ export class AuthService {
     return this.http.patch<ApiResponse<UserProfile>>(`${this.apiUrl}/users/${userId}/status`, { active });
   }
 
+  updateProfile(request: UpdateProfileRequest): Observable<ApiResponse<UserProfile>> {
+    return this.http.put<ApiResponse<UserProfile>>(`${this.apiUrl}/me`, request).pipe(
+      tap((response) => {
+        if (response.success && response.data) {
+          this.currentUserSubject.next(response.data);
+        }
+      })
+    );
+  }
+
+  updateUser(userId: string, request: AdminUpdateUserRequest): Observable<ApiResponse<UserProfile>> {
+    return this.http.put<ApiResponse<UserProfile>>(`${this.apiUrl}/users/${userId}`, request);
+  }
+
+  deleteUser(userId: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/users/${userId}`);
+  }
+
+  getCurrentUserValue(): UserProfile | null {
+    return this.currentUserSubject.value;
+  }
+
+  uploadProfileImage(file: File): Observable<ApiResponse<FileUploadResponse>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ApiResponse<FileUploadResponse>>(`${this.apiUrl}/upload/profile-image`, formData);
+  }
+
+  resolveImageUrl(path?: string | null): string | null {
+    if (!path) {
+      return null;
+    }
+    if (path.startsWith('http')) {
+      return path;
+    }
+    return `${environment.apiUrl}${path}`;
+  }
+
   getToken(): string | null {
     if (!isPlatformBrowser(this.platformId)) {
       return null;
@@ -83,6 +124,14 @@ export class AuthService {
     return this.getRole() === 'ROLE_ADMIN';
   }
 
+  isRh(): boolean {
+    return this.getRole() === 'ROLE_RH';
+  }
+
+  isCandidate(): boolean {
+    return this.getRole() === 'ROLE_USER';
+  }
+
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(TOKEN_KEY);
@@ -97,7 +146,21 @@ export class AuthService {
       this.router.navigate(['/admin/users']);
       return;
     }
-    this.router.navigate(['/home']);
+    if (role === 'ROLE_RH') {
+      this.router.navigate(['/rh/recruitments']);
+      return;
+    }
+    this.router.navigate(['/jobs']);
+  }
+
+  getProfileRoute(): string {
+    if (this.isAdmin()) {
+      return '/admin/profile';
+    }
+    if (this.isRh()) {
+      return '/rh/profile';
+    }
+    return '/jobs/profile';
   }
 
   private handleAuthSuccess(response: ApiResponse<AuthenticationResponse>): void {

@@ -1,0 +1,48 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Zones géographiques</h2>
+    <p>Définissez les zones de couverture du réseau DAAM</p>
+  </div>
+  <button nz-button nzType="primary" (click)="openZoneModal()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    Nouvelle zone
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+    <nz-table [nzData]="zones" [nzShowPagination]="false">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Description</th>
+          <th>Active</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let zone of zones">
+          <td>{{ zone.name }}</td>
+          <td>{{ zone.description || '-' }}</td>
+          <td><nz-tag [nzColor]="zone.active ? 'green' : 'default'">{{ zone.active ? 'Oui' : 'Non' }}</nz-tag></td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-spin>
+
+<nz-modal
+  [(nzVisible)]="zoneModalVisible"
+  nzTitle="Nouvelle zone"
+  (nzOnCancel)="zoneModalVisible = false"
+  (nzOnOk)="saveZone()"
+  [nzOkLoading]="modalLoading"
+>
+  <form nz-form [formGroup]="zoneForm" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label nzRequired>Nom</nz-form-label>
+      <nz-form-control><input nz-input formControlName="name" /></nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Description</nz-form-label>
+      <nz-form-control><textarea nz-input rows="3" formControlName="description"></textarea></nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

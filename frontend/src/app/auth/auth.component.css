@@ -1,93 +1,134 @@
 .auth-page {
   display: flex;
   min-height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;
 }
 
 .brand-panel {
-  flex: 1;
-  background: linear-gradient(145deg, #35654d 0%, #40a070 50%, #4db88a 100%);
+  flex: 0 0 44%;
+  max-width: 540px;
+  background: var(--daam-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 48px;
+  padding: 48px 36px;
+  overflow: hidden;
+}
+
+.auth-page.register-mode .brand-panel {
+  flex: 0 0 36%;
+  max-width: 440px;
 }
 
 .brand-content {
   text-align: center;
   color: #fff;
   z-index: 2;
-  max-width: 420px;
+  max-width: 360px;
 }
 
 .welcome-ar {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #1d1d1b;
-  margin-bottom: 24px;
-  letter-spacing: 1px;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
 }
 
 .brand-logo {
-  width: 280px;
-  max-width: 100%;
-  margin-bottom: 16px;
+  width: min(240px, 80vw);
+  margin-bottom: 12px;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
 .brand-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   letter-spacing: 2px;
 }
 
 .brand-subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin-bottom: 24px;
+  font-size: 1rem;
+  opacity: 0.92;
+  margin-bottom: 16px;
 }
 
 .brand-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  opacity: 0.85;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  opacity: 0.88;
 }
 
 .brand-decoration {
   position: absolute;
-  bottom: -80px;
-  right: -80px;
-  width: 300px;
-  height: 300px;
+  bottom: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+  animation: float 6s ease-in-out infinite;
+}
+
+.brand-decoration-2 {
+  position: absolute;
+  top: 10%;
+  left: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite reverse;
 }
 
 .form-panel {
   flex: 1;
-  background: #f5f8f6;
+  background: var(--daam-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 32px;
+  padding: 32px 24px;
   perspective: 1200px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.form-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(64, 160, 112, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(53, 101, 77, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.form-panel.flipped {
+  align-items: flex-start;
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .flip-container {
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
+  margin: auto;
 }
 
 .flip-inner {
   position: relative;
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  min-height: 380px;
 }
 
 .form-panel.flipped .flip-inner {
   transform: rotateY(180deg);
+  min-height: 820px;
 }
 
 .flip-face {
@@ -105,20 +146,31 @@
 
 .form-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 40px 36px;
-  box-shadow: 0 8px 32px rgba(53, 101, 77, 0.12);
-  border-top: 4px solid #40a070;
+  border-radius: var(--daam-radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--daam-shadow-lg);
+  border: 1px solid var(--daam-border);
+  border-top: 4px solid var(--daam-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.register-card {
+  padding: 28px 28px 24px;
 }
 
 .form-header {
-  margin-bottom: 28px;
+  margin-bottom: 22px;
   text-align: center;
 }
 
+.register-card .form-header {
+  margin-bottom: 18px;
+}
+
 .form-header h2 {
-  margin: 0 0 8px;
-  font-size: 1.75rem;
+  margin: 0 0 6px;
+  font-size: 1.6rem;
   color: #35654d;
   font-weight: 700;
 }
@@ -126,7 +178,30 @@
 .form-header p {
   margin: 0;
   color: #666;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+}
+
+.profile-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  background: #f3f9f6;
+  border: 1px dashed #b8dcc8;
+  border-radius: 12px;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+  background-color: #40a070;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(53, 101, 77, 0.15);
+}
+
+.profile-upload button {
+  white-space: nowrap;
 }
 
 .form-row {
@@ -135,10 +210,19 @@
   gap: 12px;
 }
 
+.form-card ::ng-deep .ant-form-item {
+  margin-bottom: 14px;
+}
+
+.form-card ::ng-deep .ant-input,
+.form-card ::ng-deep .ant-input-affix-wrapper {
+  border-radius: 8px;
+}
+
 .form-footer {
-  margin-top: 24px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #666;
 }
 
@@ -154,21 +238,124 @@
   color: #35654d;
 }
 
-@media (max-width: 900px) {
+/* Tablet */
+@media (max-width: 1024px) {
+  .brand-panel {
+    flex: 0 0 34%;
+    max-width: none;
+    padding: 28px 20px;
+  }
+
+  .auth-page.register-mode .brand-panel {
+    flex: 0 0 30%;
+  }
+
+  .form-panel.flipped .flip-inner {
+    min-height: 860px;
+  }
+}
+
+/* Mobile – stack layout, no 3D flip */
+@media (max-width: 768px) {
   .auth-page {
     flex-direction: column;
   }
 
-  .brand-panel {
-    padding: 32px 24px;
-    min-height: 280px;
+  .brand-panel,
+  .auth-page.register-mode .brand-panel {
+    flex: none;
+    max-width: none;
+    width: 100%;
+    padding: 24px 20px 20px;
   }
 
   .brand-logo {
-    width: 200px;
+    width: 140px;
   }
 
-  .form-panel {
-    padding: 32px 20px;
+  .brand-title {
+    font-size: 1.4rem;
+  }
+
+  .brand-subtitle {
+    margin-bottom: 0;
+  }
+
+  .brand-description,
+  .auth-page.register-mode .brand-description {
+    display: none;
+  }
+
+  .welcome-ar {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  .form-panel,
+  .form-panel.flipped {
+    width: 100%;
+    padding: 16px 16px 28px;
+    align-items: stretch;
+    overflow-y: visible;
+  }
+
+  .flip-container {
+    max-width: 100%;
+  }
+
+  .flip-inner,
+  .form-panel.flipped .flip-inner {
+    min-height: auto;
+    transform: none !important;
+    transition: none;
+  }
+
+  .flip-front {
+    display: block;
+  }
+
+  .flip-back {
+    position: relative;
+    transform: none;
+    display: none;
+  }
+
+  .form-panel.flipped .flip-front {
+    display: none;
+  }
+
+  .form-panel.flipped .flip-back {
+    display: block;
+  }
+
+  .form-card {
+    padding: 24px 18px;
+    border-radius: 14px;
+  }
+
+  .profile-upload {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .form-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .form-card {
+    padding: 20px 14px;
+  }
+
+  .profile-upload button {
+    width: 100%;
   }
 }
