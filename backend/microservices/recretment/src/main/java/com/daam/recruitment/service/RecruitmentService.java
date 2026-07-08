@@ -47,18 +47,46 @@ public class RecruitmentService {
     }
 
     @Transactional
-    public RhZoneAssignment assignRhToZone(RhZoneAssignmentRequest request) {
-        zoneRepository.findByZoneId(request.getZoneId())
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"));
+    public List<RhZoneAssignmentResponse> assignRhToZone(RhZoneAssignmentRequest request) {
         ApiResponse<UserDto> user = userClient.getUserById(internalApiKey, request.getRhUserId());
         if (!user.isSuccess() || user.getData() == null)
             throw new IllegalArgumentException("RH user not found");
         if (!"ROLE_RH".equals(user.getData().getRole()))
             throw new IllegalArgumentException("User must have ROLE_RH");
-        RhZoneAssignment assignment = rhZoneAssignmentRepository.findByRhUserId(request.getRhUserId())
-                .orElse(RhZoneAssignment.builder().rhUserId(request.getRhUserId()).build());
-        assignment.setZoneId(request.getZoneId());
-        return rhZoneAssignmentRepository.save(assignment);
+
+        if (request.getZoneIds() == null || request.getZoneIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one zone is required");
+        }
+
+        List<RhZoneAssignmentResponse> createdAssignments = new ArrayList<>();
+        Set<String> uniqueZoneIds = new LinkedHashSet<>(request.getZoneIds());
+        for (String zoneId : uniqueZoneIds) {
+            zoneRepository.findByZoneId(zoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Zone not found"));
+
+            RhZoneAssignment existingZoneAssignment = rhZoneAssignmentRepository.findByZoneId(zoneId).orElse(null);
+            if (existingZoneAssignment != null && !existingZoneAssignment.getRhUserId().equals(request.getRhUserId())) {
+                throw new IllegalArgumentException("One of the selected zones is already assigned to another RH");
+            }
+
+            if (!rhZoneAssignmentRepository.existsByRhUserIdAndZoneId(request.getRhUserId(), zoneId)) {
+                RhZoneAssignment assignment = rhZoneAssignmentRepository.save(
+                        RhZoneAssignment.builder()
+                                .rhUserId(request.getRhUserId())
+                                .zoneId(zoneId)
+                                .build()
+                );
+                createdAssignments.add(toRhZoneAssignmentResponse(assignment));
+            }
+        }
+        return createdAssignments;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RhZoneAssignmentResponse> getRhZoneAssignments() {
+        return rhZoneAssignmentRepository.findAll().stream()
+                .map(this::toRhZoneAssignmentResponse)
+                .toList();
     }
 
     // ---- Companies ----
@@ -79,8 +107,8 @@ public class RecruitmentService {
                     .map(c -> toCompanyResponse(c, getZoneName(c.getZoneId()))).toList();
         }
         if (authUser.isRh()) {
-            String zoneId = getRhZoneId(authUser.getUserId());
-            return companyRepository.findByZoneIdAndActiveTrue(zoneId).stream()
+            List<String> zoneIds = getRhZoneIds(authUser.getUserId());
+            return companyRepository.findByZoneIdInAndActiveTrue(zoneIds).stream()
                     .map(c -> toCompanyResponse(c, getZoneName(c.getZoneId()))).toList();
         }
         return companyRepository.findByActiveTrue().stream()
@@ -130,8 +158,8 @@ public class RecruitmentService {
                     .map(r -> toRecruitmentResponse(r, false)).toList();
         }
         if (authUser.isRh()) {
-            String zoneId = getRhZoneId(authUser.getUserId());
-            return recruitmentRepository.findByZoneId(zoneId).stream()
+            List<String> zoneIds = getRhZoneIds(authUser.getUserId());
+            return recruitmentRepository.findByZoneIdIn(zoneIds).stream()
                     .map(r -> toRecruitmentResponse(r, false)).toList();
         }
         return recruitmentRepository.findByStatus(RecruitmentStatus.PUBLISHED).stream()
@@ -225,8 +253,8 @@ public class RecruitmentService {
 
     @Transactional(readOnly = true)
     public List<ApplicationResponse> getApplicationsForRh(AuthUser authUser) {
-        String zoneId = getRhZoneId(authUser.getUserId());
-        List<String> recruitmentIds = recruitmentRepository.findByZoneId(zoneId).stream()
+        List<String> zoneIds = getRhZoneIds(authUser.getUserId());
+        List<String> recruitmentIds = recruitmentRepository.findByZoneIdIn(zoneIds).stream()
                 .map(Recruitment::getRecruitmentId).toList();
         if (recruitmentIds.isEmpty()) return List.of();
         return jobApplicationRepository.findByRecruitmentIdIn(recruitmentIds).stream()
@@ -250,16 +278,17 @@ public class RecruitmentService {
 
     // ---- Helpers ----
     private void ensureRhZone(String rhUserId, String zoneId) {
-        RhZoneAssignment assignment = rhZoneAssignmentRepository.findByRhUserId(rhUserId)
-                .orElseThrow(() -> new IllegalArgumentException("RH has no assigned zone"));
-        if (!assignment.getZoneId().equals(zoneId))
+        if (!getRhZoneIds(rhUserId).contains(zoneId))
             throw new IllegalArgumentException("Access denied: outside your zone");
     }
 
-    private String getRhZoneId(String rhUserId) {
-        return rhZoneAssignmentRepository.findByRhUserId(rhUserId)
-                .orElseThrow(() -> new IllegalArgumentException("RH has no assigned zone"))
-                .getZoneId();
+    private List<String> getRhZoneIds(String rhUserId) {
+        List<String> zoneIds = rhZoneAssignmentRepository.findByRhUserId(rhUserId).stream()
+                .map(RhZoneAssignment::getZoneId)
+                .toList();
+        if (zoneIds.isEmpty())
+            throw new IllegalArgumentException("RH has no assigned zone");
+        return zoneIds;
     }
 
     private String getZoneName(String zoneId) {
@@ -332,6 +361,16 @@ public class RecruitmentService {
     private CompanyResponse toCompanyResponse(Company c, String zoneName) {
         return CompanyResponse.builder().companyId(c.getCompanyId()).name(c.getName())
                 .zoneId(c.getZoneId()).zoneName(zoneName).address(c.getAddress()).active(c.isActive()).build();
+    }
+
+    private RhZoneAssignmentResponse toRhZoneAssignmentResponse(RhZoneAssignment assignment) {
+        return RhZoneAssignmentResponse.builder()
+                .id(assignment.getId())
+                .rhUserId(assignment.getRhUserId())
+                .zoneId(assignment.getZoneId())
+                .zoneName(getZoneName(assignment.getZoneId()))
+                .assignedAt(assignment.getAssignedAt())
+                .build();
     }
 
     private RecruitmentResponse toRecruitmentResponse(Recruitment r, boolean includeCorrect) {

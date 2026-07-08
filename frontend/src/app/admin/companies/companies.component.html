@@ -10,19 +10,24 @@
 </div>
 
 <nz-spin [nzSpinning]="loading">
-    <nz-table [nzData]="companies" [nzShowPagination]="false">
+    <nz-table [nzData]="groupedCompanies" [nzShowPagination]="false">
       <thead>
         <tr>
-          <th>Nom</th>
           <th>Zone</th>
-          <th>Adresse</th>
+          <th>Entreprises</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let company of companies">
-          <td>{{ company.name }}</td>
-          <td>{{ company.zoneName }}</td>
-          <td>{{ company.address || '-' }}</td>
+        <tr *ngFor="let group of groupedCompanies">
+          <td><strong>{{ group.zoneName }}</strong></td>
+          <td>
+            <div class="company-list">
+              <div class="company-chip" *ngFor="let company of group.companies">
+                <strong>{{ company.name }}</strong>
+                <span>{{ company.address || '-' }}</span>
+              </div>
+            </div>
+          </td>
         </tr>
       </tbody>
     </nz-table>

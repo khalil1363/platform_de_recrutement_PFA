@@ -48,7 +48,16 @@ public final class RecruitmentDtos {
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class RhZoneAssignmentRequest {
         @NotBlank private String rhUserId;
-        @NotBlank private String zoneId;
+        @NotNull private List<String> zoneIds;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class RhZoneAssignmentResponse {
+        private Long id;
+        private String rhUserId;
+        private String zoneId;
+        private String zoneName;
+        private LocalDateTime assignedAt;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

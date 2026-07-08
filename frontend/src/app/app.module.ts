@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
@@ -70,7 +70,6 @@ const icons: IconDefinition[] = [
   declarations: [AppComponent],
   imports: [BrowserModule, BrowserAnimationsModule, AppRoutingModule, SharedModule],
   providers: [
-    provideClientHydration(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideNzI18n(fr_FR),
     { provide: NZ_ICONS, useValue: icons }

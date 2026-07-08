@@ -4,6 +4,12 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { RecruitmentService } from '../../recruitment/services/recruitment.service';
 import { Company, Zone } from '../../recruitment/models/recruitment.model';
 
+interface ZoneCompaniesGroup {
+  zoneId: string;
+  zoneName: string;
+  companies: Company[];
+}
+
 @Component({
   selector: 'app-companies',
   templateUrl: './companies.component.html',
@@ -11,6 +17,7 @@ import { Company, Zone } from '../../recruitment/models/recruitment.model';
 })
 export class CompaniesComponent implements OnInit {
   companies: Company[] = [];
+  groupedCompanies: ZoneCompaniesGroup[] = [];
   zones: Zone[] = [];
   loading = false;
   modalVisible = false;
@@ -39,6 +46,7 @@ export class CompaniesComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.companies = response.data;
+          this.groupCompanies();
         }
       },
       error: () => {
@@ -58,6 +66,21 @@ export class CompaniesComponent implements OnInit {
   openModal(): void {
     this.companyForm.reset();
     this.modalVisible = true;
+  }
+
+  private groupCompanies(): void {
+    const grouped = new Map<string, ZoneCompaniesGroup>();
+    for (const company of this.companies) {
+      if (!grouped.has(company.zoneId)) {
+        grouped.set(company.zoneId, {
+          zoneId: company.zoneId,
+          zoneName: company.zoneName || 'Zone',
+          companies: []
+        });
+      }
+      grouped.get(company.zoneId)!.companies.push(company);
+    }
+    this.groupedCompanies = Array.from(grouped.values()).sort((a, b) => a.zoneName.localeCompare(b.zoneName));
   }
 
   saveCompany(): void {

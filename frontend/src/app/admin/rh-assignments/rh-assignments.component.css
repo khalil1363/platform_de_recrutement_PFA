@@ -3,7 +3,20 @@
   border: 1px solid var(--daam-border);
   border-radius: var(--daam-radius-md);
   padding: 28px;
-  max-width: 720px;
+  margin-bottom: 24px;
+}
+
+.assign-card h3,
+.assignments-table h3 {
+  margin: 0 0 16px;
+  color: var(--daam-primary-dark);
+}
+
+.assignments-table {
+  background: var(--daam-bg-elevated);
+  border: 1px solid var(--daam-border);
+  border-radius: var(--daam-radius-md);
+  padding: 24px;
 }
 
 .form-grid {

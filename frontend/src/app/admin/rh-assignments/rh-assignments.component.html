@@ -1,11 +1,12 @@
 <div class="page-header-bar">
   <div>
     <h2>Affectation RH</h2>
-    <p>Assignez chaque responsable RH à sa zone géographique</p>
+    <p>Assignez plusieurs zones au meme RH. Chaque zone reste reservee a un seul RH.</p>
   </div>
 </div>
 
 <div class="assign-card">
+  <h3>Ajouter plusieurs zones a un RH</h3>
   <form nz-form [formGroup]="assignForm" (ngSubmit)="assignRh()">
     <div class="form-grid">
       <nz-form-item>
@@ -21,14 +22,34 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired>Zone</nz-form-label>
+        <nz-form-label nzRequired>Zones</nz-form-label>
         <nz-form-control>
-          <nz-select formControlName="zoneId" nzPlaceHolder="Sélectionner une zone">
-            <nz-option *ngFor="let zone of zones" [nzValue]="zone.zoneId" [nzLabel]="zone.name"></nz-option>
+          <nz-select formControlName="zoneIds" nzMode="multiple" nzPlaceHolder="Selectionner une ou plusieurs zones">
+            <nz-option *ngFor="let zone of availableZones" [nzValue]="zone.zoneId" [nzLabel]="zone.name"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
     </div>
     <button nz-button nzType="primary" [nzLoading]="modalLoading" type="submit">Assigner</button>
   </form>
+</div>
+
+<div class="assignments-table">
+  <h3>RH et leurs zones</h3>
+  <nz-table [nzData]="groupedAssignments" [nzShowPagination]="false" nzSize="middle">
+    <thead>
+      <tr>
+        <th>Responsable RH</th>
+        <th>Zones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of groupedAssignments">
+        <td><strong>{{ item.rhLabel }}</strong></td>
+        <td>
+          <nz-tag *ngFor="let zone of item.zones" nzColor="green">{{ zone }}</nz-tag>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
 </div>

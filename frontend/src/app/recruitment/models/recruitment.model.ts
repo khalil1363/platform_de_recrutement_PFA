@@ -115,7 +115,15 @@ export interface CompanyRequest {
 
 export interface RhZoneAssignmentRequest {
   rhUserId: string;
+  zoneIds: string[];
+}
+
+export interface RhZoneAssignment {
+  id: number;
+  rhUserId: string;
   zoneId: string;
+  zoneName: string;
+  assignedAt?: string;
 }
 
 export interface RecruitmentRequest {

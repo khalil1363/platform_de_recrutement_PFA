@@ -53,9 +53,20 @@ public class RecruitmentController {
 
     @PostMapping("/rh-zone-assignments")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<Object>> assignRh(@Valid @RequestBody RhZoneAssignmentRequest request) {
-        recruitmentService.assignRhToZone(request);
-        return ResponseEntity.ok(ApiResponse.success("RH assigned to zone", null, HttpStatus.OK.value()));
+    public ResponseEntity<ApiResponse<List<RhZoneAssignmentResponse>>> assignRh(@Valid @RequestBody RhZoneAssignmentRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "RH assigned to zones",
+                recruitmentService.assignRhToZone(request),
+                HttpStatus.CREATED.value()));
+    }
+
+    @GetMapping("/rh-zone-assignments")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<RhZoneAssignmentResponse>>> getRhAssignments() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "RH assignments",
+                recruitmentService.getRhZoneAssignments(),
+                HttpStatus.OK.value()));
     }
 
     // ---- Companies ----

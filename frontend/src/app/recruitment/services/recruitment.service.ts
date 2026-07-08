@@ -10,6 +10,7 @@ import {
   JobApplication,
   Recruitment,
   RecruitmentRequest,
+  RhZoneAssignment,
   RhZoneAssignmentRequest,
   ApplicationStatus,
   Zone,
@@ -51,8 +52,12 @@ export class RecruitmentService {
     return this.http.post<ApiResponse<Zone>>(`${this.apiUrl}/zones`, request);
   }
 
-  assignRhToZone(request: RhZoneAssignmentRequest): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/rh-zone-assignments`, request);
+  assignRhToZone(request: RhZoneAssignmentRequest): Observable<ApiResponse<RhZoneAssignment[]>> {
+    return this.http.post<ApiResponse<RhZoneAssignment[]>>(`${this.apiUrl}/rh-zone-assignments`, request);
+  }
+
+  getRhZoneAssignments(): Observable<ApiResponse<RhZoneAssignment[]>> {
+    return this.http.get<ApiResponse<RhZoneAssignment[]>>(`${this.apiUrl}/rh-zone-assignments`);
   }
 
   getCompanies(): Observable<ApiResponse<Company[]>> {

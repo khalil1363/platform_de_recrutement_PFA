@@ -26,7 +26,11 @@
             <nz-form-label nzRequired>Entreprise</nz-form-label>
             <nz-form-control>
               <nz-select formControlName="companyId" nzPlaceHolder="Sélectionner une entreprise">
-                <nz-option *ngFor="let c of companies" [nzValue]="c.companyId" [nzLabel]="c.name"></nz-option>
+                <nz-option
+                  *ngFor="let c of companies"
+                  [nzValue]="c.companyId"
+                  [nzLabel]="c.name + ' - ' + (c.zoneName || '')"
+                ></nz-option>
               </nz-select>
             </nz-form-control>
           </nz-form-item>
