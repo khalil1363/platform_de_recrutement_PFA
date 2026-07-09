@@ -22,6 +22,7 @@ public class JobApplication {
     @Builder.Default private ApplicationStatus status = ApplicationStatus.SUBMITTED;
     private Integer qcmScore;
     private Integer qcmTotalQuestions;
+    private LocalDateTime interviewAt;
     @CreationTimestamp private LocalDateTime appliedAt;
 
     @PrePersist void prePersist() {

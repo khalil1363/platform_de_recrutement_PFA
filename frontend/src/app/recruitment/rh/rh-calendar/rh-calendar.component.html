@@ -1,0 +1,33 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Calendrier des entretiens</h2>
+    <p>Retrouvez la region et le nom du candidat pour chaque date d'entretien.</p>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <div class="calendar-layout">
+    <div class="calendar-card">
+      <nz-calendar [(ngModel)]="selectedDate"></nz-calendar>
+    </div>
+
+    <div class="agenda-card">
+      <h3>Entretiens du {{ selectedDate | date: 'dd/MM/yyyy' }}</h3>
+
+      <div class="agenda-list" *ngIf="selectedDayApplications.length; else noInterviews">
+        <div class="agenda-item" *ngFor="let app of selectedDayApplications">
+          <div class="agenda-time">{{ app.interviewAt | date: 'HH:mm' }}</div>
+          <div class="agenda-content">
+            <strong>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</strong>
+            <p>{{ app.recruitmentTitle }}</p>
+            <span>{{ app.region || app.zoneName || 'Zone non definie' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noInterviews>
+        <nz-empty nzNotFoundContent="Aucun entretien planifie pour cette date"></nz-empty>
+      </ng-template>
+    </div>
+  </div>
+</nz-spin>

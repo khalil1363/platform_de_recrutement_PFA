@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../models/api-response.model';
 import {
   ApplicationRequest,
+  ApplicationStatusUpdateRequest,
   Company,
   CompanyRequest,
   JobApplication,
@@ -92,8 +93,11 @@ export class RecruitmentService {
     return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications`);
   }
 
-  updateApplicationStatus(applicationId: string, status: ApplicationStatus): Observable<ApiResponse<JobApplication>> {
-    return this.http.patch<ApiResponse<JobApplication>>(`${this.apiUrl}/applications/${applicationId}/status`, { status });
+  updateApplicationStatus(
+    applicationId: string,
+    request: ApplicationStatusUpdateRequest
+  ): Observable<ApiResponse<JobApplication>> {
+    return this.http.patch<ApiResponse<JobApplication>>(`${this.apiUrl}/applications/${applicationId}/status`, request);
   }
 
   resolveFileUrl(path?: string | null): string | null {

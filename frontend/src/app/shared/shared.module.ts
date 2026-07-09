@@ -25,6 +25,8 @@ import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzCalendarModule } from 'ng-zorro-antd/calendar';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 const NG_ZORRO_MODULES = [
   NzButtonModule,
@@ -50,7 +52,9 @@ const NG_ZORRO_MODULES = [
   NzDescriptionsModule,
   NzRadioModule,
   NzStepsModule,
-  NzCollapseModule
+  NzCollapseModule,
+  NzCalendarModule,
+  NzDatePickerModule
 ];
 
 @NgModule({

@@ -97,3 +97,27 @@
     </ng-container>
   </div>
 </nz-modal>
+
+<nz-modal
+  [(nzVisible)]="interviewModalVisible"
+  nzTitle="Planifier l'entretien"
+  (nzOnCancel)="interviewModalVisible = false"
+  (nzOnOk)="confirmInterview()"
+  [nzOkLoading]="actionLoading"
+  nzOkText="Valider"
+>
+  <form nz-form [formGroup]="interviewForm" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label nzRequired>Date et heure</nz-form-label>
+      <nz-form-control nzErrorTip="Choisissez la date de l'entretien">
+        <nz-date-picker
+          formControlName="interviewAt"
+          nzShowTime
+          nzFormat="dd/MM/yyyy HH:mm"
+          nzPlaceHolder="Selectionner la date de l'entretien"
+          class="interview-picker"
+        ></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

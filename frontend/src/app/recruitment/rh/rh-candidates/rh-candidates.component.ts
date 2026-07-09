@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../../core/services/auth.service';
 import { RecruitmentService } from '../../services/recruitment.service';
@@ -14,15 +16,23 @@ export class RhCandidatesComponent implements OnInit {
   loading = false;
   selectedApplication: JobApplication | null = null;
   detailVisible = false;
+  interviewModalVisible = false;
   actionLoading = false;
+  interviewForm!: FormGroup;
+  pendingApplication: JobApplication | null = null;
 
   constructor(
     readonly authService: AuthService,
     private readonly recruitmentService: RecruitmentService,
-    private readonly message: NzMessageService
+    private readonly message: NzMessageService,
+    private readonly fb: FormBuilder,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.interviewForm = this.fb.group({
+      interviewAt: [null, Validators.required]
+    });
     this.loadApplications();
   }
 
@@ -48,12 +58,19 @@ export class RhCandidatesComponent implements OnInit {
   }
 
   updateStatus(app: JobApplication, status: ApplicationStatus): void {
+    if (status === 'ACCEPTED') {
+      this.pendingApplication = app;
+      this.interviewForm.reset();
+      this.interviewModalVisible = true;
+      return;
+    }
+
     this.actionLoading = true;
-    this.recruitmentService.updateApplicationStatus(app.applicationId, status).subscribe({
+    this.recruitmentService.updateApplicationStatus(app.applicationId, { status }).subscribe({
       next: (response) => {
         this.actionLoading = false;
         if (response.success) {
-          this.message.success(status === 'ACCEPTED' ? 'Candidature acceptée' : 'Candidature rejetée');
+          this.message.success(status === 'REJECTED' ? 'Candidature rejetee' : 'Statut mis a jour');
           this.detailVisible = false;
           this.loadApplications();
         }
@@ -61,6 +78,38 @@ export class RhCandidatesComponent implements OnInit {
       error: (err) => {
         this.actionLoading = false;
         this.message.error(err.error?.message || 'Erreur lors de la mise à jour');
+      }
+    });
+  }
+
+  confirmInterview(): void {
+    if (!this.pendingApplication || this.interviewForm.invalid) {
+      this.interviewForm.markAllAsTouched();
+      return;
+    }
+
+    const interviewAt: Date = this.interviewForm.value.interviewAt;
+    this.actionLoading = true;
+    this.recruitmentService.updateApplicationStatus(this.pendingApplication.applicationId, {
+      status: 'ACCEPTED',
+      interviewAt: interviewAt.toISOString()
+    }).subscribe({
+      next: (response) => {
+        this.actionLoading = false;
+        if (response.success) {
+          this.message.success('Candidature acceptee et entretien planifie');
+          this.interviewModalVisible = false;
+          this.detailVisible = false;
+          this.pendingApplication = null;
+          this.loadApplications();
+          this.router.navigate(['/rh/calendar'], {
+            state: { selectedDate: interviewAt.toISOString() }
+          });
+        }
+      },
+      error: (err) => {
+        this.actionLoading = false;
+        this.message.error(err.error?.message || 'Erreur lors de la planification');
       }
     });
   }

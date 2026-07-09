@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -263,7 +264,8 @@ public class RecruitmentService {
     }
 
     @Transactional
-    public ApplicationResponse updateApplicationStatus(String applicationId, ApplicationStatus status, AuthUser authUser) {
+    public ApplicationResponse updateApplicationStatus(
+            String applicationId, ApplicationStatus status, LocalDateTime interviewAt, AuthUser authUser) {
         if (status != ApplicationStatus.ACCEPTED && status != ApplicationStatus.REJECTED
                 && status != ApplicationStatus.UNDER_REVIEW) {
             throw new IllegalArgumentException("Invalid application status");
@@ -273,6 +275,14 @@ public class RecruitmentService {
         Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
         if (authUser.isRh()) ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
         application.setStatus(status);
+        if (status == ApplicationStatus.ACCEPTED) {
+            if (interviewAt == null) {
+                throw new IllegalArgumentException("Interview date is required when accepting a candidate");
+            }
+            application.setInterviewAt(interviewAt);
+        } else if (status == ApplicationStatus.REJECTED) {
+            application.setInterviewAt(null);
+        }
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
 
@@ -434,9 +444,11 @@ public class RecruitmentService {
 
         return ApplicationResponse.builder()
                 .applicationId(a.getApplicationId()).recruitmentId(a.getRecruitmentId())
-                .recruitmentTitle(r.getTitle()).candidateUserId(a.getCandidateUserId())
+                .recruitmentTitle(r.getTitle()).zoneName(getZoneName(r.getZoneId())).region(r.getRegion())
+                .candidateUserId(a.getCandidateUserId())
                 .candidate(candidate).cvFileUrl(a.getCvFileUrl()).status(a.getStatus())
                 .qcmScore(a.getQcmScore()).qcmTotalQuestions(a.getQcmTotalQuestions())
+                .interviewAt(a.getInterviewAt())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
     }

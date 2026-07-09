@@ -164,6 +164,7 @@ public final class RecruitmentDtos {
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class ApplicationStatusUpdateRequest {
         @NotNull private ApplicationStatus status;
+        private LocalDateTime interviewAt;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -178,12 +179,15 @@ public final class RecruitmentDtos {
         private String applicationId;
         private String recruitmentId;
         private String recruitmentTitle;
+        private String zoneName;
+        private String region;
         private String candidateUserId;
         private UserSummary candidate;
         private String cvFileUrl;
         private ApplicationStatus status;
         private Integer qcmScore;
         private Integer qcmTotalQuestions;
+        private LocalDateTime interviewAt;
         private LocalDateTime appliedAt;
         private List<ApplicationAnswerResponse> answers;
     }

@@ -7,6 +7,7 @@ import { RhLayoutComponent } from './rh/rh-layout/rh-layout.component';
 import { RhRecruitmentsComponent } from './rh/rh-recruitments/rh-recruitments.component';
 import { RhRecruitmentFormComponent } from './rh/rh-recruitment-form/rh-recruitment-form.component';
 import { RhCandidatesComponent } from './rh/rh-candidates/rh-candidates.component';
+import { RhCalendarComponent } from './rh/rh-calendar/rh-calendar.component';
 
 const routes: Routes = [
   {
@@ -19,6 +20,7 @@ const routes: Routes = [
       { path: 'recruitments/new', component: RhRecruitmentFormComponent },
       { path: 'recruitments/:id/edit', component: RhRecruitmentFormComponent },
       { path: 'candidates', component: RhCandidatesComponent },
+      { path: 'calendar', component: RhCalendarComponent },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule) }
     ]
   }
@@ -29,7 +31,8 @@ const routes: Routes = [
     RhLayoutComponent,
     RhRecruitmentsComponent,
     RhRecruitmentFormComponent,
-    RhCandidatesComponent
+    RhCandidatesComponent,
+    RhCalendarComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })

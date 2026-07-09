@@ -92,14 +92,22 @@ export interface JobApplication {
   applicationId: string;
   recruitmentId: string;
   recruitmentTitle?: string;
+  zoneName?: string;
+  region?: string;
   candidateUserId: string;
   candidate?: UserSummary;
   cvFileUrl?: string;
   status: ApplicationStatus;
   qcmScore?: number;
   qcmTotalQuestions?: number;
+  interviewAt?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
+}
+
+export interface ApplicationStatusUpdateRequest {
+  status: ApplicationStatus;
+  interviewAt?: string | null;
 }
 
 export interface ZoneRequest {

@@ -136,6 +136,14 @@
   -webkit-backface-visibility: hidden;
 }
 
+.flip-front {
+  pointer-events: auto;
+}
+
+.flip-back {
+  pointer-events: none;
+}
+
 .flip-back {
   position: absolute;
   top: 0;
@@ -153,6 +161,14 @@
   border-top: 4px solid var(--daam-primary);
   position: relative;
   z-index: 1;
+}
+
+.form-panel.flipped .flip-front {
+  pointer-events: none;
+}
+
+.form-panel.flipped .flip-back {
+  pointer-events: auto;
 }
 
 .register-card {
