@@ -21,6 +21,15 @@
             <strong>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</strong>
             <p>{{ app.recruitmentTitle }}</p>
             <span>{{ app.region || app.zoneName || 'Zone non definie' }}</span>
+            <a
+              *ngIf="app.googleMeetLink"
+              class="meet-link"
+              [href]="app.googleMeetLink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Rejoindre Google Meet
+            </a>
           </div>
         </div>
       </div>

@@ -101,6 +101,7 @@ export interface JobApplication {
   qcmScore?: number;
   qcmTotalQuestions?: number;
   interviewAt?: string;
+  googleMeetLink?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
 }

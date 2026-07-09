@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
                         HttpStatus.BAD_REQUEST.value()));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
         log.error("Unhandled exception", ex);

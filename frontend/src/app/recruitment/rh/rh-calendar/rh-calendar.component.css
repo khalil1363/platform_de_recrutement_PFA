@@ -50,6 +50,23 @@
   color: var(--daam-text-muted);
 }
 
+.meet-link {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--daam-gradient-soft);
+  color: var(--daam-primary-dark);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.meet-link:hover {
+  background: var(--daam-primary);
+  color: #fff;
+}
+
 @media (max-width: 900px) {
   .calendar-layout {
     grid-template-columns: 1fr;

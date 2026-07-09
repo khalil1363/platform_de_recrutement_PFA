@@ -92,12 +92,17 @@ export class RhCandidatesComponent implements OnInit {
     this.actionLoading = true;
     this.recruitmentService.updateApplicationStatus(this.pendingApplication.applicationId, {
       status: 'ACCEPTED',
-      interviewAt: interviewAt.toISOString()
+      interviewAt: this.formatLocalDateTime(interviewAt)
     }).subscribe({
       next: (response) => {
         this.actionLoading = false;
         if (response.success) {
-          this.message.success('Candidature acceptee et entretien planifie');
+          const meetLink = response.data?.googleMeetLink;
+          this.message.success(
+            meetLink
+              ? `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien Meet cree.`
+              : 'Candidature acceptee et entretien planifie'
+          );
           this.interviewModalVisible = false;
           this.detailVisible = false;
           this.pendingApplication = null;
@@ -133,5 +138,20 @@ export class RhCandidatesComponent implements OnInit {
       REJECTED: 'Rejetée'
     };
     return labels[status] || status;
+  }
+
+  private formatLocalDateTime(date: Date): string {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+  }
+
+  private formatDisplayDate(date: Date): string {
+    return date.toLocaleString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

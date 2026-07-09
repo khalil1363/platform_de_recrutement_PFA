@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local secrets (email password, etc.)
+application-local.properties
+src/main/resources/application-local.properties
+credentials/google-calendar.json
+credentials/*.json
+src/main/resources/credentials/

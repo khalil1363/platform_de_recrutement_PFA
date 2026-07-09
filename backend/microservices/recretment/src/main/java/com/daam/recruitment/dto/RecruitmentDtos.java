@@ -188,6 +188,7 @@ public final class RecruitmentDtos {
         private Integer qcmScore;
         private Integer qcmTotalQuestions;
         private LocalDateTime interviewAt;
+        private String googleMeetLink;
         private LocalDateTime appliedAt;
         private List<ApplicationAnswerResponse> answers;
     }

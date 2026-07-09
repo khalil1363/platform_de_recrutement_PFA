@@ -23,6 +23,8 @@ public class JobApplication {
     private Integer qcmScore;
     private Integer qcmTotalQuestions;
     private LocalDateTime interviewAt;
+    @Column(length = 512)
+    private String googleMeetLink;
     @CreationTimestamp private LocalDateTime appliedAt;
 
     @PrePersist void prePersist() {

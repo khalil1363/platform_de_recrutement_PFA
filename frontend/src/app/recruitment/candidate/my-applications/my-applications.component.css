@@ -6,3 +6,26 @@
   border-radius: 8px;
   font-size: 0.85rem;
 }
+
+.interview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meet-link {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--daam-gradient-soft);
+  color: var(--daam-primary-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.meet-link:hover {
+  background: var(--daam-primary);
+  color: #fff;
+}

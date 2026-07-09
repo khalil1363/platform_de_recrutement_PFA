@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -159,7 +160,8 @@ public class UserServiceImpl implements UserService {
                 request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl());
 
         user.setRole(roleAuthority);
-        user.setAuthorities(resolveAuthoritiesForRole(roleAuthority));
+        user.getAuthorities().clear();
+        user.getAuthorities().addAll(resolveAuthoritiesForRole(roleAuthority));
 
         if (StringUtils.hasText(request.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -204,15 +206,15 @@ public class UserServiceImpl implements UserService {
 
     private List<String> resolveAuthoritiesForRole(String roleAuthority) {
         if (Role.ADMIN.getAuthority().equals(roleAuthority)) {
-            return List.of("read", "edit", "delete");
+            return new ArrayList<>(List.of("read", "edit", "delete"));
         }
         if (Role.RH.getAuthority().equals(roleAuthority)) {
-            return List.of("read", "edit", "manage_candidates");
+            return new ArrayList<>(List.of("read", "edit", "manage_candidates"));
         }
         if (Role.DEVELOPER.getAuthority().equals(roleAuthority)) {
-            return List.of("read", "edit", "manage_system");
+            return new ArrayList<>(List.of("read", "edit", "manage_system"));
         }
-        return List.of("read", "edit");
+        return new ArrayList<>(List.of("read", "edit"));
     }
 
     /**

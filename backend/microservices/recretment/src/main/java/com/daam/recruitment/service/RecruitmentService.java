@@ -29,6 +29,8 @@ public class RecruitmentService {
     private final JobApplicationRepository jobApplicationRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final UserClient userClient;
+    private final GoogleMeetService googleMeetService;
+    private final InterviewEmailService interviewEmailService;
 
     @Value("${internal.api-key}")
     private String internalApiKey;
@@ -280,8 +282,54 @@ public class RecruitmentService {
                 throw new IllegalArgumentException("Interview date is required when accepting a candidate");
             }
             application.setInterviewAt(interviewAt);
+
+            String candidateEmail = null;
+            String candidateName = "Candidat";
+            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, application.getCandidateUserId());
+            if (userResp.isSuccess() && userResp.getData() != null) {
+                UserDto candidate = userResp.getData();
+                candidateEmail = candidate.getEmail();
+                candidateName = (candidate.getFirstName() != null ? candidate.getFirstName() : "")
+                        + " " + (candidate.getLastName() != null ? candidate.getLastName() : "");
+                candidateName = candidateName.trim();
+                if (candidateName.isBlank()) {
+                    candidateName = candidate.getUsername() != null ? candidate.getUsername() : "Candidat";
+                }
+            }
+
+            String rhEmail = null;
+            String rhName = authUser.getUsername();
+            ApiResponse<UserDto> rhResp = userClient.getUserById(internalApiKey, authUser.getUserId());
+            if (rhResp.isSuccess() && rhResp.getData() != null) {
+                UserDto rh = rhResp.getData();
+                rhEmail = rh.getEmail();
+                rhName = ((rh.getFirstName() != null ? rh.getFirstName() : "")
+                        + " " + (rh.getLastName() != null ? rh.getLastName() : "")).trim();
+                if (rhName.isBlank()) {
+                    rhName = rh.getUsername();
+                }
+            }
+
+            String meetLink = googleMeetService.createMeetLink(
+                    "Entretien — " + recruitment.getTitle(),
+                    interviewAt,
+                    candidateEmail,
+                    candidateName,
+                    rhEmail);
+            application.setGoogleMeetLink(meetLink);
+
+            interviewEmailService.sendInterviewNotifications(
+                    candidateEmail,
+                    candidateName,
+                    rhEmail,
+                    rhName,
+                    recruitment.getTitle(),
+                    recruitment.getRegion(),
+                    interviewAt,
+                    meetLink);
         } else if (status == ApplicationStatus.REJECTED) {
             application.setInterviewAt(null);
+            application.setGoogleMeetLink(null);
         }
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
@@ -448,7 +496,7 @@ public class RecruitmentService {
                 .candidateUserId(a.getCandidateUserId())
                 .candidate(candidate).cvFileUrl(a.getCvFileUrl()).status(a.getStatus())
                 .qcmScore(a.getQcmScore()).qcmTotalQuestions(a.getQcmTotalQuestions())
-                .interviewAt(a.getInterviewAt())
+                .interviewAt(a.getInterviewAt()).googleMeetLink(a.getGoogleMeetLink())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
     }
