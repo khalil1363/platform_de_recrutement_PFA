@@ -22,6 +22,17 @@ public class JobApplication {
     @Builder.Default private ApplicationStatus status = ApplicationStatus.SUBMITTED;
     private Integer qcmScore;
     private Integer qcmTotalQuestions;
+    /** 0–100 match between CV skills and job requirements */
+    private Integer cvMatchScore;
+    @Column(columnDefinition = "TEXT")
+    private String extractedSkills;
+    @Column(columnDefinition = "TEXT")
+    private String matchedSkills;
+    @Column(columnDefinition = "TEXT")
+    private String missingSkills;
+    @Column(columnDefinition = "TEXT")
+    private String cvAnalysisSummary;
+    private LocalDateTime cvAnalyzedAt;
     private LocalDateTime interviewAt;
     @Column(length = 512)
     private String googleMeetLink;

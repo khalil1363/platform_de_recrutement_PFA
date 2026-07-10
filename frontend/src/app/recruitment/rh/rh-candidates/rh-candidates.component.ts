@@ -8,6 +8,14 @@ import { AuthService } from '../../../core/services/auth.service';
 import { RecruitmentService } from '../../services/recruitment.service';
 import { ApplicationStatus, JobApplication } from '../../models/recruitment.model';
 
+interface RecruitmentApplicationsGroup {
+  recruitmentId: string;
+  recruitmentTitle: string;
+  zoneName?: string;
+  region?: string;
+  applications: JobApplication[];
+}
+
 @Component({
   selector: 'app-rh-candidates',
   templateUrl: './rh-candidates.component.html',
@@ -15,6 +23,7 @@ import { ApplicationStatus, JobApplication } from '../../models/recruitment.mode
 })
 export class RhCandidatesComponent implements OnInit, OnDestroy {
   applications: JobApplication[] = [];
+  groups: RecruitmentApplicationsGroup[] = [];
   loading = false;
   selectedApplication: JobApplication | null = null;
   detailVisible = false;
@@ -26,6 +35,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   cvPreviewLoading = false;
   cvPreviewSrc: SafeResourceUrl | null = null;
   cvObjectUrl: string | null = null;
+  analyzeLoading = false;
 
   constructor(
     readonly authService: AuthService,
@@ -55,6 +65,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
         this.loading = false;
         if (response.success && response.data) {
           this.applications = response.data;
+          this.rebuildGroups();
         }
       },
       error: () => {
@@ -86,6 +97,40 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   isImageCv(path?: string): boolean {
     const url = this.cvUrl(path);
     return !!url && /\.(png|jpe?g|gif|webp)($|\?)/i.test(url);
+  }
+
+  matchColor(score?: number | null): string {
+    if (score == null) return 'default';
+    if (score >= 75) return 'green';
+    if (score >= 50) return 'blue';
+    if (score >= 30) return 'orange';
+    return 'red';
+  }
+
+  skillList(value?: string): string[] {
+    if (!value) return [];
+    return value.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  analyzeCv(app: JobApplication): void {
+    this.analyzeLoading = true;
+    this.recruitmentService.analyzeApplicationCv(app.applicationId).subscribe({
+      next: (response) => {
+        this.analyzeLoading = false;
+        if (response.success && response.data) {
+          this.selectedApplication = response.data;
+          this.applications = this.applications.map((a) =>
+            a.applicationId === response.data!.applicationId ? response.data! : a
+          );
+          this.rebuildGroups();
+          this.message.success('Analyse CV terminée');
+        }
+      },
+      error: (err) => {
+        this.analyzeLoading = false;
+        this.message.error(err.error?.message || 'Erreur lors de l\'analyse du CV');
+      }
+    });
   }
 
   updateStatus(app: JobApplication, status: ApplicationStatus): void {
@@ -176,6 +221,37 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
     this.cvPreviewLoading = false;
     this.cvPreviewSrc = null;
     this.revokeCvObjectUrl();
+  }
+
+  private rebuildGroups(): void {
+    const byRecruitment = new Map<string, RecruitmentApplicationsGroup>();
+
+    for (const app of this.applications) {
+      const key = app.recruitmentId;
+      let group = byRecruitment.get(key);
+      if (!group) {
+        group = {
+          recruitmentId: app.recruitmentId,
+          recruitmentTitle: app.recruitmentTitle || 'Offre sans titre',
+          zoneName: app.zoneName,
+          region: app.region,
+          applications: []
+        };
+        byRecruitment.set(key, group);
+      }
+      group.applications.push(app);
+    }
+
+    this.groups = Array.from(byRecruitment.values())
+      .map((group) => ({
+        ...group,
+        applications: [...group.applications].sort((a, b) => {
+          const scoreDiff = (b.cvMatchScore ?? -1) - (a.cvMatchScore ?? -1);
+          if (scoreDiff !== 0) return scoreDiff;
+          return (b.qcmScore ?? -1) - (a.qcmScore ?? -1);
+        })
+      }))
+      .sort((a, b) => a.recruitmentTitle.localeCompare(b.recruitmentTitle, 'fr'));
   }
 
   private loadCvPreview(): void {

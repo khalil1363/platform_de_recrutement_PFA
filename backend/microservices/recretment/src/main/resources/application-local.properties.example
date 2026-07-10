@@ -21,3 +21,7 @@ google.calendar.timezone=Africa/Casablanca
 
 # Optional (Google Workspace only): use your RH Gmail/Workspace email so events appear on your calendar
 # google.calendar.delegate-user=your-rh-email@gmail.com
+
+# 3) Optional OpenAI for richer CV analysis (without key, local skill matching is used)
+# app.cv-analysis.openai-api-key=sk-...
+# app.cv-analysis.openai-model=gpt-4o-mini

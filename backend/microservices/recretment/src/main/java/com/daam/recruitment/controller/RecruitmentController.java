@@ -210,4 +210,13 @@ public class RecruitmentController {
                 recruitmentService.updateApplicationStatus(applicationId, request.getStatus(), request.getInterviewAt(), user),
                 HttpStatus.OK.value()));
     }
+
+    @PostMapping("/applications/{applicationId}/analyze-cv")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH', 'ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> analyzeApplicationCv(
+            @PathVariable String applicationId,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success("CV analysis completed",
+                recruitmentService.analyzeApplicationCv(applicationId, user), HttpStatus.OK.value()));
+    }
 }

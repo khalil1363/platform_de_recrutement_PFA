@@ -122,6 +122,10 @@ export class RecruitmentService {
     return this.http.patch<ApiResponse<JobApplication>>(`${this.apiUrl}/applications/${applicationId}/status`, request);
   }
 
+  analyzeApplicationCv(applicationId: string): Observable<ApiResponse<JobApplication>> {
+    return this.http.post<ApiResponse<JobApplication>>(`${this.apiUrl}/applications/${applicationId}/analyze-cv`, {});
+  }
+
   resolveFileUrl(path?: string | null): string | null {
     if (!path) {
       return null;

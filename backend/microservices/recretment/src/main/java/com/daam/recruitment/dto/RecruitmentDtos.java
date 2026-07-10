@@ -207,6 +207,12 @@ public final class RecruitmentDtos {
         private ApplicationStatus status;
         private Integer qcmScore;
         private Integer qcmTotalQuestions;
+        private Integer cvMatchScore;
+        private String extractedSkills;
+        private String matchedSkills;
+        private String missingSkills;
+        private String cvAnalysisSummary;
+        private LocalDateTime cvAnalyzedAt;
         private LocalDateTime interviewAt;
         private String googleMeetLink;
         private LocalDateTime appliedAt;

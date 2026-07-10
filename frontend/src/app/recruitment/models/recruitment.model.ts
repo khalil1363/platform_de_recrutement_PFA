@@ -118,6 +118,12 @@ export interface JobApplication {
   status: ApplicationStatus;
   qcmScore?: number;
   qcmTotalQuestions?: number;
+  cvMatchScore?: number | null;
+  extractedSkills?: string;
+  matchedSkills?: string;
+  missingSkills?: string;
+  cvAnalysisSummary?: string;
+  cvAnalyzedAt?: string;
   interviewAt?: string;
   googleMeetLink?: string;
   appliedAt?: string;

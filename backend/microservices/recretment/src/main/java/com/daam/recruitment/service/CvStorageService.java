@@ -3,10 +3,13 @@ package com.daam.recruitment.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 public class CvStorageService {
@@ -18,9 +21,49 @@ public class CvStorageService {
     private final Path uploadDir;
 
     public CvStorageService(@Value("${file.upload-dir:uploads/cv}") String uploadDir) {
-        this.uploadDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        try { Files.createDirectories(this.uploadDir); } catch (IOException e) {
-            throw new IllegalStateException("Cannot create CV upload directory");
+        this.uploadDir = resolveUploadDir(uploadDir);
+        try {
+            Files.createDirectories(this.uploadDir);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create CV upload directory: " + this.uploadDir);
+        }
+    }
+
+    private Path resolveUploadDir(String configured) {
+        List<Path> candidates = List.of(
+                Paths.get(configured).toAbsolutePath().normalize(),
+                Paths.get("uploads", "cv").toAbsolutePath().normalize(),
+                Paths.get("..", "uploads", "cv").toAbsolutePath().normalize(),
+                Paths.get("..", "..", "uploads", "cv").toAbsolutePath().normalize(),
+                Paths.get("backend", "microservices", "recretment", "uploads", "cv").toAbsolutePath().normalize()
+        );
+
+        Path bestExisting = null;
+        long bestCount = -1;
+        for (Path candidate : candidates) {
+            if (!Files.isDirectory(candidate)) {
+                continue;
+            }
+            long count = countFiles(candidate);
+            if (count > bestCount) {
+                bestCount = count;
+                bestExisting = candidate;
+            }
+        }
+        if (bestExisting != null && bestCount > 0) {
+            return bestExisting;
+        }
+        if (bestExisting != null) {
+            return bestExisting;
+        }
+        return Paths.get(configured).toAbsolutePath().normalize();
+    }
+
+    private long countFiles(Path dir) {
+        try (Stream<Path> stream = Files.list(dir)) {
+            return stream.filter(Files::isRegularFile).count();
+        } catch (IOException e) {
+            return 0;
         }
     }
 
@@ -39,5 +82,7 @@ public class CvStorageService {
         }
     }
 
-    public Path getUploadDir() { return uploadDir; }
+    public Path getUploadDir() {
+        return uploadDir;
+    }
 }

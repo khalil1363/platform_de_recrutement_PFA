@@ -4,10 +4,113 @@
   gap: 8px;
 }
 
+.empty-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: #888;
+}
+
+.recruitment-group {
+  margin-bottom: 28px;
+  padding: 18px 20px 8px;
+  border: 1px solid var(--daam-border, #e8e8e8);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.group-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.group-header h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #35654d;
+}
+
+.group-meta {
+  margin: 0;
+  color: #777;
+  font-size: 13px;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  font-weight: 600;
+  color: #555;
+}
+
+.rank-badge.top {
+  background: #e8f5ee;
+  color: #35654d;
+}
+
+.pending-analysis {
+  color: #999;
+  font-size: 13px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.cv-analysis {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--daam-border, #e8e8e8);
+  border-radius: 12px;
+  background: #f8fbf9;
+}
+
+.cv-analysis.pending {
+  background: #fafafa;
+}
+
+.cv-analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cv-analysis-header h4 {
+  margin: 0;
+}
+
+.cv-summary {
+  margin: 0 0 12px;
+  color: #444;
+  line-height: 1.5;
+}
+
+.skill-block {
+  margin-top: 10px;
+}
+
+.skill-block strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .cv-actions {

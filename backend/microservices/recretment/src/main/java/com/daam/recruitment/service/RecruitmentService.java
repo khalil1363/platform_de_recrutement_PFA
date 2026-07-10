@@ -32,6 +32,7 @@ public class RecruitmentService {
     private final UserClient userClient;
     private final GoogleMeetService googleMeetService;
     private final InterviewEmailService interviewEmailService;
+    private final CvAnalysisService cvAnalysisService;
 
     @Value("${internal.api-key}")
     private String internalApiKey;
@@ -227,6 +228,11 @@ public class RecruitmentService {
         }
         saved.setQcmScore(score);
         jobApplicationRepository.save(saved);
+        try {
+            saved = cvAnalysisService.analyzeApplication(saved.getApplicationId());
+        } catch (Exception e) {
+            // Score stays null only if analyze itself could not persist a fallback
+        }
         return toApplicationResponse(saved, recruitment, true);
     }
 
@@ -235,7 +241,9 @@ public class RecruitmentService {
         Recruitment recruitment = getRecruitmentOrThrow(recruitmentId);
         if (authUser.isRh()) ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
         return jobApplicationRepository.findByRecruitmentId(recruitmentId).stream()
-                .map(a -> toApplicationResponse(a, recruitment, true)).toList();
+                .map(a -> toApplicationResponse(a, recruitment, true))
+                .sorted(applicationRankingComparator())
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -247,15 +255,39 @@ public class RecruitmentService {
                 }).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ApplicationResponse> getApplicationsForRh(AuthUser authUser) {
         List<String> zoneIds = getRhZoneIds(authUser.getUserId());
         List<String> recruitmentIds = recruitmentRepository.findByZoneIdIn(zoneIds).stream()
                 .map(Recruitment::getRecruitmentId).toList();
         if (recruitmentIds.isEmpty()) return List.of();
         return jobApplicationRepository.findByRecruitmentIdIn(recruitmentIds).stream()
+                .map(a -> ensureCvAnalyzed(a))
                 .map(a -> toApplicationResponse(a, getRecruitmentOrThrow(a.getRecruitmentId()), true))
+                .sorted(applicationRankingComparator())
                 .toList();
+    }
+
+    private JobApplication ensureCvAnalyzed(JobApplication application) {
+        if (application.getCvMatchScore() != null || application.getCvFileUrl() == null
+                || application.getCvFileUrl().isBlank()) {
+            return application;
+        }
+        try {
+            return cvAnalysisService.analyzeApplication(application.getApplicationId());
+        } catch (Exception e) {
+            return application;
+        }
+    }
+
+    @Transactional
+    public ApplicationResponse analyzeApplicationCv(String applicationId, AuthUser authUser) {
+        JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+        Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
+        if (authUser.isRh()) ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
+        JobApplication analyzed = cvAnalysisService.analyzeApplication(applicationId);
+        return toApplicationResponse(analyzed, recruitment, true);
     }
 
     @Transactional
@@ -498,8 +530,22 @@ public class RecruitmentService {
                 .candidateUserId(a.getCandidateUserId())
                 .candidate(candidate).cvFileUrl(a.getCvFileUrl()).status(a.getStatus())
                 .qcmScore(a.getQcmScore()).qcmTotalQuestions(a.getQcmTotalQuestions())
+                .cvMatchScore(a.getCvMatchScore())
+                .extractedSkills(a.getExtractedSkills())
+                .matchedSkills(a.getMatchedSkills())
+                .missingSkills(a.getMissingSkills())
+                .cvAnalysisSummary(a.getCvAnalysisSummary())
+                .cvAnalyzedAt(a.getCvAnalyzedAt())
                 .interviewAt(a.getInterviewAt()).googleMeetLink(a.getGoogleMeetLink())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
+    }
+
+    private Comparator<ApplicationResponse> applicationRankingComparator() {
+        return Comparator
+                .comparing((ApplicationResponse a) -> a.getCvMatchScore() == null ? -1 : a.getCvMatchScore(),
+                        Comparator.reverseOrder())
+                .thenComparing(a -> a.getQcmScore() == null ? -1 : a.getQcmScore(), Comparator.reverseOrder())
+                .thenComparing(ApplicationResponse::getAppliedAt, Comparator.nullsLast(Comparator.reverseOrder()));
     }
 }

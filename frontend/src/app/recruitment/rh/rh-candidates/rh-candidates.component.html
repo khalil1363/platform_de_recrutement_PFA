@@ -1,16 +1,35 @@
 <div class="page-header-bar">
   <div>
-    <h2>Candidatures reçues</h2>
-    <p>Consultez les profils, CV et résultats QCM — acceptez ou rejetez les candidats</p>
+    <h2>Candidatures par offre</h2>
+    <p>Chaque recrutement a son classement CV (meilleur match en premier)</p>
   </div>
 </div>
 
 <nz-spin [nzSpinning]="loading">
-    <nz-table [nzData]="applications">
+  <div class="empty-state" *ngIf="!loading && groups.length === 0">
+    <p>Aucune candidature pour le moment.</p>
+  </div>
+
+  <section class="recruitment-group" *ngFor="let group of groups">
+    <div class="group-header">
+      <div>
+        <h3>{{ group.recruitmentTitle }}</h3>
+        <p class="group-meta">
+          <span *ngIf="group.zoneName">{{ group.zoneName }}</span>
+          <span *ngIf="group.zoneName && group.region"> · </span>
+          <span *ngIf="group.region">{{ group.region }}</span>
+          <span *ngIf="!group.zoneName && !group.region">Offre de recrutement</span>
+        </p>
+      </div>
+      <nz-tag nzColor="processing">{{ group.applications.length }} candidature(s)</nz-tag>
+    </div>
+
+    <nz-table [nzData]="group.applications" [nzFrontPagination]="false">
       <thead>
         <tr>
+          <th>Rang</th>
           <th>Candidat</th>
-          <th>Offre</th>
+          <th>Match CV</th>
           <th>Score QCM</th>
           <th>Date</th>
           <th>Statut</th>
@@ -18,7 +37,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let app of applications">
+        <tr *ngFor="let app of group.applications; let i = index">
+          <td>
+            <span class="rank-badge" [class.top]="i < 3">#{{ i + 1 }}</span>
+          </td>
           <td>
             <div class="candidate-cell">
               <nz-avatar
@@ -28,7 +50,12 @@
               <span>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</span>
             </div>
           </td>
-          <td>{{ app.recruitmentTitle }}</td>
+          <td>
+            <nz-tag *ngIf="app.cvMatchScore != null" [nzColor]="matchColor(app.cvMatchScore)">
+              {{ app.cvMatchScore }}%
+            </nz-tag>
+            <span *ngIf="app.cvMatchScore == null" class="pending-analysis">Analyse…</span>
+          </td>
           <td>{{ app.qcmScore }}/{{ app.qcmTotalQuestions }}</td>
           <td>{{ app.appliedAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td><nz-tag [nzColor]="statusColor(app.status)">{{ statusLabel(app.status) }}</nz-tag></td>
@@ -58,7 +85,8 @@
         </tr>
       </tbody>
     </nz-table>
-  </nz-spin>
+  </section>
+</nz-spin>
 
 <nz-modal
   [(nzVisible)]="detailVisible"
@@ -79,8 +107,67 @@
         <nz-descriptions-item nzTitle="Score QCM">
           {{ selectedApplication.qcmScore }}/{{ selectedApplication.qcmTotalQuestions }}
         </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Match CV">
+          <nz-tag *ngIf="selectedApplication.cvMatchScore != null" [nzColor]="matchColor(selectedApplication.cvMatchScore)">
+            {{ selectedApplication.cvMatchScore }}%
+          </nz-tag>
+          <span *ngIf="selectedApplication.cvMatchScore == null">En attente d'analyse</span>
+        </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Statut">{{ statusLabel(selectedApplication.status) }}</nz-descriptions-item>
       </nz-descriptions>
+
+      <div class="cv-analysis" *ngIf="selectedApplication.cvAnalysisSummary || selectedApplication.cvMatchScore != null">
+        <div class="cv-analysis-header">
+          <h4>Analyse IA du CV</h4>
+          <button
+            nz-button
+            nzSize="small"
+            type="button"
+            [nzLoading]="analyzeLoading"
+            (click)="analyzeCv(selectedApplication)"
+          >
+            Relancer l'analyse
+          </button>
+        </div>
+        <p class="cv-summary" *ngIf="selectedApplication.cvAnalysisSummary">
+          {{ selectedApplication.cvAnalysisSummary }}
+        </p>
+        <div class="skill-block" *ngIf="selectedApplication.matchedSkills">
+          <strong>Compétences correspondantes</strong>
+          <div class="skill-tags">
+            <nz-tag *ngFor="let skill of skillList(selectedApplication.matchedSkills)" nzColor="green">{{ skill }}</nz-tag>
+          </div>
+        </div>
+        <div class="skill-block" *ngIf="selectedApplication.missingSkills">
+          <strong>Compétences manquantes</strong>
+          <div class="skill-tags">
+            <nz-tag *ngFor="let skill of skillList(selectedApplication.missingSkills)" nzColor="orange">{{ skill }}</nz-tag>
+          </div>
+        </div>
+        <div class="skill-block" *ngIf="selectedApplication.extractedSkills">
+          <strong>Compétences détectées sur le CV</strong>
+          <div class="skill-tags">
+            <nz-tag *ngFor="let skill of skillList(selectedApplication.extractedSkills)">{{ skill }}</nz-tag>
+          </div>
+        </div>
+      </div>
+
+      <div class="cv-analysis pending" *ngIf="!selectedApplication.cvAnalysisSummary && selectedApplication.cvMatchScore == null">
+        <div class="cv-analysis-header">
+          <h4>Analyse IA du CV</h4>
+          <button
+            nz-button
+            nzSize="small"
+            nzType="primary"
+            type="button"
+            [nzLoading]="analyzeLoading"
+            (click)="analyzeCv(selectedApplication)"
+          >
+            Lancer l'analyse
+          </button>
+        </div>
+        <p>L'analyse n'est pas encore disponible. Vous pouvez la lancer manuellement.</p>
+      </div>
 
       <div class="cv-actions" *ngIf="selectedApplication.cvFileUrl">
         <button
