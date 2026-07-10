@@ -39,8 +39,8 @@
   [(nzVisible)]="detailVisible"
   nzTitle="Détail de la candidature"
   [nzFooter]="null"
-  (nzOnCancel)="detailVisible = false"
-  nzWidth="760px"
+  (nzOnCancel)="detailVisible = false; hideCvPreview()"
+  [nzWidth]="cvPreviewVisible ? 980 : 760"
 >
   <div *nzModalContent>
     <ng-container *ngIf="selectedApplication">
@@ -55,10 +55,46 @@
         </nz-descriptions-item>
       </nz-descriptions>
 
-      <div class="cv-link" *ngIf="selectedApplication.cvFileUrl">
-        <a [href]="cvUrl(selectedApplication.cvFileUrl)!" target="_blank" rel="noopener">
+      <div class="cv-actions" *ngIf="selectedApplication.cvFileUrl">
+        <button
+          nz-button
+          nzType="primary"
+          type="button"
+          [nzLoading]="cvPreviewLoading"
+          (click)="toggleCvPreview()"
+        >
+          <span nz-icon [nzType]="cvPreviewVisible ? 'eye-invisible' : 'eye'" nzTheme="outline"></span>
+          {{ cvPreviewVisible ? 'Masquer le CV' : 'Voir le CV' }}
+        </button>
+        <a
+          nz-button
+          [href]="cvUrl(selectedApplication.cvFileUrl)!"
+          target="_blank"
+          rel="noopener"
+          download
+        >
+          <span nz-icon nzType="download" nzTheme="outline"></span>
           Télécharger le CV
         </a>
+      </div>
+
+      <div class="cv-viewer" *ngIf="cvPreviewVisible && selectedApplication.cvFileUrl">
+        <nz-spin [nzSpinning]="cvPreviewLoading">
+          <iframe
+            *ngIf="isPdfCv(selectedApplication.cvFileUrl) && cvPreviewSrc"
+            [src]="cvPreviewSrc"
+            title="Aperçu du CV"
+          ></iframe>
+          <img
+            *ngIf="isImageCv(selectedApplication.cvFileUrl) && cvObjectUrl"
+            [src]="cvObjectUrl"
+            alt="Aperçu du CV"
+          />
+          <div class="cv-fallback" *ngIf="!isPdfCv(selectedApplication.cvFileUrl) && !isImageCv(selectedApplication.cvFileUrl)">
+            <p>Aperçu non disponible pour ce format (Word).</p>
+            <a [href]="cvUrl(selectedApplication.cvFileUrl)!" target="_blank" rel="noopener">Ouvrir / télécharger le fichier</a>
+          </div>
+        </nz-spin>
       </div>
 
       <h4>Réponses QCM</h4>

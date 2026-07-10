@@ -30,7 +30,10 @@ import {
   FileTextOutline,
   UsergroupAddOutline,
   ArrowLeftOutline,
-  SendOutline
+  SendOutline,
+  EyeOutline,
+  EyeInvisibleOutline,
+  DownloadOutline
 } from '@ant-design/icons-angular/icons';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -63,7 +66,10 @@ const icons: IconDefinition[] = [
   FileTextOutline,
   UsergroupAddOutline,
   ArrowLeftOutline,
-  SendOutline
+  SendOutline,
+  EyeOutline,
+  EyeInvisibleOutline,
+  DownloadOutline
 ];
 
 @NgModule({

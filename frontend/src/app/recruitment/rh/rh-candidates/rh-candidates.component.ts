@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -11,7 +13,7 @@ import { ApplicationStatus, JobApplication } from '../../models/recruitment.mode
   templateUrl: './rh-candidates.component.html',
   styleUrl: './rh-candidates.component.css'
 })
-export class RhCandidatesComponent implements OnInit {
+export class RhCandidatesComponent implements OnInit, OnDestroy {
   applications: JobApplication[] = [];
   loading = false;
   selectedApplication: JobApplication | null = null;
@@ -20,13 +22,19 @@ export class RhCandidatesComponent implements OnInit {
   actionLoading = false;
   interviewForm!: FormGroup;
   pendingApplication: JobApplication | null = null;
+  cvPreviewVisible = false;
+  cvPreviewLoading = false;
+  cvPreviewSrc: SafeResourceUrl | null = null;
+  cvObjectUrl: string | null = null;
 
   constructor(
     readonly authService: AuthService,
     private readonly recruitmentService: RecruitmentService,
     private readonly message: NzMessageService,
     private readonly fb: FormBuilder,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly sanitizer: DomSanitizer,
+    private readonly http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -34,6 +42,10 @@ export class RhCandidatesComponent implements OnInit {
       interviewAt: [null, Validators.required]
     });
     this.loadApplications();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeCvObjectUrl();
   }
 
   loadApplications(): void {
@@ -54,7 +66,26 @@ export class RhCandidatesComponent implements OnInit {
 
   openDetails(app: JobApplication): void {
     this.selectedApplication = app;
+    this.hideCvPreview();
     this.detailVisible = true;
+  }
+
+  toggleCvPreview(): void {
+    if (this.cvPreviewVisible) {
+      this.hideCvPreview();
+      return;
+    }
+    this.loadCvPreview();
+  }
+
+  isPdfCv(path?: string): boolean {
+    const url = this.cvUrl(path);
+    return !!url && /\.pdf($|\?)/i.test(url);
+  }
+
+  isImageCv(path?: string): boolean {
+    const url = this.cvUrl(path);
+    return !!url && /\.(png|jpe?g|gif|webp)($|\?)/i.test(url);
   }
 
   updateStatus(app: JobApplication, status: ApplicationStatus): void {
@@ -138,6 +169,48 @@ export class RhCandidatesComponent implements OnInit {
       REJECTED: 'Rejetée'
     };
     return labels[status] || status;
+  }
+
+  hideCvPreview(): void {
+    this.cvPreviewVisible = false;
+    this.cvPreviewLoading = false;
+    this.cvPreviewSrc = null;
+    this.revokeCvObjectUrl();
+  }
+
+  private loadCvPreview(): void {
+    const path = this.selectedApplication?.cvFileUrl;
+    const url = this.cvUrl(path);
+    if (!url) {
+      return;
+    }
+
+    if (!this.isPdfCv(path) && !this.isImageCv(path)) {
+      this.cvPreviewVisible = true;
+      return;
+    }
+
+    this.cvPreviewLoading = true;
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        this.revokeCvObjectUrl();
+        this.cvObjectUrl = URL.createObjectURL(blob);
+        this.cvPreviewSrc = this.sanitizer.bypassSecurityTrustResourceUrl(this.cvObjectUrl);
+        this.cvPreviewVisible = true;
+        this.cvPreviewLoading = false;
+      },
+      error: () => {
+        this.cvPreviewLoading = false;
+        this.message.error('Impossible de charger le CV');
+      }
+    });
+  }
+
+  private revokeCvObjectUrl(): void {
+    if (this.cvObjectUrl) {
+      URL.revokeObjectURL(this.cvObjectUrl);
+      this.cvObjectUrl = null;
+    }
   }
 
   private formatLocalDateTime(date: Date): string {
