@@ -1,0 +1,89 @@
+<div class="form-page">
+  <div class="page-header-bar">
+    <div>
+      <h2>{{ isEdit ? 'Modifier le QCM' : 'Nouveau QCM' }}</h2>
+      <p>Définissez les questions, puis assignez ce QCM à un recrutement</p>
+    </div>
+    <button nz-button type="button" (click)="cancel()">
+      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      Retour
+    </button>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <form nz-form [formGroup]="form" (ngSubmit)="save()" class="qcm-form">
+      <section class="form-section">
+        <div class="section-head">
+          <span nz-icon nzType="file-text" nzTheme="outline"></span>
+          <h3>Informations</h3>
+        </div>
+        <div class="form-grid">
+          <nz-form-item>
+            <nz-form-label nzRequired>Titre</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="title" placeholder="Ex. QCM Développeur Java" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Description</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="description" placeholder="Optionnel" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-head">
+          <span nz-icon nzType="solution" nzTheme="outline"></span>
+          <h3>Questions</h3>
+          <button nz-button nzType="dashed" type="button" class="add-question-btn" (click)="addQuestion()">
+            <span nz-icon nzType="plus" nzTheme="outline"></span>
+            Ajouter une question
+          </button>
+        </div>
+
+        <div class="question-card" *ngFor="let question of questions.controls; let i = index" [formGroup]="$any(question)">
+          <div class="question-header">
+            <div class="question-badge">Q{{ i + 1 }}</div>
+            <strong>Question {{ i + 1 }}</strong>
+            <button nz-button nzType="text" nzDanger type="button" (click)="removeQuestion(i)">
+              <span nz-icon nzType="delete" nzTheme="outline"></span>
+              Supprimer
+            </button>
+          </div>
+          <nz-form-item>
+            <nz-form-control>
+              <input nz-input placeholder="Énoncé de la question" formControlName="questionText" />
+            </nz-form-control>
+          </nz-form-item>
+          <div class="options-grid">
+            <input nz-input placeholder="Option A" formControlName="optionA" />
+            <input nz-input placeholder="Option B" formControlName="optionB" />
+            <input nz-input placeholder="Option C (optionnel)" formControlName="optionC" />
+            <input nz-input placeholder="Option D (optionnel)" formControlName="optionD" />
+          </div>
+          <nz-form-item>
+            <nz-form-label>Bonne réponse</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="correctOption" nzPlaceHolder="Sélectionner">
+                <nz-option nzValue="A" nzLabel="A"></nz-option>
+                <nz-option nzValue="B" nzLabel="B"></nz-option>
+                <nz-option nzValue="C" nzLabel="C"></nz-option>
+                <nz-option nzValue="D" nzLabel="D"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button nz-button type="button" (click)="cancel()">Annuler</button>
+        <button nz-button nzType="primary" [nzLoading]="saving" type="submit">
+          <span nz-icon nzType="save" nzTheme="outline"></span>
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </nz-spin>
+</div>

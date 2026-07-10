@@ -28,6 +28,22 @@ export interface QcmQuestion {
   orderIndex?: number;
 }
 
+export interface Qcm {
+  qcmId: string;
+  title: string;
+  description?: string;
+  createdByRhUserId?: string;
+  createdAt?: string;
+  questionCount?: number;
+  questions?: QcmQuestion[];
+}
+
+export interface QcmRequest {
+  title: string;
+  description?: string;
+  questions: QcmQuestion[];
+}
+
 export interface QcmAnswer {
   questionId: string;
   selectedOption: string;
@@ -67,6 +83,8 @@ export interface Recruitment {
   keejobReference?: string;
   status: RecruitmentStatus;
   createdAt?: string;
+  qcmId?: string | null;
+  qcmTitle?: string;
   questions?: QcmQuestion[];
 }
 
@@ -165,7 +183,7 @@ export interface RecruitmentRequest {
   internalReference?: string;
   keejobReference?: string;
   status?: RecruitmentStatus;
-  questions?: QcmQuestion[];
+  qcmId?: string | null;
 }
 
 export interface ApplicationRequest {

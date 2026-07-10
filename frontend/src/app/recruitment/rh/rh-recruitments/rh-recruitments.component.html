@@ -16,6 +16,7 @@
         <th>Titre</th>
         <th>Entreprise</th>
         <th>Zone</th>
+        <th>QCM</th>
         <th>Statut</th>
         <th>Actions</th>
       </tr>
@@ -25,6 +26,7 @@
         <td><strong>{{ item.title }}</strong></td>
         <td>{{ item.companyName }}</td>
         <td>{{ item.zoneName }}</td>
+        <td>{{ item.qcmTitle || '—' }}</td>
         <td><nz-tag [nzColor]="statusColor(item.status)">{{ item.status }}</nz-tag></td>
         <td>
           <button nz-button nzSize="small" (click)="edit(item.recruitmentId)">Modifier</button>

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { RecruitmentService } from '../../services/recruitment.service';
-import { Company, RecruitmentRequest } from '../../models/recruitment.model';
+import { Company, Qcm, RecruitmentRequest } from '../../models/recruitment.model';
 
 @Component({
   selector: 'app-rh-recruitment-form',
@@ -13,6 +13,7 @@ import { Company, RecruitmentRequest } from '../../models/recruitment.model';
 export class RhRecruitmentFormComponent implements OnInit {
   form!: FormGroup;
   companies: Company[] = [];
+  qcms: Qcm[] = [];
   loading = false;
   saving = false;
   isEdit = false;
@@ -35,15 +36,12 @@ export class RhRecruitmentFormComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this.loadCompanies();
+    this.loadQcms();
     this.recruitmentId = this.route.snapshot.paramMap.get('id') || '';
     this.isEdit = !!this.recruitmentId && this.route.snapshot.url.some((s) => s.path === 'edit');
     if (this.isEdit) {
       this.loadRecruitment();
     }
-  }
-
-  get questions(): FormArray {
-    return this.form.get('questions') as FormArray;
   }
 
   buildForm(): void {
@@ -75,29 +73,8 @@ export class RhRecruitmentFormComponent implements OnInit {
       internalReference: [''],
       keejobReference: [''],
       status: ['DRAFT'],
-      questions: this.fb.array([this.createQuestionGroup()])
+      qcmId: [null]
     });
-  }
-
-  createQuestionGroup(): FormGroup {
-    return this.fb.group({
-      questionText: ['', Validators.required],
-      optionA: ['', Validators.required],
-      optionB: ['', Validators.required],
-      optionC: [''],
-      optionD: [''],
-      correctOption: ['A', Validators.required]
-    });
-  }
-
-  addQuestion(): void {
-    this.questions.push(this.createQuestionGroup());
-  }
-
-  removeQuestion(index: number): void {
-    if (this.questions.length > 1) {
-      this.questions.removeAt(index);
-    }
   }
 
   loadCompanies(): void {
@@ -105,6 +82,16 @@ export class RhRecruitmentFormComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.companies = response.data;
+        }
+      }
+    });
+  }
+
+  loadQcms(): void {
+    this.recruitmentService.getQcms().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.qcms = response.data;
         }
       }
     });
@@ -144,22 +131,9 @@ export class RhRecruitmentFormComponent implements OnInit {
             responsibleName: data.responsibleName,
             internalReference: data.internalReference,
             keejobReference: data.keejobReference,
-            status: data.status
+            status: data.status,
+            qcmId: data.qcmId || null
           });
-          this.questions.clear();
-          (data.questions || []).forEach((q) => {
-            this.questions.push(this.fb.group({
-              questionText: [q.questionText, Validators.required],
-              optionA: [q.optionA, Validators.required],
-              optionB: [q.optionB, Validators.required],
-              optionC: [q.optionC || ''],
-              optionD: [q.optionD || ''],
-              correctOption: [q.correctOption || 'A', Validators.required]
-            }));
-          });
-          if (!this.questions.length) {
-            this.addQuestion();
-          }
         }
       },
       error: () => {
@@ -175,7 +149,10 @@ export class RhRecruitmentFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = this.form.value as RecruitmentRequest;
+    const payload = { ...this.form.value } as RecruitmentRequest;
+    if (!payload.qcmId) {
+      payload.qcmId = null;
+    }
     this.saving = true;
     const request$ = this.isEdit
       ? this.recruitmentService.updateRecruitment(this.recruitmentId, payload)
@@ -194,6 +171,10 @@ export class RhRecruitmentFormComponent implements OnInit {
         this.message.error(err.error?.message || 'Erreur lors de l\'enregistrement');
       }
     });
+  }
+
+  goToQcm(): void {
+    this.router.navigate(['/rh/qcm/new']);
   }
 
   cancel(): void {

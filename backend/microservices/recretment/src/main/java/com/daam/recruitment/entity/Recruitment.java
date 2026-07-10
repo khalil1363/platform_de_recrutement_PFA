@@ -54,6 +54,7 @@ public class Recruitment {
     private String keejobReference;
     @Enumerated(EnumType.STRING)
     @Builder.Default private RecruitmentStatus status = RecruitmentStatus.DRAFT;
+    private String qcmId;
     @Column(nullable = false) private String createdByRhUserId;
     @CreationTimestamp private LocalDateTime createdAt;
     @UpdateTimestamp private LocalDateTime updatedAt;

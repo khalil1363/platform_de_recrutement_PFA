@@ -91,7 +91,7 @@ public final class RecruitmentDtos {
         private String internalReference;
         private String keejobReference;
         private RecruitmentStatus status;
-        private List<QcmQuestionRequest> questions;
+        private String qcmId;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -129,6 +129,26 @@ public final class RecruitmentDtos {
         private String keejobReference;
         private RecruitmentStatus status;
         private LocalDateTime createdAt;
+        private String qcmId;
+        private String qcmTitle;
+        private List<QcmQuestionResponse> questions;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class QcmRequest {
+        @NotBlank private String title;
+        private String description;
+        @NotNull private List<QcmQuestionRequest> questions;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class QcmResponse {
+        private String qcmId;
+        private String title;
+        private String description;
+        private String createdByRhUserId;
+        private LocalDateTime createdAt;
+        private int questionCount;
         private List<QcmQuestionResponse> questions;
     }
 

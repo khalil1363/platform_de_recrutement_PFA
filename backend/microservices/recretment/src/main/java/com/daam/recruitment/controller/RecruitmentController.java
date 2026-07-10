@@ -4,6 +4,7 @@ import com.daam.recruitment.dto.RecruitmentDtos.*;
 import com.daam.recruitment.response.ApiResponse;
 import com.daam.recruitment.security.AuthUser;
 import com.daam.recruitment.service.CvStorageService;
+import com.daam.recruitment.service.QcmService;
 import com.daam.recruitment.service.RecruitmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class RecruitmentController {
 
     private final RecruitmentService recruitmentService;
+    private final QcmService qcmService;
     private final CvStorageService cvStorageService;
 
     // ---- Public ----
@@ -83,6 +85,45 @@ public class RecruitmentController {
     public ResponseEntity<ApiResponse<List<CompanyResponse>>> getCompanies(@AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("Companies",
                 recruitmentService.getCompanies(user), HttpStatus.OK.value()));
+    }
+
+    // ---- QCM bank ----
+    @PostMapping("/qcm")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<QcmResponse>> createQcm(
+            @Valid @RequestBody QcmRequest request, @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "QCM created", qcmService.createQcm(request, user), HttpStatus.CREATED.value()));
+    }
+
+    @GetMapping("/qcm")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_RH')")
+    public ResponseEntity<ApiResponse<List<QcmResponse>>> listQcm(@AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success("QCMs", qcmService.listQcms(user), HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/qcm/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_RH')")
+    public ResponseEntity<ApiResponse<QcmResponse>> getQcm(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success("QCM", qcmService.getQcm(id, true), HttpStatus.OK.value()));
+    }
+
+    @PutMapping("/qcm/{id}")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<QcmResponse>> updateQcm(
+            @PathVariable String id,
+            @Valid @RequestBody QcmRequest request,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "QCM updated", qcmService.updateQcm(id, request, user), HttpStatus.OK.value()));
+    }
+
+    @DeleteMapping("/qcm/{id}")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<Void>> deleteQcm(
+            @PathVariable String id, @AuthenticationPrincipal AuthUser user) {
+        qcmService.deleteQcm(id, user);
+        return ResponseEntity.ok(ApiResponse.success("QCM deleted", null, HttpStatus.OK.value()));
     }
 
     // ---- Recruitments ----

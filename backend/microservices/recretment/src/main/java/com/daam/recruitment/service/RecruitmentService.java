@@ -25,6 +25,7 @@ public class RecruitmentService {
     private final CompanyRepository companyRepository;
     private final RhZoneAssignmentRepository rhZoneAssignmentRepository;
     private final RecruitmentRepository recruitmentRepository;
+    private final QcmRepository qcmRepository;
     private final QcmQuestionRepository qcmQuestionRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
@@ -129,11 +130,8 @@ public class RecruitmentService {
         recruitment.setCreatedByRhUserId(authUser.getUserId());
         recruitment.setZoneId(company.getZoneId());
         if (recruitment.getStatus() == null) recruitment.setStatus(RecruitmentStatus.DRAFT);
+        assignQcmIfPresent(recruitment, request.getQcmId());
         Recruitment saved = recruitmentRepository.save(recruitment);
-
-        if (request.getQuestions() != null) {
-            saveQuestions(saved.getRecruitmentId(), request.getQuestions());
-        }
         return toRecruitmentResponse(saved, true);
     }
 
@@ -145,12 +143,8 @@ public class RecruitmentService {
         Company company = companyRepository.findByCompanyId(request.getCompanyId())
                 .orElseThrow(() -> new IllegalArgumentException("Company not found"));
         applyRequest(recruitment, request, company);
+        assignQcmIfPresent(recruitment, request.getQcmId());
         Recruitment saved = recruitmentRepository.save(recruitment);
-
-        if (request.getQuestions() != null) {
-            qcmQuestionRepository.deleteByRecruitmentId(recruitmentId);
-            saveQuestions(recruitmentId, request.getQuestions());
-        }
         return toRecruitmentResponse(saved, true);
     }
 
@@ -204,8 +198,7 @@ public class RecruitmentService {
                 request.getRecruitmentId(), authUser.getUserId()))
             throw new IllegalArgumentException("You already applied for this position");
 
-        List<QcmQuestion> questions = qcmQuestionRepository
-                .findByRecruitmentIdOrderByOrderIndexAsc(request.getRecruitmentId());
+        List<QcmQuestion> questions = getQuestionsForRecruitment(recruitment);
         if (questions.isEmpty()) throw new IllegalArgumentException("No QCM configured for this recruitment");
         if (request.getAnswers() == null || request.getAnswers().size() != questions.size())
             throw new IllegalArgumentException("All QCM questions must be answered");
@@ -353,23 +346,27 @@ public class RecruitmentService {
         return zoneRepository.findByZoneId(zoneId).map(Zone::getName).orElse("");
     }
 
+    private void assignQcmIfPresent(Recruitment recruitment, String qcmId) {
+        if (qcmId == null || qcmId.isBlank()) {
+            recruitment.setQcmId(null);
+            return;
+        }
+        if (!qcmRepository.existsByQcmId(qcmId)) {
+            throw new IllegalArgumentException("QCM not found");
+        }
+        recruitment.setQcmId(qcmId);
+    }
+
+    private List<QcmQuestion> getQuestionsForRecruitment(Recruitment recruitment) {
+        if (recruitment.getQcmId() == null || recruitment.getQcmId().isBlank()) {
+            return List.of();
+        }
+        return qcmQuestionRepository.findByQcmIdOrderByOrderIndexAsc(recruitment.getQcmId());
+    }
+
     private Recruitment getRecruitmentOrThrow(String recruitmentId) {
         return recruitmentRepository.findByRecruitmentId(recruitmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Recruitment not found"));
-    }
-
-    private void saveQuestions(String recruitmentId, List<QcmQuestionRequest> questions) {
-        int index = 0;
-        for (QcmQuestionRequest q : questions) {
-            qcmQuestionRepository.save(QcmQuestion.builder()
-                    .recruitmentId(recruitmentId)
-                    .questionText(q.getQuestionText())
-                    .optionA(q.getOptionA()).optionB(q.getOptionB())
-                    .optionC(q.getOptionC()).optionD(q.getOptionD())
-                    .correctOption(q.getCorrectOption().toUpperCase())
-                    .orderIndex(q.getOrderIndex() != null ? q.getOrderIndex() : index++)
-                    .build());
-        }
     }
 
     private Recruitment mapToEntity(RecruitmentRequest req, Company company) {
@@ -434,8 +431,11 @@ public class RecruitmentService {
     private RecruitmentResponse toRecruitmentResponse(Recruitment r, boolean includeCorrect) {
         String companyName = companyRepository.findByCompanyId(r.getCompanyId()).map(Company::getName).orElse("");
         String zoneName = getZoneName(r.getZoneId());
-        List<QcmQuestionResponse> questions = qcmQuestionRepository
-                .findByRecruitmentIdOrderByOrderIndexAsc(r.getRecruitmentId()).stream()
+        String qcmTitle = null;
+        if (r.getQcmId() != null && !r.getQcmId().isBlank()) {
+            qcmTitle = qcmRepository.findByQcmId(r.getQcmId()).map(Qcm::getTitle).orElse(null);
+        }
+        List<QcmQuestionResponse> questions = getQuestionsForRecruitment(r).stream()
                 .map(q -> QcmQuestionResponse.builder()
                         .questionId(q.getQuestionId()).questionText(q.getQuestionText())
                         .optionA(q.getOptionA()).optionB(q.getOptionB())
@@ -462,7 +462,9 @@ public class RecruitmentService {
                 .anonymousMode(r.getAnonymousMode()).publicationDate(r.getPublicationDate())
                 .responsibleName(r.getResponsibleName())
                 .internalReference(r.getInternalReference()).keejobReference(r.getKeejobReference())
-                .status(r.getStatus()).createdAt(r.getCreatedAt()).questions(questions)
+                .status(r.getStatus()).createdAt(r.getCreatedAt())
+                .qcmId(r.getQcmId()).qcmTitle(qcmTitle)
+                .questions(questions)
                 .build();
     }
 

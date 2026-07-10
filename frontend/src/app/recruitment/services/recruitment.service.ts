@@ -14,6 +14,8 @@ import {
   RhZoneAssignment,
   RhZoneAssignmentRequest,
   ApplicationStatus,
+  Qcm,
+  QcmRequest,
   Zone,
   ZoneRequest
 } from '../models/recruitment.model';
@@ -83,6 +85,26 @@ export class RecruitmentService {
 
   updateRecruitment(id: string, request: RecruitmentRequest): Observable<ApiResponse<Recruitment>> {
     return this.http.put<ApiResponse<Recruitment>>(`${this.apiUrl}/recruitments/${id}`, request);
+  }
+
+  getQcms(): Observable<ApiResponse<Qcm[]>> {
+    return this.http.get<ApiResponse<Qcm[]>>(`${this.apiUrl}/qcm`);
+  }
+
+  getQcm(id: string): Observable<ApiResponse<Qcm>> {
+    return this.http.get<ApiResponse<Qcm>>(`${this.apiUrl}/qcm/${id}`);
+  }
+
+  createQcm(request: QcmRequest): Observable<ApiResponse<Qcm>> {
+    return this.http.post<ApiResponse<Qcm>>(`${this.apiUrl}/qcm`, request);
+  }
+
+  updateQcm(id: string, request: QcmRequest): Observable<ApiResponse<Qcm>> {
+    return this.http.put<ApiResponse<Qcm>>(`${this.apiUrl}/qcm/${id}`, request);
+  }
+
+  deleteQcm(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/qcm/${id}`);
   }
 
   getApplications(recruitmentId: string): Observable<ApiResponse<JobApplication[]>> {

@@ -89,48 +89,33 @@
       <section class="form-section">
         <div class="section-head">
           <span nz-icon nzType="solution" nzTheme="outline"></span>
-          <h3>Questions QCM</h3>
-          <button nz-button nzType="dashed" type="button" class="add-question-btn" (click)="addQuestion()">
+          <h3>QCM associé</h3>
+          <button nz-button nzType="dashed" type="button" class="add-question-btn" (click)="goToQcm()">
             <span nz-icon nzType="plus" nzTheme="outline"></span>
-            Ajouter une question
+            Créer un QCM
           </button>
         </div>
-
-        <div class="empty-questions" *ngIf="questions.controls.length === 0">
-          <span nz-icon nzType="solution" nzTheme="outline"></span>
-          <p>Aucune question pour l'instant. Ajoutez un QCM pour évaluer les candidats.</p>
-        </div>
-
-        <div class="question-card" *ngFor="let question of questions.controls; let i = index" [formGroup]="$any(question)">
-          <div class="question-header">
-            <div class="question-badge">Q{{ i + 1 }}</div>
-            <strong>Question {{ i + 1 }}</strong>
-            <button nz-button nzType="text" nzDanger type="button" (click)="removeQuestion(i)">
-              <span nz-icon nzType="delete" nzTheme="outline"></span>
-              Supprimer
-            </button>
-          </div>
-          <nz-form-item>
-            <nz-form-control><input nz-input placeholder="Énoncé de la question" formControlName="questionText" /></nz-form-control>
-          </nz-form-item>
-          <div class="options-grid">
-            <input nz-input placeholder="Option A" formControlName="optionA" />
-            <input nz-input placeholder="Option B" formControlName="optionB" />
-            <input nz-input placeholder="Option C (optionnel)" formControlName="optionC" />
-            <input nz-input placeholder="Option D (optionnel)" formControlName="optionD" />
-          </div>
-          <nz-form-item>
-            <nz-form-label>Bonne réponse</nz-form-label>
-            <nz-form-control>
-              <nz-select formControlName="correctOption" nzPlaceHolder="Sélectionner">
-                <nz-option nzValue="A" nzLabel="A"></nz-option>
-                <nz-option nzValue="B" nzLabel="B"></nz-option>
-                <nz-option nzValue="C" nzLabel="C"></nz-option>
-                <nz-option nzValue="D" nzLabel="D"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
+        <nz-form-item>
+          <nz-form-label>Sélectionner un QCM</nz-form-label>
+          <nz-form-control>
+            <nz-select
+              formControlName="qcmId"
+              nzAllowClear
+              nzPlaceHolder="Choisir un QCM déjà créé"
+              nzShowSearch
+            >
+              <nz-option
+                *ngFor="let q of qcms"
+                [nzValue]="q.qcmId"
+                [nzLabel]="q.title + ' (' + (q.questionCount || 0) + ' questions)'"
+              ></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <p class="qcm-hint">
+          Créez d'abord vos QCM dans le menu <strong>QCM</strong>, puis assignez-en un ici.
+          Sans QCM, les candidats ne pourront pas postuler.
+        </p>
       </section>
 
       <div class="form-actions">

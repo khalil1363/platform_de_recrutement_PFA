@@ -1,0 +1,52 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Banque de QCM</h2>
+    <p>Créez des questionnaires, puis assignez-les à vos recrutements</p>
+  </div>
+  <button nz-button nzType="primary" (click)="create()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    Nouveau QCM
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="qcms" nzSize="middle" *ngIf="qcms.length; else emptyState">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Questions</th>
+        <th>Créé le</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of qcms">
+        <td>
+          <strong>{{ item.title }}</strong>
+          <div class="muted" *ngIf="item.description">{{ item.description }}</div>
+        </td>
+        <td>{{ item.questionCount || 0 }}</td>
+        <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td class="actions">
+          <button nz-button nzSize="small" (click)="edit(item.qcmId)">Modifier</button>
+          <button
+            nz-button
+            nzSize="small"
+            nzDanger
+            nz-popconfirm
+            nzPopconfirmTitle="Supprimer ce QCM ?"
+            (nzOnConfirm)="delete(item)"
+          >
+            Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+
+  <ng-template #emptyState>
+    <nz-empty nzNotFoundContent="Aucun QCM pour le moment">
+      <button nz-button nzType="primary" (click)="create()">Créer un QCM</button>
+    </nz-empty>
+  </ng-template>
+</nz-spin>

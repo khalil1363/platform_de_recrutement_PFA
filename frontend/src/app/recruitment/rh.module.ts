@@ -8,6 +8,8 @@ import { RhRecruitmentsComponent } from './rh/rh-recruitments/rh-recruitments.co
 import { RhRecruitmentFormComponent } from './rh/rh-recruitment-form/rh-recruitment-form.component';
 import { RhCandidatesComponent } from './rh/rh-candidates/rh-candidates.component';
 import { RhCalendarComponent } from './rh/rh-calendar/rh-calendar.component';
+import { RhQcmListComponent } from './rh/rh-qcm-list/rh-qcm-list.component';
+import { RhQcmFormComponent } from './rh/rh-qcm-form/rh-qcm-form.component';
 
 const routes: Routes = [
   {
@@ -19,6 +21,9 @@ const routes: Routes = [
       { path: 'recruitments', component: RhRecruitmentsComponent },
       { path: 'recruitments/new', component: RhRecruitmentFormComponent },
       { path: 'recruitments/:id/edit', component: RhRecruitmentFormComponent },
+      { path: 'qcm', component: RhQcmListComponent },
+      { path: 'qcm/new', component: RhQcmFormComponent },
+      { path: 'qcm/:id/edit', component: RhQcmFormComponent },
       { path: 'candidates', component: RhCandidatesComponent },
       { path: 'calendar', component: RhCalendarComponent },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule) }
@@ -31,6 +36,8 @@ const routes: Routes = [
     RhLayoutComponent,
     RhRecruitmentsComponent,
     RhRecruitmentFormComponent,
+    RhQcmListComponent,
+    RhQcmFormComponent,
     RhCandidatesComponent,
     RhCalendarComponent
   ],

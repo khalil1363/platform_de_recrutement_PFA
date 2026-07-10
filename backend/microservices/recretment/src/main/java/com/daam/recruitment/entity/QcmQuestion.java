@@ -12,7 +12,8 @@ public class QcmQuestion {
     private Long id;
     @Column(nullable = false, unique = true, updatable = false)
     private String questionId;
-    @Column(nullable = false) private String recruitmentId;
+    @Column(name = "qcm_id")
+    private String qcmId;
     @Column(nullable = false, columnDefinition = "TEXT") private String questionText;
     @Column(nullable = false) private String optionA;
     @Column(nullable = false) private String optionB;
