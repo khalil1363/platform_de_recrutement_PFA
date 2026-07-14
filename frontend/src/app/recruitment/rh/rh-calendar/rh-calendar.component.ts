@@ -59,4 +59,22 @@ export class RhCalendarComponent implements OnInit {
       && a.getMonth() === b.getMonth()
       && a.getDate() === b.getDate();
   }
+
+  meetingJoinLabel(): string {
+    return 'Rejoindre la reunion';
+  }
+
+  formatInterviewTime(app: JobApplication): string {
+    if (!app.interviewAt) {
+      return '';
+    }
+    const start = new Date(app.interviewAt);
+    if (app.interviewEndAt) {
+      const end = new Date(app.interviewEndAt);
+      const startStr = start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const endStr = end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      return `${startStr} — ${endStr}`;
+    }
+    return start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
 }

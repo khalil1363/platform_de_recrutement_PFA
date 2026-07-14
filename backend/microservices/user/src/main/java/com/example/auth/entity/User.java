@@ -54,6 +54,9 @@ public class User implements Serializable {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Column(name = "meeting_link", length = 512)
+    private String meetingLink;
+
     @Column(name = "last_login_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLoginDate;

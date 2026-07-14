@@ -185,6 +185,8 @@ public final class RecruitmentDtos {
     public static class ApplicationStatusUpdateRequest {
         @NotNull private ApplicationStatus status;
         private LocalDateTime interviewAt;
+        private LocalDateTime interviewEndAt;
+        private Integer durationMinutes;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -214,7 +216,11 @@ public final class RecruitmentDtos {
         private String cvAnalysisSummary;
         private LocalDateTime cvAnalyzedAt;
         private LocalDateTime interviewAt;
+        private LocalDateTime interviewEndAt;
         private String googleMeetLink;
+        private String meetingProvider;
+        private String meetingId;
+        private String meetingWarning;
         private LocalDateTime appliedAt;
         private List<ApplicationAnswerResponse> answers;
     }

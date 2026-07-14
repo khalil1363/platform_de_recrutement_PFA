@@ -30,9 +30,9 @@ public class RecruitmentService {
     private final JobApplicationRepository jobApplicationRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
     private final UserClient userClient;
-    private final GoogleMeetService googleMeetService;
     private final InterviewEmailService interviewEmailService;
     private final CvAnalysisService cvAnalysisService;
+    private final InterviewService interviewService;
 
     @Value("${internal.api-key}")
     private String internalApiKey;
@@ -292,7 +292,12 @@ public class RecruitmentService {
 
     @Transactional
     public ApplicationResponse updateApplicationStatus(
-            String applicationId, ApplicationStatus status, LocalDateTime interviewAt, AuthUser authUser) {
+            String applicationId,
+            ApplicationStatus status,
+            LocalDateTime interviewAt,
+            LocalDateTime interviewEndAt,
+            Integer durationMinutes,
+            AuthUser authUser) {
         if (status != ApplicationStatus.ACCEPTED && status != ApplicationStatus.REJECTED
                 && status != ApplicationStatus.UNDER_REVIEW) {
             throw new IllegalArgumentException("Invalid application status");
@@ -302,11 +307,15 @@ public class RecruitmentService {
         Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
         if (authUser.isRh()) ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
         application.setStatus(status);
+
         if (status == ApplicationStatus.ACCEPTED) {
             if (interviewAt == null) {
                 throw new IllegalArgumentException("Interview date is required when accepting a candidate");
             }
-            application.setInterviewAt(interviewAt);
+            LocalDateTime endAt = interviewEndAt;
+            if (endAt == null && durationMinutes != null && durationMinutes > 0) {
+                endAt = interviewAt.plusMinutes(durationMinutes);
+            }
 
             String candidateEmail = null;
             String candidateName = "Candidat";
@@ -324,10 +333,12 @@ public class RecruitmentService {
 
             String rhEmail = null;
             String rhName = authUser.getUsername();
+            String rhMeetingLink = null;
             ApiResponse<UserDto> rhResp = userClient.getUserById(internalApiKey, authUser.getUserId());
             if (rhResp.isSuccess() && rhResp.getData() != null) {
                 UserDto rh = rhResp.getData();
                 rhEmail = rh.getEmail();
+                rhMeetingLink = rh.getMeetingLink();
                 rhName = ((rh.getFirstName() != null ? rh.getFirstName() : "")
                         + " " + (rh.getLastName() != null ? rh.getLastName() : "")).trim();
                 if (rhName.isBlank()) {
@@ -335,13 +346,14 @@ public class RecruitmentService {
                 }
             }
 
-            String meetLink = googleMeetService.createMeetLink(
-                    "Entretien — " + recruitment.getTitle(),
-                    interviewAt,
-                    candidateEmail,
+            var scheduleResult = interviewService.scheduleInterview(
+                    application,
+                    recruitment,
+                    authUser.getUserId(),
                     candidateName,
-                    rhEmail);
-            application.setGoogleMeetLink(meetLink);
+                    interviewAt,
+                    endAt,
+                    rhMeetingLink);
 
             interviewEmailService.sendInterviewNotifications(
                     candidateEmail,
@@ -350,11 +362,28 @@ public class RecruitmentService {
                     rhName,
                     recruitment.getTitle(),
                     recruitment.getRegion(),
-                    interviewAt,
-                    meetLink);
-        } else if (status == ApplicationStatus.REJECTED) {
+                    scheduleResult.getInterview().getStartDateTime(),
+                    scheduleResult.getInterview().getEndDateTime(),
+                    scheduleResult.getMeetingLink(),
+                    scheduleResult.getMeetingProvider(),
+                    scheduleResult.getWarningMessage());
+
+            JobApplication saved = jobApplicationRepository.save(application);
+            ApplicationResponse response = toApplicationResponse(saved, recruitment, true);
+            if (scheduleResult.getWarningMessage() != null) {
+                response.setMeetingWarning(scheduleResult.getWarningMessage());
+            }
+            return response;
+        }
+
+        if (status == ApplicationStatus.REJECTED) {
+            interviewService.cancelByApplication(application.getApplicationId());
             application.setInterviewAt(null);
+            application.setInterviewEndAt(null);
             application.setGoogleMeetLink(null);
+            application.setMeetingProvider(null);
+            application.setMeetingId(null);
+            application.setMeetingWarning(null);
         }
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
@@ -536,7 +565,12 @@ public class RecruitmentService {
                 .missingSkills(a.getMissingSkills())
                 .cvAnalysisSummary(a.getCvAnalysisSummary())
                 .cvAnalyzedAt(a.getCvAnalyzedAt())
-                .interviewAt(a.getInterviewAt()).googleMeetLink(a.getGoogleMeetLink())
+                .interviewAt(a.getInterviewAt())
+                .interviewEndAt(a.getInterviewEndAt())
+                .googleMeetLink(a.getGoogleMeetLink())
+                .meetingProvider(a.getMeetingProvider())
+                .meetingId(a.getMeetingId())
+                .meetingWarning(a.getMeetingWarning())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
     }

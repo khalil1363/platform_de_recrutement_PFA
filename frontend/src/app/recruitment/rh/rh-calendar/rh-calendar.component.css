@@ -67,6 +67,67 @@
   color: #fff;
 }
 
+.meeting-warning {
+  margin-top: 8px !important;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #b45309;
+  font-size: 0.85rem;
+}
+
+.calendar-day-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  pointer-events: none;
+}
+
+.interview-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--daam-primary, #40a070);
+  box-shadow: 0 0 0 2px rgba(64, 160, 112, 0.2);
+}
+
+.interview-count {
+  font-size: 0.62rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--daam-primary-dark, #35654d);
+  text-align: center;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 4px 0;
+  font-size: 0.85rem;
+  color: var(--daam-text-muted, #666);
+}
+
+:host ::ng-deep .ant-picker-calendar-date-content {
+  min-height: 28px;
+}
+
+:host ::ng-deep .ant-picker-cell-selected .interview-dot {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+:host ::ng-deep .ant-picker-cell-selected .interview-count {
+  color: rgba(255, 255, 255, 0.95);
+}
+
 @media (max-width: 900px) {
   .calendar-layout {
     grid-template-columns: 1fr;

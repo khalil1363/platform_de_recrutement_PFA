@@ -49,7 +49,9 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.interviewForm = this.fb.group({
-      interviewAt: [null, Validators.required]
+      interviewDate: [null, Validators.required],
+      startTime: [null, Validators.required],
+      endTime: [null, Validators.required]
     });
     this.loadApplications();
   }
@@ -136,7 +138,15 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   updateStatus(app: JobApplication, status: ApplicationStatus): void {
     if (status === 'ACCEPTED') {
       this.pendingApplication = app;
-      this.interviewForm.reset();
+      const defaultStart = new Date();
+      defaultStart.setHours(10, 0, 0, 0);
+      const defaultEnd = new Date();
+      defaultEnd.setHours(11, 0, 0, 0);
+      this.interviewForm.reset({
+        interviewDate: null,
+        startTime: defaultStart,
+        endTime: defaultEnd
+      });
       this.interviewModalVisible = true;
       return;
     }
@@ -164,21 +174,41 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const interviewAt: Date = this.interviewForm.value.interviewAt;
+    const { interviewDate, startTime, endTime } = this.interviewForm.value;
+    const interviewAt = this.combineDateAndTime(interviewDate, startTime);
+    const interviewEndAt = this.combineDateAndTime(interviewDate, endTime);
+
+    if (!interviewAt || !interviewEndAt) {
+      this.message.error('Date et horaires invalides');
+      return;
+    }
+    if (interviewEndAt <= interviewAt) {
+      this.message.error('L\'heure de fin doit etre apres l\'heure de debut');
+      return;
+    }
+
     this.actionLoading = true;
     this.recruitmentService.updateApplicationStatus(this.pendingApplication.applicationId, {
       status: 'ACCEPTED',
-      interviewAt: this.formatLocalDateTime(interviewAt)
+      interviewAt: this.formatLocalDateTime(interviewAt),
+      interviewEndAt: this.formatLocalDateTime(interviewEndAt)
     }).subscribe({
       next: (response) => {
         this.actionLoading = false;
         if (response.success) {
           const meetLink = response.data?.googleMeetLink;
-          this.message.success(
-            meetLink
-              ? `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien Meet cree.`
-              : 'Candidature acceptee et entretien planifie'
-          );
+          const warning = response.data?.meetingWarning;
+
+          if (warning) {
+            this.message.warning(warning, { nzDuration: 8000 });
+          } else if (meetLink) {
+            this.message.success(
+              `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien de reunion envoye au candidat.`
+            );
+          } else {
+            this.message.success('Candidature acceptee et entretien planifie');
+          }
+
           this.interviewModalVisible = false;
           this.detailVisible = false;
           this.pendingApplication = null;
@@ -292,6 +322,15 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   private formatLocalDateTime(date: Date): string {
     const pad = (value: number) => value.toString().padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+  }
+
+  private combineDateAndTime(dateValue: Date, timeValue: Date): Date | null {
+    if (!dateValue || !timeValue) {
+      return null;
+    }
+    const combined = new Date(dateValue);
+    combined.setHours(timeValue.getHours(), timeValue.getMinutes(), 0, 0);
+    return combined;
   }
 
   private formatDisplayDate(date: Date): string {

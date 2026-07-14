@@ -229,20 +229,48 @@
   (nzOnCancel)="interviewModalVisible = false"
   (nzOnOk)="confirmInterview()"
   [nzOkLoading]="actionLoading"
-  nzOkText="Creer l'entretien et le Meet"
+  nzOkText="Planifier"
 >
   <form nz-form [formGroup]="interviewForm" *nzModalContent>
     <nz-form-item>
-      <nz-form-label nzRequired>Date et heure</nz-form-label>
+      <nz-form-label nzRequired>Date</nz-form-label>
       <nz-form-control nzErrorTip="Choisissez la date de l'entretien">
         <nz-date-picker
-          formControlName="interviewAt"
-          nzShowTime
-          nzFormat="dd/MM/yyyy HH:mm"
-          nzPlaceHolder="Selectionner la date de l'entretien"
+          formControlName="interviewDate"
+          nzFormat="dd/MM/yyyy"
+          nzPlaceHolder="Selectionner la date"
           class="interview-picker"
         ></nz-date-picker>
       </nz-form-control>
     </nz-form-item>
+    <div class="interview-time-row">
+      <nz-form-item>
+        <nz-form-label nzRequired>Heure de debut</nz-form-label>
+        <nz-form-control nzErrorTip="Heure de debut requise">
+          <nz-date-picker
+            formControlName="startTime"
+            nzMode="time"
+            nzFormat="HH:mm"
+            nzPlaceHolder="Debut"
+            class="interview-picker"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired>Heure de fin</nz-form-label>
+        <nz-form-control nzErrorTip="Heure de fin requise">
+          <nz-date-picker
+            formControlName="endTime"
+            nzMode="time"
+            nzFormat="HH:mm"
+            nzPlaceHolder="Fin"
+            class="interview-picker"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <p class="interview-hint">
+      Le lien de reunion enregistre dans votre profil sera envoye au candidat par email.
+    </p>
   </form>
 </nz-modal>

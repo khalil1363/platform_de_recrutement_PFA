@@ -34,8 +34,13 @@ public class JobApplication {
     private String cvAnalysisSummary;
     private LocalDateTime cvAnalyzedAt;
     private LocalDateTime interviewAt;
+    private LocalDateTime interviewEndAt;
     @Column(length = 512)
     private String googleMeetLink;
+    private String meetingProvider;
+    private String meetingId;
+    @Column(columnDefinition = "TEXT")
+    private String meetingWarning;
     @CreationTimestamp private LocalDateTime appliedAt;
 
     @PrePersist void prePersist() {

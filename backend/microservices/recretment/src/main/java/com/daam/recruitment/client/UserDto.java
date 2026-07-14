@@ -15,4 +15,5 @@ public class UserDto {
     private String profileImageUrl;
     private String role;
     private boolean active;
+    private String meetingLink;
 }

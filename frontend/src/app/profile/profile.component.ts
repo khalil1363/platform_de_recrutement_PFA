@@ -86,6 +86,9 @@ export class ProfileComponent implements OnInit {
     if (!payload.profileImageUrl) {
       delete payload.profileImageUrl;
     }
+    if (!payload.meetingLink) {
+      delete payload.meetingLink;
+    }
 
     this.saving = true;
     this.authService.updateProfile(payload).subscribe({
@@ -156,6 +159,7 @@ export class ProfileComponent implements OnInit {
       phoneNumber: [''],
       address: [''],
       profileImageUrl: [''],
+      meetingLink: [''],
       password: ['', Validators.minLength(6)]
     });
   }
@@ -168,6 +172,7 @@ export class ProfileComponent implements OnInit {
       phoneNumber: user.phoneNumber || '',
       address: user.address || '',
       profileImageUrl: user.profileImageUrl || '',
+      meetingLink: user.meetingLink || '',
       password: ''
     });
   }

@@ -28,6 +28,7 @@
           <ng-container *ngIf="app.status === 'ACCEPTED' && app.interviewAt; else noInterview">
             <div class="interview-info">
               <span>{{ app.interviewAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span *ngIf="app.interviewEndAt"> — {{ app.interviewEndAt | date:'HH:mm' }}</span>
               <a
                 *ngIf="app.googleMeetLink"
                 class="meet-link"
@@ -35,7 +36,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Google Meet
+                {{ 'Rejoindre la reunion' }}
               </a>
             </div>
           </ng-container>

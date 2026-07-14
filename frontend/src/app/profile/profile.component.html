@@ -110,6 +110,24 @@
 
           <nz-divider nzText="Sécurité" nzOrientation="left"></nz-divider>
 
+          <ng-container *ngIf="authService.isRh()">
+            <nz-divider nzText="Entretiens" nzOrientation="left"></nz-divider>
+            <nz-form-item>
+              <nz-form-label>Lien de reunion</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="meetingLink"
+                  [readonly]="!editMode"
+                  placeholder="https://teams.microsoft.com/... ou https://meet.google.com/..."
+                />
+              </nz-form-control>
+              <p class="field-hint">
+                Creez votre lien Teams ou Google Meet, puis collez-le ici. Il sera envoye au candidat lors de l'acceptation.
+              </p>
+            </nz-form-item>
+          </ng-container>
+
           <nz-form-item>
             <nz-form-label>Nouveau mot de passe</nz-form-label>
             <nz-form-control nzErrorTip="Minimum 6 caractères">

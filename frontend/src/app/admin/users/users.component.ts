@@ -80,6 +80,7 @@ export class UsersComponent implements OnInit {
       phoneNumber: user.phoneNumber || '',
       address: user.address || '',
       profileImageUrl: user.profileImageUrl || '',
+      meetingLink: user.meetingLink || '',
       password: ''
     });
     this.userForm.get('password')?.setValidators([Validators.minLength(6)]);
@@ -104,6 +105,7 @@ export class UsersComponent implements OnInit {
     if (!raw.phoneNumber) delete raw.phoneNumber;
     if (!raw.address) delete raw.address;
     if (!raw.profileImageUrl) delete raw.profileImageUrl;
+    if (!raw.meetingLink) delete raw.meetingLink;
     if (!raw.password) delete raw.password;
 
     this.modalLoading = true;
@@ -226,7 +228,8 @@ export class UsersComponent implements OnInit {
       role: ['ROLE_RH', [Validators.required]],
       phoneNumber: [''],
       address: [''],
-      profileImageUrl: ['']
+      profileImageUrl: [''],
+      meetingLink: ['']
     });
   }
 }

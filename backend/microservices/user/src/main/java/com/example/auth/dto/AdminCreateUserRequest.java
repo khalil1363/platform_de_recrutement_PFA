@@ -52,4 +52,7 @@ public class AdminCreateUserRequest {
 
     @Size(max = 500, message = "Profile image URL must not exceed 500 characters")
     private String profileImageUrl;
+
+    @Size(max = 512, message = "Meeting link must not exceed 512 characters")
+    private String meetingLink;
 }

@@ -207,7 +207,13 @@ public class RecruitmentController {
             @Valid @RequestBody ApplicationStatusUpdateRequest request,
             @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("Application status updated",
-                recruitmentService.updateApplicationStatus(applicationId, request.getStatus(), request.getInterviewAt(), user),
+                recruitmentService.updateApplicationStatus(
+                        applicationId,
+                        request.getStatus(),
+                        request.getInterviewAt(),
+                        request.getInterviewEndAt(),
+                        request.getDurationMinutes(),
+                        user),
                 HttpStatus.OK.value()));
     }
 

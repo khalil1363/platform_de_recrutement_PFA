@@ -27,6 +27,7 @@ import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzCalendarModule } from 'ng-zorro-antd/calendar';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 
 const NG_ZORRO_MODULES = [
   NzButtonModule,
@@ -54,7 +55,8 @@ const NG_ZORRO_MODULES = [
   NzStepsModule,
   NzCollapseModule,
   NzCalendarModule,
-  NzDatePickerModule
+  NzDatePickerModule,
+  NzAlertModule
 ];
 
 @NgModule({

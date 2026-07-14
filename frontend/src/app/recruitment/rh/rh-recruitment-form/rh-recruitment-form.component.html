@@ -23,9 +23,9 @@
             <nz-form-control><input nz-input formControlName="title" placeholder="Ex. Développeur Full Stack" /></nz-form-control>
           </nz-form-item>
           <nz-form-item>
-            <nz-form-label nzRequired>Entreprise</nz-form-label>
+            <nz-form-label nzRequired>Agence</nz-form-label>
             <nz-form-control>
-              <nz-select formControlName="companyId" nzPlaceHolder="Sélectionner une entreprise">
+              <nz-select formControlName="companyId" nzPlaceHolder="Sélectionner une Agence">
                 <nz-option
                   *ngFor="let c of companies"
                   [nzValue]="c.companyId"

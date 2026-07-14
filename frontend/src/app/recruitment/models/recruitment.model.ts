@@ -125,7 +125,11 @@ export interface JobApplication {
   cvAnalysisSummary?: string;
   cvAnalyzedAt?: string;
   interviewAt?: string;
+  interviewEndAt?: string;
   googleMeetLink?: string;
+  meetingProvider?: string;
+  meetingId?: string;
+  meetingWarning?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
 }
@@ -133,6 +137,8 @@ export interface JobApplication {
 export interface ApplicationStatusUpdateRequest {
   status: ApplicationStatus;
   interviewAt?: string | null;
+  interviewEndAt?: string | null;
+  durationMinutes?: number | null;
 }
 
 export interface ZoneRequest {

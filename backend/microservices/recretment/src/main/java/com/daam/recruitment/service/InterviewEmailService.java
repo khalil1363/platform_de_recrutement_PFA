@@ -35,10 +35,15 @@ public class InterviewEmailService {
             String rhName,
             String jobTitle,
             String region,
-            LocalDateTime interviewAt,
-            String meetLink) {
-        sendToRecipient(candidateEmail, candidateName, jobTitle, region, interviewAt, meetLink, false);
-        sendToRecipient(rhEmail, rhName, jobTitle, region, interviewAt, meetLink, true);
+            LocalDateTime interviewStart,
+            LocalDateTime interviewEnd,
+            String meetingLink,
+            String meetingProvider,
+            String warningMessage) {
+        sendToRecipient(candidateEmail, candidateName, jobTitle, region, interviewStart, interviewEnd,
+                meetingLink, meetingProvider, warningMessage, false);
+        sendToRecipient(rhEmail, rhName, jobTitle, region, interviewStart, interviewEnd,
+                meetingLink, meetingProvider, warningMessage, true);
     }
 
     private void sendToRecipient(
@@ -46,8 +51,11 @@ public class InterviewEmailService {
             String recipientName,
             String jobTitle,
             String region,
-            LocalDateTime interviewAt,
-            String meetLink,
+            LocalDateTime interviewStart,
+            LocalDateTime interviewEnd,
+            String meetingLink,
+            String meetingProvider,
+            String warningMessage,
             boolean isRh) {
         if (!StringUtils.hasText(toEmail)) {
             log.warn("Interview email skipped: no address for {}", isRh ? "RH" : "candidate");
@@ -60,12 +68,18 @@ public class InterviewEmailService {
 
         String subject = isRh
                 ? "Entretien planifie — " + jobTitle
-                : "Candidature acceptee — entretien " + jobTitle;
+                : "Invitation entretien — " + jobTitle;
 
         String greeting = StringUtils.hasText(recipientName) ? recipientName : (isRh ? "RH" : "Candidat");
         String intro = isRh
                 ? "Vous avez planifie un entretien pour le poste <strong>" + escapeHtml(jobTitle) + "</strong>."
                 : "Votre candidature pour le poste <strong>" + escapeHtml(jobTitle) + "</strong> a ete <strong>acceptee</strong>.";
+
+        String timeRange = formatTimeRange(interviewStart, interviewEnd);
+        String meetingSection = buildMeetingSection(meetingLink, meetingProvider);
+        String warningSection = StringUtils.hasText(warningMessage) && isRh
+                ? "<p style=\"color:#b45309;\"><strong>Note :</strong> " + escapeHtml(warningMessage) + "</p>"
+                : "";
 
         String htmlBody = """
                 <html>
@@ -76,8 +90,9 @@ public class InterviewEmailService {
                   <ul>
                     <li><strong>Date :</strong> %s</li>
                     <li><strong>Region :</strong> %s</li>
-                    <li><strong>Google Meet :</strong> <a href="%s">%s</a></li>
+                    %s
                   </ul>
+                  %s
                   <p>Merci de rejoindre la reunion a l'heure indiquee.</p>
                   <p>Cordialement,<br/>L'equipe RH DAAM</p>
                 </body>
@@ -85,10 +100,14 @@ public class InterviewEmailService {
                 """.formatted(
                 escapeHtml(greeting),
                 intro,
-                interviewAt.format(DATE_FORMAT),
+                timeRange,
                 escapeHtml(StringUtils.hasText(region) ? region : "Non precisee"),
-                meetLink,
-                escapeHtml(meetLink));
+                meetingSection,
+                warningSection);
+
+        String textMeeting = StringUtils.hasText(meetingLink)
+                ? "- Lien " + meetingLabel(meetingProvider) + " : " + meetingLink
+                : "- Lien visioconference : sera communique par le RH";
 
         String textBody = """
                 Bonjour %s,
@@ -98,7 +117,7 @@ public class InterviewEmailService {
                 Details de l'entretien :
                 - Date : %s
                 - Region : %s
-                - Lien Google Meet : %s
+                %s
 
                 Merci de rejoindre la reunion a l'heure indiquee.
 
@@ -108,9 +127,9 @@ public class InterviewEmailService {
                 greeting,
                 isRh ? "Vous avez planifie un entretien pour le poste " + jobTitle + "."
                         : "Votre candidature pour le poste " + jobTitle + " a ete acceptee.",
-                interviewAt.format(DATE_FORMAT),
+                timeRange,
                 StringUtils.hasText(region) ? region : "Non precisee",
-                meetLink);
+                textMeeting);
 
         try {
             JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
@@ -129,6 +148,32 @@ public class InterviewEmailService {
         } catch (Exception e) {
             log.error("Failed to send interview email to {}: {}", toEmail, e.getMessage(), e);
         }
+    }
+
+    private String formatTimeRange(LocalDateTime start, LocalDateTime end) {
+        if (start == null) {
+            return "Non precisee";
+        }
+        if (end != null && end.isAfter(start)) {
+            return start.format(DATE_FORMAT) + " — " + end.format(DATE_FORMAT);
+        }
+        return start.format(DATE_FORMAT);
+    }
+
+    private String buildMeetingSection(String meetingLink, String meetingProvider) {
+        if (!StringUtils.hasText(meetingLink)) {
+            return "<li><strong>Visioconference :</strong> lien a confirmer</li>";
+        }
+        String label = meetingLabel(meetingProvider);
+        return "<li><strong>" + escapeHtml(label) + " :</strong> "
+                + "<a href=\"" + escapeHtml(meetingLink) + "\">" + escapeHtml(meetingLink) + "</a></li>";
+    }
+
+    private String meetingLabel(String meetingProvider) {
+        if ("MANUAL".equalsIgnoreCase(meetingProvider)) {
+            return "Lien de reunion";
+        }
+        return "Lien de reunion";
     }
 
     private String escapeHtml(String value) {

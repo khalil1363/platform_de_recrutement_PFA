@@ -164,3 +164,21 @@
 .interview-picker {
   width: 100%;
 }
+
+.interview-time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.interview-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+@media (max-width: 560px) {
+  .interview-time-row {
+    grid-template-columns: 1fr;
+  }
+}

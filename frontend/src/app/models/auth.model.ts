@@ -30,6 +30,7 @@ export interface UserProfile {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  meetingLink?: string;
   lastLoginDate?: string;
   joinDate?: string;
   role: string;
@@ -45,6 +46,7 @@ export interface UpdateProfileRequest {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  meetingLink?: string;
   password?: string;
 }
 
@@ -56,6 +58,7 @@ export interface AdminUpdateUserRequest {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  meetingLink?: string;
   password?: string;
 }
 
@@ -69,6 +72,7 @@ export interface AdminCreateUserRequest {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  meetingLink?: string;
 }
 
 export interface FileUploadResponse {

@@ -27,6 +27,7 @@ public class UserResponse {
     private String phoneNumber;
     private String address;
     private String profileImageUrl;
+    private String meetingLink;
     private Date lastLoginDate;
     private Date joinDate;
     private String role;

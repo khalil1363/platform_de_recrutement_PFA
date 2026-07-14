@@ -9,19 +9,6 @@ spring.mail.port=587
 spring.mail.username=khalil.fray@issatm.ucar.tn
 spring.mail.password=YOUR_EMAIL_PASSWORD_HERE
 
-# 2) Google Calendar API (automatic Meet link per interview date)
-# Steps:
-#   a) https://console.cloud.google.com → create project → enable "Google Calendar API"
-#   b) APIs & Services → Credentials → Create credentials → Service account
-#   c) Download JSON key → save as: backend/microservices/recretment/credentials/google-calendar.json
-#   d) Restart RECRUITMENT service
-google.calendar.enabled=true
-google.calendar.credentials-path=credentials/google-calendar.json
-google.calendar.timezone=Africa/Casablanca
-
-# Optional (Google Workspace only): use your RH Gmail/Workspace email so events appear on your calendar
-# google.calendar.delegate-user=your-rh-email@gmail.com
-
-# 3) Optional OpenAI for richer CV analysis (without key, local skill matching is used)
+# 2) Optional OpenAI for richer CV analysis (without key, local skill matching is used)
 # app.cv-analysis.openai-api-key=sk-...
 # app.cv-analysis.openai-model=gpt-4o-mini

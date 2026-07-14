@@ -97,6 +97,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
                 .profileImageUrl(request.getProfileImageUrl())
+                .meetingLink(request.getMeetingLink())
                 .joinDate(now)
                 .role(roleAuthority)
                 .authorities(resolveAuthoritiesForRole(roleAuthority))
@@ -133,7 +134,7 @@ public class UserServiceImpl implements UserService {
         }
 
         applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
-                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl());
+                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl(), request.getMeetingLink());
 
         if (StringUtils.hasText(request.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -157,7 +158,7 @@ public class UserServiceImpl implements UserService {
 
         String roleAuthority = resolveRoleAuthority(request.getRole());
         applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
-                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl());
+                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl(), request.getMeetingLink());
 
         user.setRole(roleAuthority);
         user.getAuthorities().clear();
@@ -187,13 +188,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private void applyProfileFields(User user, String firstName, String lastName, String email,
-                                    String phoneNumber, String address, String profileImageUrl) {
+                                    String phoneNumber, String address, String profileImageUrl, String meetingLink) {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPhoneNumber(phoneNumber);
         user.setAddress(address);
         user.setProfileImageUrl(profileImageUrl);
+        user.setMeetingLink(meetingLink);
     }
 
     private String resolveRoleAuthority(String role) {
@@ -231,6 +233,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .address(user.getAddress())
                 .profileImageUrl(user.getProfileImageUrl())
+                .meetingLink(user.getMeetingLink())
                 .lastLoginDate(user.getLastLoginDate())
                 .joinDate(user.getJoinDate())
                 .role(user.getRole())

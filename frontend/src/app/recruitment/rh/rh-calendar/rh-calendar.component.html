@@ -1,14 +1,27 @@
 <div class="page-header-bar">
   <div>
     <h2>Calendrier des entretiens</h2>
-    <p>Retrouvez la region et le nom du candidat pour chaque date d'entretien.</p>
+    <p>Les dates avec un point vert ont au moins un entretien planifie.</p>
   </div>
 </div>
 
 <nz-spin [nzSpinning]="loading">
   <div class="calendar-layout">
     <div class="calendar-card">
-      <nz-calendar [(ngModel)]="selectedDate"></nz-calendar>
+      <nz-calendar [(ngModel)]="selectedDate">
+        <ng-container *nzDateCell="let date">
+          <div class="calendar-day-hint" *ngIf="getDayCount(date) > 0">
+            <span class="interview-dot" aria-hidden="true"></span>
+            <span class="interview-count">
+              {{ getDayCount(date) }} entretien{{ getDayCount(date) > 1 ? 's' : '' }}
+            </span>
+          </div>
+        </ng-container>
+      </nz-calendar>
+      <p class="calendar-legend">
+        <span class="interview-dot" aria-hidden="true"></span>
+        Date avec entretien planifie
+      </p>
     </div>
 
     <div class="agenda-card">
@@ -16,11 +29,12 @@
 
       <div class="agenda-list" *ngIf="selectedDayApplications.length; else noInterviews">
         <div class="agenda-item" *ngFor="let app of selectedDayApplications">
-          <div class="agenda-time">{{ app.interviewAt | date: 'HH:mm' }}</div>
+          <div class="agenda-time">{{ formatInterviewTime(app) }}</div>
           <div class="agenda-content">
             <strong>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</strong>
             <p>{{ app.recruitmentTitle }}</p>
             <span>{{ app.region || app.zoneName || 'Zone non definie' }}</span>
+            <p class="meeting-warning" *ngIf="app.meetingWarning">{{ app.meetingWarning }}</p>
             <a
               *ngIf="app.googleMeetLink"
               class="meet-link"
@@ -28,7 +42,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              Rejoindre Google Meet
+              {{ meetingJoinLabel() }}
             </a>
           </div>
         </div>

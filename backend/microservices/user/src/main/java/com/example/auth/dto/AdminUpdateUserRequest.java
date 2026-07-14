@@ -45,6 +45,9 @@ public class AdminUpdateUserRequest {
     @Size(max = 500, message = "Profile image URL must not exceed 500 characters")
     private String profileImageUrl;
 
+    @Size(max = 512, message = "Meeting link must not exceed 512 characters")
+    private String meetingLink;
+
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
 }
