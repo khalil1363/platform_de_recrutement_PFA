@@ -1,11 +1,11 @@
 <div class="page-header-bar">
   <div>
-    <h2>Entreprises par zone</h2>
-    <p>Associez les entreprises aux zones géographiques</p>
+    <h2>Agence par zone</h2>
+    <p>Associez les agence aux zones géographiques</p>
   </div>
   <button nz-button nzType="primary" (click)="openModal()">
     <span nz-icon nzType="plus" nzTheme="outline"></span>
-    Nouvelle entreprise
+    Nouvelle Agences
   </button>
 </div>
 
@@ -14,7 +14,7 @@
       <thead>
         <tr>
           <th>Zone</th>
-          <th>Entreprises</th>
+          <th>Agence</th>
         </tr>
       </thead>
       <tbody>
@@ -35,7 +35,7 @@
 
 <nz-modal
   [(nzVisible)]="modalVisible"
-  nzTitle="Nouvelle entreprise"
+  nzTitle="Nouvelle agences"
   (nzOnCancel)="modalVisible = false"
   (nzOnOk)="saveCompany()"
   [nzOkLoading]="modalLoading"
