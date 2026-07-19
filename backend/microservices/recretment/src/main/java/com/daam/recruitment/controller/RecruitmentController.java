@@ -4,11 +4,16 @@ import com.daam.recruitment.dto.RecruitmentDtos.*;
 import com.daam.recruitment.response.ApiResponse;
 import com.daam.recruitment.security.AuthUser;
 import com.daam.recruitment.service.CvStorageService;
+import com.daam.recruitment.service.HiredEvaluationsExcelService;
+import com.daam.recruitment.service.HiredQcmService;
 import com.daam.recruitment.service.QcmService;
 import com.daam.recruitment.service.RecruitmentService;
+import com.daam.recruitment.service.TalentReportPdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +29,9 @@ public class RecruitmentController {
 
     private final RecruitmentService recruitmentService;
     private final QcmService qcmService;
+    private final HiredQcmService hiredQcmService;
+    private final TalentReportPdfService talentReportPdfService;
+    private final HiredEvaluationsExcelService hiredEvaluationsExcelService;
     private final CvStorageService cvStorageService;
 
     // ---- Public ----
@@ -144,6 +152,14 @@ public class RecruitmentController {
                 recruitmentService.updateRecruitment(id, request, user), HttpStatus.OK.value()));
     }
 
+    @DeleteMapping("/recruitments/{id}")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<Void>> deleteRecruitment(
+            @PathVariable String id, @AuthenticationPrincipal AuthUser user) {
+        recruitmentService.deleteRecruitment(id, user);
+        return ResponseEntity.ok(ApiResponse.success("Recruitment deleted", null, HttpStatus.OK.value()));
+    }
+
     @GetMapping("/recruitments")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<RecruitmentResponse>>> getRecruitments(@AuthenticationPrincipal AuthUser user) {
@@ -207,14 +223,16 @@ public class RecruitmentController {
             @Valid @RequestBody ApplicationStatusUpdateRequest request,
             @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("Application status updated",
-                recruitmentService.updateApplicationStatus(
-                        applicationId,
-                        request.getStatus(),
-                        request.getInterviewAt(),
-                        request.getInterviewEndAt(),
-                        request.getDurationMinutes(),
-                        user),
+                recruitmentService.updateApplicationStatus(applicationId, request, user),
                 HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/applications/hired")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getHiredApplications(
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success("Hired applications",
+                recruitmentService.getHiredApplicationsForRh(user), HttpStatus.OK.value()));
     }
 
     @PostMapping("/applications/{applicationId}/analyze-cv")
@@ -224,5 +242,87 @@ public class RecruitmentController {
             @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("CV analysis completed",
                 recruitmentService.analyzeApplicationCv(applicationId, user), HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/applications/{applicationId}/hired-qcm")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<HiredQcmAssignmentResponse>> assignHiredQcm(
+            @PathVariable String applicationId,
+            @Valid @RequestBody AssignHiredQcmRequest request,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "QCM assigné au candidat admis",
+                hiredQcmService.assignToHiredCandidate(applicationId, request, user),
+                HttpStatus.CREATED.value()));
+    }
+
+    @GetMapping("/applications/{applicationId}/hired-qcm")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<List<HiredQcmAssignmentResponse>>> listHiredQcmForApplication(
+            @PathVariable String applicationId,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "QCM assignés",
+                hiredQcmService.listForApplication(applicationId, user),
+                HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/hired-qcm/my")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<List<HiredQcmAssignmentResponse>>> myHiredQcm(
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Mes évaluations",
+                hiredQcmService.listMyAssignments(user),
+                HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/hired-qcm/{assignmentId}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<HiredQcmAssignmentResponse>> getHiredQcm(
+            @PathVariable String assignmentId,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Évaluation",
+                hiredQcmService.getAssignmentForCandidate(assignmentId, user),
+                HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/hired-qcm/{assignmentId}/submit")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<HiredQcmAssignmentResponse>> submitHiredQcm(
+            @PathVariable String assignmentId,
+            @Valid @RequestBody HiredQcmSubmitRequest request,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Évaluation soumise",
+                hiredQcmService.submitAssignment(assignmentId, request, user),
+                HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/hired-qcm/{assignmentId}/report.pdf")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<byte[]> downloadTalentReportPdf(
+            @PathVariable String assignmentId,
+            @AuthenticationPrincipal AuthUser user) {
+        byte[] pdf = talentReportPdfService.generateForAssignment(assignmentId, user);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"rapport-talent-" + assignmentId + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @GetMapping("/applications/hired/evaluations/export.xlsx")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<byte[]> exportHiredEvaluationsExcel(
+            @AuthenticationPrincipal AuthUser user) {
+        byte[] xlsx = hiredEvaluationsExcelService.exportCompletedEvaluations(user);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"suivi-test-psy-cc.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(xlsx);
     }
 }

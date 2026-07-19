@@ -33,6 +33,9 @@ public final class RecruitmentDtos {
         @NotBlank private String name;
         @NotBlank private String zoneId;
         private String address;
+        private Double latitude;
+        private Double longitude;
+        private String googleMapsUrl;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -42,6 +45,9 @@ public final class RecruitmentDtos {
         private String zoneId;
         private String zoneName;
         private String address;
+        private Double latitude;
+        private Double longitude;
+        private String googleMapsUrl;
         private boolean active;
     }
 
@@ -161,6 +167,11 @@ public final class RecruitmentDtos {
         private String optionD;
         @NotBlank private String correctOption;
         private Integer orderIndex;
+        private String dimensionCode;
+        private Double scoreA;
+        private Double scoreB;
+        private Double scoreC;
+        private Double scoreD;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -173,6 +184,11 @@ public final class RecruitmentDtos {
         private String optionD;
         private String correctOption;
         private Integer orderIndex;
+        private String dimensionCode;
+        private Double scoreA;
+        private Double scoreB;
+        private Double scoreC;
+        private Double scoreD;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -187,6 +203,18 @@ public final class RecruitmentDtos {
         private LocalDateTime interviewAt;
         private LocalDateTime interviewEndAt;
         private Integer durationMinutes;
+        /** ONLINE (default) or PHYSICAL */
+        private String interviewType;
+        /** Optional override for physical interview location */
+        private String interviewLocation;
+        /** Hire confirmation fields (when status = HIRED) */
+        private java.time.LocalDate hireStartDate;
+        private String hireContractType;
+        private String hireNetSalary;
+        private String hireWorkingHours;
+        private String hireBenefits;
+        private String hireIntegrationAddress;
+        private String hireIntegrationGpsUrl;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -194,6 +222,8 @@ public final class RecruitmentDtos {
         @NotBlank private String recruitmentId;
         private String cvFileUrl;
         private List<QcmAnswerRequest> answers;
+        /** When true (anti-cheat triggered), QCM score is forced to 0. */
+        private Boolean qcmViolated;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -221,6 +251,17 @@ public final class RecruitmentDtos {
         private String meetingProvider;
         private String meetingId;
         private String meetingWarning;
+        private String companyName;
+        private String companyAddress;
+        private String companyGoogleMapsUrl;
+        private LocalDateTime hiredAt;
+        private java.time.LocalDate hireStartDate;
+        private String hireContractType;
+        private String hireNetSalary;
+        private String hireWorkingHours;
+        private String hireBenefits;
+        private String hireIntegrationAddress;
+        private String hireIntegrationGpsUrl;
         private LocalDateTime appliedAt;
         private List<ApplicationAnswerResponse> answers;
     }
@@ -243,5 +284,49 @@ public final class RecruitmentDtos {
         private String email;
         private String phoneNumber;
         private String profileImageUrl;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class AssignHiredQcmRequest {
+        @NotBlank private String qcmId;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class HiredQcmSubmitRequest {
+        private List<QcmAnswerRequest> answers;
+        private Boolean qcmViolated;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class HiredQcmAssignmentResponse {
+        private String assignmentId;
+        private String applicationId;
+        private String candidateUserId;
+        private String recruitmentId;
+        private String recruitmentTitle;
+        private String companyName;
+        private String qcmId;
+        private String qcmTitle;
+        private String status;
+        private Integer score;
+        private Integer totalQuestions;
+        private Integer overallFitPercent;
+        private Boolean qcmViolated;
+        private LocalDateTime assignedAt;
+        private LocalDateTime completedAt;
+        private UserSummary candidate;
+        private List<QcmQuestionResponse> questions;
+        private List<ApplicationAnswerResponse> answers;
+        private List<DimensionScoreResponse> dimensionScores;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DimensionScoreResponse {
+        private String dimensionCode;
+        private String dimensionLabel;
+        private Double score;
+        private Double expectedScore;
+        private String commentText;
+        private Integer sortOrder;
     }
 }

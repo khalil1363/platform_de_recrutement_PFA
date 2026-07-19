@@ -11,6 +11,8 @@ import { RhCalendarComponent } from './rh/rh-calendar/rh-calendar.component';
 import { RhQcmListComponent } from './rh/rh-qcm-list/rh-qcm-list.component';
 import { RhQcmFormComponent } from './rh/rh-qcm-form/rh-qcm-form.component';
 
+import { RhHiredCandidatesComponent } from './rh/rh-hired-candidates/rh-hired-candidates.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -25,6 +27,7 @@ const routes: Routes = [
       { path: 'qcm/new', component: RhQcmFormComponent },
       { path: 'qcm/:id/edit', component: RhQcmFormComponent },
       { path: 'candidates', component: RhCandidatesComponent },
+      { path: 'hired', component: RhHiredCandidatesComponent },
       { path: 'calendar', component: RhCalendarComponent },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule) }
     ]
@@ -39,6 +42,7 @@ const routes: Routes = [
     RhQcmListComponent,
     RhQcmFormComponent,
     RhCandidatesComponent,
+    RhHiredCandidatesComponent,
     RhCalendarComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]

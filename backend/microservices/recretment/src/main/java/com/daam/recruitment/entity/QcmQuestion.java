@@ -22,6 +22,20 @@ public class QcmQuestion {
     @Column(nullable = false) private String correctOption;
     private Integer orderIndex;
 
+    /** Psychometric competency code (e.g. APPROCHE_CLIENT). Optional for classic QCMs. */
+    @Column(name = "dimension_code")
+    private String dimensionCode;
+
+    /** Option weights 0..10 used for psychometric scoring. */
+    @Column(name = "score_a")
+    private Double scoreA;
+    @Column(name = "score_b")
+    private Double scoreB;
+    @Column(name = "score_c")
+    private Double scoreC;
+    @Column(name = "score_d")
+    private Double scoreD;
+
     @PrePersist void prePersist() {
         if (questionId == null) questionId = UUID.randomUUID().toString();
     }

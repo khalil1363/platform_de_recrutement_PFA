@@ -648,3 +648,41 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* MapLibre agency location picker */
+.map-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1200 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+}
+
+.map-overlay .agency-map {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-height: 320px !important;
+  position: relative !important;
+  background: #e8eef5 !important;
+}
+
+.map-overlay .maplibregl-map {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.map-overlay .maplibregl-marker {
+  z-index: 3 !important;
+}
+
+.map-overlay .maplibregl-popup-content {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #35654d;
+  padding: 8px 12px;
+}
+

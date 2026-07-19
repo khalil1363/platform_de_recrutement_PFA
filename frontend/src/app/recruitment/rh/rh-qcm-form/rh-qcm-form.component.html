@@ -2,12 +2,18 @@
   <div class="page-header-bar">
     <div>
       <h2>{{ isEdit ? 'Modifier le QCM' : 'Nouveau QCM' }}</h2>
-      <p>Définissez les questions, puis assignez ce QCM à un recrutement</p>
+      <p>Questions classiques ou questionnaire PSY (dimensions + scores) pour rapports PDF / Excel</p>
     </div>
-    <button nz-button type="button" (click)="cancel()">
-      <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-      Retour
-    </button>
+    <div class="header-actions">
+      <button nz-button type="button" *ngIf="!isEdit" (click)="loadPsySample()">
+        <span nz-icon nzType="experiment" nzTheme="outline"></span>
+        Charger modèle PSY CC
+      </button>
+      <button nz-button type="button" (click)="cancel()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+        Retour
+      </button>
+    </div>
   </div>
 
   <nz-spin [nzSpinning]="loading">
@@ -21,7 +27,7 @@
           <nz-form-item>
             <nz-form-label nzRequired>Titre</nz-form-label>
             <nz-form-control>
-              <input nz-input formControlName="title" placeholder="Ex. QCM Développeur Java" />
+              <input nz-input formControlName="title" placeholder="Ex. Test PSY Chargé de crédit" />
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
@@ -63,17 +69,49 @@
             <input nz-input placeholder="Option C (optionnel)" formControlName="optionC" />
             <input nz-input placeholder="Option D (optionnel)" formControlName="optionD" />
           </div>
-          <nz-form-item>
-            <nz-form-label>Bonne réponse</nz-form-label>
-            <nz-form-control>
-              <nz-select formControlName="correctOption" nzPlaceHolder="Sélectionner">
-                <nz-option nzValue="A" nzLabel="A"></nz-option>
-                <nz-option nzValue="B" nzLabel="B"></nz-option>
-                <nz-option nzValue="C" nzLabel="C"></nz-option>
-                <nz-option nzValue="D" nzLabel="D"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
+          <div class="psy-grid">
+            <nz-form-item>
+              <nz-form-label>Bonne réponse / ancre</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="correctOption" nzPlaceHolder="Sélectionner">
+                  <nz-option nzValue="A" nzLabel="A"></nz-option>
+                  <nz-option nzValue="B" nzLabel="B"></nz-option>
+                  <nz-option nzValue="C" nzLabel="C"></nz-option>
+                  <nz-option nzValue="D" nzLabel="D"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Dimension PSY</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="dimensionCode" nzAllowClear nzPlaceHolder="Aucune (QCM classique)" nzShowSearch>
+                  <nz-option
+                    *ngFor="let d of dimensionOptions"
+                    [nzValue]="d.code"
+                    [nzLabel]="d.label"
+                  ></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div class="score-grid">
+            <nz-form-item>
+              <nz-form-label>Score A (0-10)</nz-form-label>
+              <nz-form-control><input nz-input type="number" formControlName="scoreA" min="0" max="10" /></nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Score B (0-10)</nz-form-label>
+              <nz-form-control><input nz-input type="number" formControlName="scoreB" min="0" max="10" /></nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Score C (0-10)</nz-form-label>
+              <nz-form-control><input nz-input type="number" formControlName="scoreC" min="0" max="10" /></nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Score D (0-10)</nz-form-label>
+              <nz-form-control><input nz-input type="number" formControlName="scoreD" min="0" max="10" /></nz-form-control>
+            </nz-form-item>
+          </div>
         </div>
       </section>
 

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ApplicationAnswerRepository extends JpaRepository<ApplicationAnswer, Long> {
     List<ApplicationAnswer> findByApplicationId(String applicationId);
+    void deleteByApplicationId(String applicationId);
 }

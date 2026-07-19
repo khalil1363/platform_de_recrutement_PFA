@@ -129,6 +129,12 @@ public class QcmService {
                     .optionD(q.getOptionD())
                     .correctOption(q.getCorrectOption().toUpperCase())
                     .orderIndex(q.getOrderIndex() != null ? q.getOrderIndex() : index++)
+                    .dimensionCode(StringUtils.hasText(q.getDimensionCode())
+                            ? q.getDimensionCode().trim().toUpperCase() : null)
+                    .scoreA(q.getScoreA())
+                    .scoreB(q.getScoreB())
+                    .scoreC(q.getScoreC())
+                    .scoreD(q.getScoreD())
                     .build());
         }
     }
@@ -159,6 +165,11 @@ public class QcmService {
                 .optionD(q.getOptionD())
                 .correctOption(q.getCorrectOption())
                 .orderIndex(q.getOrderIndex())
+                .dimensionCode(q.getDimensionCode())
+                .scoreA(q.getScoreA())
+                .scoreB(q.getScoreB())
+                .scoreC(q.getScoreC())
+                .scoreD(q.getScoreD())
                 .build();
     }
 }

@@ -1,0 +1,179 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Candidats admis</h2>
+    <p>QCM post-embauche, rapports PDF Talent Insight et export Excel suivi PSY</p>
+  </div>
+  <button nz-button nzType="default" [nzLoading]="exportLoading" (click)="exportExcel()">
+    <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+    Export Excel suivi PSY
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <div class="empty-state" *ngIf="!loading && applications.length === 0">
+    <p>Aucun candidat admis pour le moment.</p>
+  </div>
+
+  <nz-table *ngIf="applications.length" [nzData]="applications" [nzFrontPagination]="true" [nzPageSize]="10">
+    <thead>
+      <tr>
+        <th>Candidat</th>
+        <th>Poste</th>
+        <th>Agence</th>
+        <th>Prise de fonction</th>
+        <th>Rémunération</th>
+        <th>Confirmé le</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let app of applications">
+        <td>
+          <div class="candidate-cell">
+            <nz-avatar
+              [nzSrc]="authService.resolveImageUrl(app.candidate?.profileImageUrl) || undefined"
+              nzIcon="user"
+            ></nz-avatar>
+            <div>
+              <strong>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</strong>
+              <div class="muted">{{ app.candidate?.email }}</div>
+            </div>
+          </div>
+        </td>
+        <td>{{ app.recruitmentTitle }}</td>
+        <td>{{ app.companyName || app.zoneName || '-' }}</td>
+        <td>{{ app.hireStartDate | date:'dd/MM/yyyy' }}</td>
+        <td>{{ app.hireNetSalary || '-' }}</td>
+        <td>{{ app.hiredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td class="actions">
+          <button nz-button nzSize="small" (click)="openDetails(app)">Détails</button>
+          <button nz-button nzSize="small" nzType="primary" (click)="openAssignQcm(app)">
+            Assigner QCM
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-spin>
+
+<nz-modal
+  [(nzVisible)]="detailVisible"
+  nzTitle="Dossier candidat admis"
+  [nzFooter]="null"
+  (nzOnCancel)="detailVisible = false"
+  [nzWidth]="760"
+>
+  <div *nzModalContent>
+    <ng-container *ngIf="selected as app">
+      <nz-descriptions nzBordered [nzColumn]="2" nzSize="small">
+        <nz-descriptions-item nzTitle="Candidat" [nzSpan]="2">
+          {{ app.candidate?.firstName }} {{ app.candidate?.lastName }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email">{{ app.candidate?.email || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Téléphone">{{ app.candidate?.phoneNumber || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Poste" [nzSpan]="2">{{ app.recruitmentTitle }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Agence">{{ app.companyName || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Zone">{{ app.zoneName || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Adresse agence" [nzSpan]="2">
+          {{ app.companyAddress || '-' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Date de prise de fonction">
+          {{ app.hireStartDate | date:'dd/MM/yyyy' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Rémunération">{{ app.hireNetSalary || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Contrat" [nzSpan]="2">
+          {{ app.hireContractType || '-' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Horaires" [nzSpan]="2">
+          {{ app.hireWorkingHours || '-' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Adresse d'intégration" [nzSpan]="2">
+          {{ app.hireIntegrationAddress || '-' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="GPS" [nzSpan]="2">
+          <a *ngIf="app.hireIntegrationGpsUrl" [href]="app.hireIntegrationGpsUrl" target="_blank" rel="noopener">
+            {{ app.hireIntegrationGpsUrl }}
+          </a>
+          <span *ngIf="!app.hireIntegrationGpsUrl">-</span>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Confirmé le">
+          {{ app.hiredAt | date:'dd/MM/yyyy HH:mm' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Match CV">
+          {{ app.cvMatchScore != null ? app.cvMatchScore + '%' : '-' }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+
+      <div class="benefits-block" *ngIf="app.hireBenefits">
+        <h4>Avantages</h4>
+        <ul>
+          <li *ngFor="let line of benefitLines(app.hireBenefits)">{{ line }}</li>
+        </ul>
+      </div>
+
+      <div class="qcm-block">
+        <div class="qcm-block-header">
+          <h4>QCM d'évaluation</h4>
+          <button nz-button nzSize="small" nzType="primary" (click)="openAssignQcm(app)">Assigner QCM</button>
+        </div>
+        <nz-spin [nzSpinning]="assignmentsLoading">
+          <div class="empty-state" *ngIf="!assignmentsLoading && assignments.length === 0">
+            <p>Aucun QCM assigné pour ce candidat.</p>
+          </div>
+          <div class="assignment-row" *ngFor="let item of assignments">
+            <div>
+              <strong>{{ item.qcmTitle }}</strong>
+              <div class="muted">Assigné le {{ item.assignedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+              <div class="muted" *ngIf="item.overallFitPercent != null">
+                Fit poste : {{ item.overallFitPercent }}%
+              </div>
+            </div>
+            <div class="assignment-meta">
+              <nz-tag [nzColor]="assignmentStatusColor(item.status)">
+                {{ assignmentStatusLabel(item.status) }}
+              </nz-tag>
+              <span *ngIf="item.score != null">Score : {{ item.score }}/{{ item.totalQuestions }}</span>
+              <button
+                nz-button
+                nzSize="small"
+                *ngIf="item.status !== 'ASSIGNED'"
+                (click)="downloadReport(item)"
+              >
+                Rapport PDF
+              </button>
+            </div>
+          </div>
+        </nz-spin>
+      </div>
+    </ng-container>
+  </div>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="qcmModalVisible"
+  nzTitle="Assigner un QCM"
+  (nzOnCancel)="qcmModalVisible = false"
+  (nzOnOk)="confirmAssignQcm()"
+  [nzOkLoading]="assignLoading"
+  nzOkText="Assigner"
+>
+  <ng-container *nzModalContent>
+    <p class="hint" *ngIf="assignTarget">
+      Candidat : <strong>{{ assignTarget.candidate?.firstName }} {{ assignTarget.candidate?.lastName }}</strong>
+      · {{ assignTarget.recruitmentTitle }}
+    </p>
+    <nz-select
+      [(ngModel)]="selectedQcmId"
+      nzPlaceHolder="Sélectionner un QCM existant"
+      style="width: 100%"
+      nzShowSearch
+    >
+      <nz-option
+        *ngFor="let qcm of qcms"
+        [nzValue]="qcm.qcmId"
+        [nzLabel]="qcm.title + (qcm.questionCount != null ? ' (' + qcm.questionCount + ' questions)' : '')"
+      ></nz-option>
+    </nz-select>
+    <p class="hint">Le candidat verra ce questionnaire dans « Mes évaluations » après connexion.</p>
+  </ng-container>
+</nz-modal>

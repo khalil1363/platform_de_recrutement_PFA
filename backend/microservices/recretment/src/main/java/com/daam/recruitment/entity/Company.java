@@ -17,6 +17,10 @@ public class Company {
     @Column(nullable = false) private String name;
     @Column(nullable = false) private String zoneId;
     private String address;
+    private Double latitude;
+    private Double longitude;
+    @Column(length = 512)
+    private String googleMapsUrl;
     @Builder.Default private boolean active = true;
     @CreationTimestamp private LocalDateTime createdAt;
 

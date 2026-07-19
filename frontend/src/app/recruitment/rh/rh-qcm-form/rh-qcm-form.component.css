@@ -91,6 +91,23 @@
   margin-bottom: 14px;
 }
 
+.psy-grid,
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.score-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -100,7 +117,9 @@
 
 @media (max-width: 768px) {
   .form-grid,
-  .options-grid {
+  .options-grid,
+  .psy-grid,
+  .score-grid {
     grid-template-columns: 1fr;
   }
 

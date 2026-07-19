@@ -1,5 +1,5 @@
 <div class="apply-page">
-  <button class="back-link" type="button" (click)="back()">
+  <button class="back-link" type="button" (click)="back()" *ngIf="!qcmViolated && !submitting">
     <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
     Retour à l'offre
   </button>
@@ -50,16 +50,58 @@
           </div>
         </div>
 
-        <div class="step-content" *ngIf="currentStep === 1">
+        <div class="violation-panel" *ngIf="qcmViolated">
+          <div class="violation-icon">
+            <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+          </div>
+          <h3>Triche détectée — test terminé</h3>
+          <p class="violation-reason">{{ violationMessage }}</p>
+          <p class="violation-detail">
+            Votre score au QCM est <strong>0 / {{ totalQuestions }}</strong>.
+            Vous ne pouvez plus continuer le questionnaire.
+          </p>
+          <p class="violation-submit">
+            <span nz-icon nzType="loading" nzTheme="outline" *ngIf="submitting"></span>
+            {{ submitting ? 'Envoi automatique de votre candidature...' : 'Candidature envoyée. Redirection...' }}
+          </p>
+        </div>
+
+        <div
+          class="step-content quiz-protected"
+          *ngIf="currentStep === 1 && !qcmViolated && currentQuestion as question"
+          (copy)="blockClipboard($event)"
+          (paste)="blockClipboard($event)"
+          (cut)="blockClipboard($event)"
+          (contextmenu)="blockClipboard($event)"
+        >
           <div class="step-intro">
             <span nz-icon nzType="solution" nzTheme="outline" class="step-icon"></span>
             <div>
-              <h3>Questionnaire de compétences</h3>
-              <p>{{ recruitment.questions?.length || 0 }} question(s) · Choisissez la meilleure réponse</p>
+              <h3>Questionnaire sécurisé</h3>
+              <p>Une question à la fois · Ne quittez pas cette fenêtre</p>
             </div>
           </div>
-          <div class="question-block" *ngFor="let question of recruitment.questions; let i = index">
-            <div class="question-number">{{ i + 1 }}</div>
+
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            nzMessage="Mode anti-triche actif"
+            nzDescription="Changer d'onglet, réduire la fenêtre ou copier-coller entraîne un score 0 et l'envoi automatique de la candidature."
+            class="quiz-alert"
+          ></nz-alert>
+
+          <div class="quiz-progress">
+            <span>Question {{ currentQuestionIndex + 1 }} / {{ totalQuestions }}</span>
+            <div class="quiz-progress-bar">
+              <div
+                class="quiz-progress-fill"
+                [style.width.%]="((currentQuestionIndex + 1) / totalQuestions) * 100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <div class="question-number">{{ currentQuestionIndex + 1 }}</div>
             <div class="question-body">
               <h4>{{ question.questionText }}</h4>
               <nz-radio-group [(ngModel)]="answers[question.questionId!]" class="answer-group">
@@ -95,18 +137,18 @@
             </div>
             <div class="summary-item ok">
               <span class="summary-label">QCM</span>
-              <strong>{{ recruitment.questions?.length || 0 }} réponse(s)</strong>
+              <strong>{{ answeredQuestionsCount }}/{{ totalQuestions }} réponse(s)</strong>
             </div>
           </div>
         </div>
 
-        <div class="step-actions">
-          <button nz-button *ngIf="currentStep > 0" (click)="prevStep()">
+        <div class="step-actions" *ngIf="!qcmViolated">
+          <button nz-button *ngIf="currentStep > 0 && !submitting" (click)="prevStep()">
             <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
-            Précédent
+            {{ currentStep === 1 && currentQuestionIndex > 0 ? 'Question précédente' : 'Précédent' }}
           </button>
-          <button nz-button nzType="primary" *ngIf="currentStep < 2" (click)="nextStep()">
-            Suivant
+          <button nz-button nzType="primary" *ngIf="currentStep < 2" [disabled]="submitting" (click)="nextStep()">
+            {{ currentStep === 1 && currentQuestionIndex < totalQuestions - 1 ? 'Question suivante' : 'Suivant' }}
             <span nz-icon nzType="right" nzTheme="outline"></span>
           </button>
           <button nz-button nzType="primary" *ngIf="currentStep === 2" [nzLoading]="submitting" (click)="submit()">

@@ -1,0 +1,156 @@
+<div class="apply-page">
+  <button class="back-link" type="button" (click)="back()" *ngIf="!qcmViolated && !submitting && !result">
+    <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+    Retour aux évaluations
+  </button>
+
+  <nz-spin [nzSpinning]="loading">
+    <ng-container *ngIf="assignment">
+      <section class="apply-hero">
+        <div class="apply-hero-content">
+          <span class="hero-badge">Évaluation post-embauche</span>
+          <h1>{{ assignment.qcmTitle }}</h1>
+          <p>
+            {{ assignment.recruitmentTitle }}
+            <span *ngIf="assignment.companyName"> · {{ assignment.companyName }}</span>
+          </p>
+        </div>
+      </section>
+
+      <div class="apply-card">
+        <div class="violation-panel" *ngIf="qcmViolated">
+          <div class="violation-icon">
+            <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+          </div>
+          <h3>Triche détectée — test terminé</h3>
+          <p class="violation-reason">{{ violationMessage }}</p>
+          <p class="violation-detail">
+            Votre score est <strong>0 / {{ totalQuestions || assignment.totalQuestions }}</strong>.
+          </p>
+          <p class="violation-submit">
+            <span nz-icon nzType="loading" nzTheme="outline" *ngIf="submitting"></span>
+            {{ submitting ? 'Envoi automatique...' : 'Évaluation enregistrée.' }}
+          </p>
+          <button nz-button nzType="primary" *ngIf="!submitting" (click)="goToEvaluations()">
+            Retour à Mes évaluations
+          </button>
+        </div>
+
+        <div class="step-content" *ngIf="!qcmViolated && result">
+          <div class="step-intro">
+            <span nz-icon nzType="check-circle" nzTheme="outline" class="step-icon"></span>
+            <div>
+              <h3>Évaluation terminée</h3>
+              <p>Merci — votre résultat a été transmis à l'équipe RH</p>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item ok">
+              <span class="summary-label">Score</span>
+              <strong>{{ result.score }}/{{ result.totalQuestions }}</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Statut</span>
+              <strong>{{ result.status === 'VIOLATED' ? 'Triche' : 'Terminé' }}</strong>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button nz-button nzType="primary" (click)="goToEvaluations()">
+              Retour à Mes évaluations
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="!qcmViolated && !result">
+          <div class="step-content" *ngIf="currentStep === 0">
+            <div class="step-intro">
+              <span nz-icon nzType="solution" nzTheme="outline" class="step-icon"></span>
+              <div>
+                <h3>Prêt à commencer ?</h3>
+                <p>{{ totalQuestions }} question(s) · Mode anti-triche actif</p>
+              </div>
+            </div>
+            <nz-alert
+              nzType="warning"
+              nzShowIcon
+              nzMessage="Important"
+              nzDescription="Changer d'onglet, réduire la fenêtre ou copier-coller entraîne un score 0 et la clôture automatique du test."
+            ></nz-alert>
+            <div class="step-actions">
+              <button nz-button nzType="primary" (click)="startQuiz()">
+                Démarrer le QCM
+                <span nz-icon nzType="right" nzTheme="outline"></span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="step-content quiz-protected"
+            *ngIf="currentStep === 1 && currentQuestion as question"
+            (copy)="blockClipboard($event)"
+            (paste)="blockClipboard($event)"
+            (cut)="blockClipboard($event)"
+            (contextmenu)="blockClipboard($event)"
+          >
+            <nz-alert
+              nzType="warning"
+              nzShowIcon
+              nzMessage="Mode anti-triche actif"
+              nzDescription="Ne quittez pas cette fenêtre pendant le questionnaire."
+              class="quiz-alert"
+            ></nz-alert>
+
+            <div class="quiz-progress">
+              <span>Question {{ currentQuestionIndex + 1 }} / {{ totalQuestions }}</span>
+              <div class="quiz-progress-bar">
+                <div
+                  class="quiz-progress-fill"
+                  [style.width.%]="((currentQuestionIndex + 1) / totalQuestions) * 100"
+                ></div>
+              </div>
+            </div>
+
+            <div class="question-block">
+              <div class="question-number">{{ currentQuestionIndex + 1 }}</div>
+              <div class="question-body">
+                <h4>{{ question.questionText }}</h4>
+                <nz-radio-group [(ngModel)]="answers[question.questionId!]" class="answer-group">
+                  <label nz-radio nzValue="A" class="answer-option">{{ question.optionA }}</label>
+                  <label nz-radio nzValue="B" class="answer-option">{{ question.optionB }}</label>
+                  <label nz-radio nzValue="C" class="answer-option" *ngIf="question.optionC">{{ question.optionC }}</label>
+                  <label nz-radio nzValue="D" class="answer-option" *ngIf="question.optionD">{{ question.optionD }}</label>
+                </nz-radio-group>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button nz-button *ngIf="currentQuestionIndex > 0" (click)="prevQuestion()">
+                Question précédente
+              </button>
+              <button nz-button nzType="primary" (click)="nextQuestion()">
+                {{ currentQuestionIndex < totalQuestions - 1 ? 'Question suivante' : 'Vérifier' }}
+                <span nz-icon nzType="right" nzTheme="outline"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="step-content" *ngIf="currentStep === 2">
+            <div class="step-intro">
+              <span nz-icon nzType="send" nzTheme="outline" class="step-icon"></span>
+              <div>
+                <h3>Confirmer l'envoi</h3>
+                <p>{{ answeredQuestionsCount }}/{{ totalQuestions }} réponse(s) — envoi définitif</p>
+              </div>
+            </div>
+            <div class="step-actions">
+              <button nz-button (click)="resumeQuizFromReview()">Revenir aux questions</button>
+              <button nz-button nzType="primary" [nzLoading]="submitting" (click)="submit()">
+                Envoyer mon évaluation
+              </button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </nz-spin>
+</div>

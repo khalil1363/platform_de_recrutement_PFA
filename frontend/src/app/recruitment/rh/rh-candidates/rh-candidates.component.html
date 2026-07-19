@@ -65,17 +65,38 @@
               nz-button
               nzSize="small"
               nzType="primary"
-              [disabled]="app.status === 'ACCEPTED'"
+              *ngIf="app.status !== 'ACCEPTED' && app.status !== 'REJECTED' && app.status !== 'HIRED'"
               [nzLoading]="actionLoading"
-              (click)="updateStatus(app, 'ACCEPTED')"
+              (click)="updateStatus(app, 'ACCEPTED', 'ONLINE')"
             >
-              Accepter
+              Accepter reunion en ligne
+            </button>
+            <button
+              nz-button
+              nzSize="small"
+              nzType="primary"
+              nzGhost
+              *ngIf="app.status === 'ACCEPTED' && app.meetingProvider !== 'PHYSICAL'"
+              [nzLoading]="actionLoading"
+              (click)="updateStatus(app, 'ACCEPTED', 'PHYSICAL')"
+            >
+              Planifier reunion physique
+            </button>
+            <button
+              nz-button
+              nzSize="small"
+              nzType="default"
+              *ngIf="app.status === 'ACCEPTED' && app.meetingProvider === 'PHYSICAL'"
+              [nzLoading]="actionLoading"
+              (click)="openHireModal(app)"
+            >
+              CONFIRMATION D'EMBAUCHE
             </button>
             <button
               nz-button
               nzSize="small"
               nzDanger
-              [disabled]="app.status === 'REJECTED'"
+              [disabled]="app.status === 'REJECTED' || app.status === 'HIRED'"
               [nzLoading]="actionLoading"
               (click)="updateStatus(app, 'REJECTED')"
             >
@@ -225,7 +246,7 @@
 
 <nz-modal
   [(nzVisible)]="interviewModalVisible"
-  nzTitle="Planifier l'entretien"
+  [nzTitle]="interviewModalTitle"
   (nzOnCancel)="interviewModalVisible = false"
   (nzOnOk)="confirmInterview()"
   [nzOkLoading]="actionLoading"
@@ -269,8 +290,113 @@
         </nz-form-control>
       </nz-form-item>
     </div>
-    <p class="interview-hint">
+    <nz-form-item *ngIf="pendingInterviewType === 'PHYSICAL'">
+      <nz-form-label>Lieu (optionnel)</nz-form-label>
+      <nz-form-control>
+        <input
+          nz-input
+          formControlName="interviewLocation"
+          placeholder="Adresse de l'entretien (sinon adresse de l'agence)"
+        />
+      </nz-form-control>
+    </nz-form-item>
+    <p class="interview-hint" *ngIf="pendingInterviewType === 'ONLINE'">
       Le lien de reunion enregistre dans votre profil sera envoye au candidat par email.
+    </p>
+    <p class="interview-hint" *ngIf="pendingInterviewType === 'PHYSICAL'">
+      Etape optionnelle apres l'entretien en ligne.
+      Une convocation physique sera envoyee (agence / entreprise + adresse en base).
+      Si vous laissez le lieu vide, l'adresse de l'entreprise sera utilisee.
+    </p>
+  </form>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="hireModalVisible"
+  nzTitle="Confirmation d'embauche"
+  (nzOnCancel)="hireModalVisible = false"
+  (nzOnOk)="confirmHire()"
+  [nzOkLoading]="actionLoading"
+  nzOkText="Envoyer la confirmation"
+  [nzWidth]="720"
+>
+  <form nz-form [formGroup]="hireForm" *nzModalContent>
+    <p class="interview-hint" *ngIf="pendingApplication">
+      Offre : <strong>{{ pendingApplication.recruitmentTitle }}</strong>
+      <span *ngIf="pendingApplication.companyName"> · {{ pendingApplication.companyName }}</span>
+    </p>
+    <nz-form-item>
+      <nz-form-label nzRequired>Date de prise de fonction</nz-form-label>
+      <nz-form-control nzErrorTip="Date obligatoire">
+        <nz-date-picker
+          formControlName="hireStartDate"
+          nzFormat="dd/MM/yyyy"
+          nzPlaceHolder="Sélectionner la date"
+          class="interview-picker"
+        ></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired>Rémunération nette mensuelle</nz-form-label>
+      <nz-form-control nzErrorTip="Rémunération obligatoire">
+        <input nz-input formControlName="hireNetSalary" placeholder="Ex: 800,000 DT" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Nature du contrat</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="hireContractType" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Horaires de travail</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="hireWorkingHours" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Avantages accordés</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="hireBenefits" [nzAutosize]="{ minRows: 4, maxRows: 8 }"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Adresse d'intégration</nz-form-label>
+      <nz-form-control>
+        <div class="agency-ready-field" *ngIf="pendingApplication?.companyAddress; else noAgencyAddress">
+          <span nz-icon nzType="home" nzTheme="outline"></span>
+          {{ pendingApplication?.companyAddress }}
+        </div>
+        <ng-template #noAgencyAddress>
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            nzMessage="Aucune adresse enregistrée pour cette agence. Ajoutez-la dans Admin → Agences."
+          ></nz-alert>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Localisation GPS</nz-form-label>
+      <nz-form-control>
+        <div class="agency-ready-field" *ngIf="pendingApplication?.companyGoogleMapsUrl; else noAgencyMaps">
+          <span nz-icon nzType="environment" nzTheme="outline"></span>
+          <a [href]="pendingApplication?.companyGoogleMapsUrl" target="_blank" rel="noopener">
+            {{ pendingApplication?.companyGoogleMapsUrl }}
+          </a>
+        </div>
+        <ng-template #noAgencyMaps>
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            nzMessage="Aucune localisation Google Maps pour cette agence. Ouvrez la carte dans Admin → Agences."
+          ></nz-alert>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <p class="interview-hint">
+      Adresse et GPS sont pris automatiquement depuis l'agence liée à l'offre.
+      Un e-mail de confirmation sera envoyé au candidat avec la liste documentaire en pièce jointe.
     </p>
   </form>
 </nz-modal>

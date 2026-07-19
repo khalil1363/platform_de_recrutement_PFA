@@ -1,0 +1,53 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Mes évaluations</h2>
+    <p>QCM assignés après votre confirmation d'embauche</p>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="assignments" [nzShowPagination]="false" *ngIf="assignments.length; else emptyState">
+    <thead>
+      <tr>
+        <th>Questionnaire</th>
+        <th>Poste</th>
+        <th>Agence</th>
+        <th>Assigné le</th>
+        <th>Statut</th>
+        <th>Score</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of assignments">
+        <td><strong>{{ item.qcmTitle }}</strong></td>
+        <td>{{ item.recruitmentTitle || '-' }}</td>
+        <td>{{ item.companyName || '-' }}</td>
+        <td>{{ item.assignedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+        </td>
+        <td>
+          <span class="score-badge" *ngIf="item.score != null">
+            {{ item.score }}/{{ item.totalQuestions }}
+          </span>
+          <span *ngIf="item.score == null">—</span>
+        </td>
+        <td>
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="small"
+            *ngIf="item.status === 'ASSIGNED'"
+            (click)="open(item)"
+          >
+            Passer le QCM
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+  <ng-template #emptyState>
+    <nz-empty nzNotFoundContent="Aucune évaluation assignée pour le moment"></nz-empty>
+  </ng-template>
+</nz-spin>

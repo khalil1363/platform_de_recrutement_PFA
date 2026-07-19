@@ -8,6 +8,8 @@ import {
   ApplicationStatusUpdateRequest,
   Company,
   CompanyRequest,
+  HiredQcmAssignment,
+  HiredQcmSubmitRequest,
   JobApplication,
   Recruitment,
   RecruitmentRequest,
@@ -87,6 +89,10 @@ export class RecruitmentService {
     return this.http.put<ApiResponse<Recruitment>>(`${this.apiUrl}/recruitments/${id}`, request);
   }
 
+  deleteRecruitment(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/recruitments/${id}`);
+  }
+
   getQcms(): Observable<ApiResponse<Qcm[]>> {
     return this.http.get<ApiResponse<Qcm[]>>(`${this.apiUrl}/qcm`);
   }
@@ -113,6 +119,53 @@ export class RecruitmentService {
 
   getRhApplications(): Observable<ApiResponse<JobApplication[]>> {
     return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications`);
+  }
+
+  getHiredApplications(): Observable<ApiResponse<JobApplication[]>> {
+    return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications/hired`);
+  }
+
+  assignHiredQcm(applicationId: string, qcmId: string): Observable<ApiResponse<HiredQcmAssignment>> {
+    return this.http.post<ApiResponse<HiredQcmAssignment>>(
+      `${this.apiUrl}/applications/${applicationId}/hired-qcm`,
+      { qcmId }
+    );
+  }
+
+  getHiredQcmForApplication(applicationId: string): Observable<ApiResponse<HiredQcmAssignment[]>> {
+    return this.http.get<ApiResponse<HiredQcmAssignment[]>>(
+      `${this.apiUrl}/applications/${applicationId}/hired-qcm`
+    );
+  }
+
+  getMyHiredQcm(): Observable<ApiResponse<HiredQcmAssignment[]>> {
+    return this.http.get<ApiResponse<HiredQcmAssignment[]>>(`${this.apiUrl}/hired-qcm/my`);
+  }
+
+  getHiredQcmAssignment(assignmentId: string): Observable<ApiResponse<HiredQcmAssignment>> {
+    return this.http.get<ApiResponse<HiredQcmAssignment>>(`${this.apiUrl}/hired-qcm/${assignmentId}`);
+  }
+
+  submitHiredQcm(
+    assignmentId: string,
+    request: HiredQcmSubmitRequest
+  ): Observable<ApiResponse<HiredQcmAssignment>> {
+    return this.http.post<ApiResponse<HiredQcmAssignment>>(
+      `${this.apiUrl}/hired-qcm/${assignmentId}/submit`,
+      request
+    );
+  }
+
+  downloadHiredQcmReportPdf(assignmentId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/hired-qcm/${assignmentId}/report.pdf`, {
+      responseType: 'blob'
+    });
+  }
+
+  exportHiredEvaluationsExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/applications/hired/evaluations/export.xlsx`, {
+      responseType: 'blob'
+    });
   }
 
   updateApplicationStatus(

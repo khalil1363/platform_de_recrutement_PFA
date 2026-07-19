@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
     Optional<Interview> findByApplicationIdAndStatus(String applicationId, InterviewStatus status);
+    void deleteByApplicationId(String applicationId);
 }

@@ -10,28 +10,37 @@
 </div>
 
 <nz-spin [nzSpinning]="loading">
-    <nz-table [nzData]="groupedCompanies" [nzShowPagination]="false">
-      <thead>
-        <tr>
-          <th>Zone</th>
-          <th>Agence</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let group of groupedCompanies">
-          <td><strong>{{ group.zoneName }}</strong></td>
-          <td>
-            <div class="company-list">
-              <div class="company-chip" *ngFor="let company of group.companies">
-                <strong>{{ company.name }}</strong>
-                <span>{{ company.address || '-' }}</span>
-              </div>
+  <nz-table [nzData]="groupedCompanies" [nzShowPagination]="false">
+    <thead>
+      <tr>
+        <th>Zone</th>
+        <th>Agence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let group of groupedCompanies">
+        <td><strong>{{ group.zoneName }}</strong></td>
+        <td>
+          <div class="company-list">
+            <div class="company-chip" *ngFor="let company of group.companies">
+              <strong>{{ company.name }}</strong>
+              <span>{{ company.address || '-' }}</span>
+              <a
+                *ngIf="company.googleMapsUrl"
+                class="maps-link"
+                [href]="company.googleMapsUrl"
+                target="_blank"
+                rel="noopener"
+              >
+                Voir sur Google Maps
+              </a>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </nz-table>
-  </nz-spin>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-spin>
 
 <nz-modal
   [(nzVisible)]="modalVisible"
@@ -39,6 +48,7 @@
   (nzOnCancel)="modalVisible = false"
   (nzOnOk)="saveCompany()"
   [nzOkLoading]="modalLoading"
+  [nzWidth]="560"
 >
   <form nz-form [formGroup]="companyForm" *nzModalContent>
     <nz-form-item>
@@ -55,7 +65,108 @@
     </nz-form-item>
     <nz-form-item>
       <nz-form-label>Adresse</nz-form-label>
-      <nz-form-control><input nz-input formControlName="address" /></nz-form-control>
+      <nz-form-control><input nz-input formControlName="address" placeholder="Adresse textuelle" /></nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Localisation Google Maps</nz-form-label>
+      <nz-form-control>
+        <div class="map-field">
+          <button nz-button type="button" (click)="openMapPicker()">
+            <span nz-icon nzType="environment" nzTheme="outline"></span>
+            {{ hasMapLocation ? 'Modifier la localisation' : 'Ouvrir la carte' }}
+          </button>
+          <button
+            nz-button
+            type="button"
+            nzDanger
+            *ngIf="hasMapLocation"
+            (click)="clearMapLocation()"
+          >
+            Effacer
+          </button>
+        </div>
+        <div class="map-selected" *ngIf="hasMapLocation">
+          <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+          Point sélectionné : {{ locationSummary }}
+          <a [href]="companyForm.get('googleMapsUrl')?.value" target="_blank" rel="noopener">
+            Ouvrir dans Google Maps
+          </a>
+        </div>
+        <p class="map-hint">Cliquez sur la carte pour choisir l’emplacement exact de l’agence.</p>
+      </nz-form-control>
     </nz-form-item>
   </form>
 </nz-modal>
+
+<div class="map-overlay" *ngIf="mapPickerOpen">
+  <div class="map-overlay-header">
+    <div>
+      <h3>Sélectionner la localisation</h3>
+      <p>Recherchez, utilisez votre position GPS, ou cliquez sur la carte.</p>
+    </div>
+    <button nz-button type="button" (click)="closeMapPicker()">
+      <span nz-icon nzType="close" nzTheme="outline"></span>
+      Fermer
+    </button>
+  </div>
+
+  <div class="map-toolbar">
+    <div class="map-search">
+      <input
+        nz-input
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchInput()"
+        (keydown.enter)="$event.preventDefault(); searchNow()"
+        placeholder="Rechercher une adresse, ville, rue…"
+      />
+      <button nz-button nzType="primary" type="button" [nzLoading]="searching" (click)="searchNow()">
+        <span nz-icon nzType="search" nzTheme="outline"></span>
+        Rechercher
+      </button>
+      <button
+        nz-button
+        type="button"
+        [nzLoading]="locating"
+        (click)="useMyLocation()"
+        title="Ma position"
+      >
+        <span nz-icon nzType="aim" nzTheme="outline"></span>
+        Ma position
+      </button>
+    </div>
+
+    <div class="map-search-results" *ngIf="searchResults.length">
+      <button
+        type="button"
+        class="map-search-item"
+        *ngFor="let result of searchResults"
+        (click)="selectSearchResult(result)"
+      >
+        <span nz-icon nzType="environment" nzTheme="outline"></span>
+        {{ result.displayName }}
+      </button>
+    </div>
+
+    <div class="map-selected-banner" *ngIf="pendingLngLat">
+      <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+      <span *ngIf="selectedPlaceLabel; else coordsOnly">{{ selectedPlaceLabel }}</span>
+      <ng-template #coordsOnly>
+        {{ pendingLngLat.lat | number:'1.5-5' }}, {{ pendingLngLat.lng | number:'1.5-5' }}
+      </ng-template>
+    </div>
+  </div>
+
+  <div id="agency-map" class="agency-map"></div>
+  <div class="map-overlay-footer">
+    <button nz-button type="button" (click)="closeMapPicker()">Annuler</button>
+    <button
+      nz-button
+      nzType="primary"
+      type="button"
+      [disabled]="!pendingLngLat"
+      (click)="confirmMapLocation()"
+    >
+      Confirmer la position
+    </button>
+  </div>
+</div>

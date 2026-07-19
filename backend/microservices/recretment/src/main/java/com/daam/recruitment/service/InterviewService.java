@@ -33,6 +33,20 @@ public class InterviewService {
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
             String rhMeetingLink) {
+        return scheduleInterview(application, recruitment, recruiterUserId, candidateName,
+                startDateTime, endDateTime, rhMeetingLink, false);
+    }
+
+    @Transactional
+    public InterviewScheduleResult scheduleInterview(
+            JobApplication application,
+            Recruitment recruitment,
+            String recruiterUserId,
+            String candidateName,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            String rhMeetingLink,
+            boolean physical) {
 
         if (startDateTime == null) {
             throw new IllegalArgumentException("Interview start date/time is required");
@@ -51,11 +65,19 @@ public class InterviewService {
                 });
 
         String title = buildTitle(recruitment.getTitle(), candidateName);
-        String meetingLink = StringUtils.hasText(rhMeetingLink) ? rhMeetingLink.trim() : null;
-        String warning = meetingLink == null
-                ? "Entretien enregistre. Ajoutez votre lien de reunion (Teams, Meet, etc.) dans Mon profil."
-                : null;
-        MeetingProviderType provider = meetingLink != null ? MeetingProviderType.MANUAL : MeetingProviderType.NONE;
+        String meetingLink = null;
+        String warning = null;
+        MeetingProviderType provider;
+
+        if (physical) {
+            provider = MeetingProviderType.PHYSICAL;
+        } else {
+            meetingLink = StringUtils.hasText(rhMeetingLink) ? rhMeetingLink.trim() : null;
+            warning = meetingLink == null
+                    ? "Entretien enregistre. Ajoutez votre lien de reunion (Teams, Meet, etc.) dans Mon profil."
+                    : null;
+            provider = meetingLink != null ? MeetingProviderType.MANUAL : MeetingProviderType.NONE;
+        }
 
         Interview interview = Interview.builder()
                 .applicationId(application.getApplicationId())

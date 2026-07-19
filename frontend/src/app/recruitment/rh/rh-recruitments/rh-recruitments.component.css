@@ -1,3 +1,9 @@
 .page-header-bar {
   margin-bottom: 8px;
 }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

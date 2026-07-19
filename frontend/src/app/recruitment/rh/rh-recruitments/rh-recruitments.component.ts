@@ -47,6 +47,20 @@ export class RhRecruitmentsComponent implements OnInit {
     this.router.navigate(['/rh/recruitments', id, 'edit']);
   }
 
+  delete(item: Recruitment): void {
+    this.recruitmentService.deleteRecruitment(item.recruitmentId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.message.success('Recrutement supprime');
+          this.loadRecruitments();
+        }
+      },
+      error: (err) => {
+        this.message.error(err.error?.message || 'Impossible de supprimer ce recrutement');
+      }
+    });
+  }
+
   statusColor(status: string): string {
     if (status === 'PUBLISHED') return 'green';
     if (status === 'CLOSED') return 'red';

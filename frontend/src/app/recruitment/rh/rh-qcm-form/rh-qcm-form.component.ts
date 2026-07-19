@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { RecruitmentService } from '../../services/recruitment.service';
 import { QcmRequest } from '../../models/recruitment.model';
+import { PSY_CC_DIMENSION_OPTIONS, PSY_CC_SAMPLE_QUESTIONS } from '../../data/psy-cc-sample-qcm';
 
 @Component({
   selector: 'app-rh-qcm-form',
@@ -16,6 +17,7 @@ export class RhQcmFormComponent implements OnInit {
   saving = false;
   isEdit = false;
   qcmId = '';
+  readonly dimensionOptions = PSY_CC_DIMENSION_OPTIONS;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -46,14 +48,31 @@ export class RhQcmFormComponent implements OnInit {
     });
   }
 
-  createQuestionGroup(): FormGroup {
+  createQuestionGroup(data?: Partial<{
+    questionText: string;
+    optionA: string;
+    optionB: string;
+    optionC: string;
+    optionD: string;
+    correctOption: string;
+    dimensionCode: string | null;
+    scoreA: number | null;
+    scoreB: number | null;
+    scoreC: number | null;
+    scoreD: number | null;
+  }>): FormGroup {
     return this.fb.group({
-      questionText: ['', Validators.required],
-      optionA: ['', Validators.required],
-      optionB: ['', Validators.required],
-      optionC: [''],
-      optionD: [''],
-      correctOption: ['A', Validators.required]
+      questionText: [data?.questionText || '', Validators.required],
+      optionA: [data?.optionA || '', Validators.required],
+      optionB: [data?.optionB || '', Validators.required],
+      optionC: [data?.optionC || ''],
+      optionD: [data?.optionD || ''],
+      correctOption: [data?.correctOption || 'A', Validators.required],
+      dimensionCode: [data?.dimensionCode || null],
+      scoreA: [data?.scoreA ?? null],
+      scoreB: [data?.scoreB ?? null],
+      scoreC: [data?.scoreC ?? null],
+      scoreD: [data?.scoreD ?? null]
     });
   }
 
@@ -65,6 +84,19 @@ export class RhQcmFormComponent implements OnInit {
     if (this.questions.length > 1) {
       this.questions.removeAt(index);
     }
+  }
+
+  loadPsySample(): void {
+    this.form.patchValue({
+      title: 'Test PSY — Profil Commercial / Chargé de crédit',
+      description:
+        'Questionnaire psychométrique post-embauche (18 compétences). Réponses Likert scorées pour rapports PDF / Excel.'
+    });
+    this.questions.clear();
+    PSY_CC_SAMPLE_QUESTIONS.forEach((q) => {
+      this.questions.push(this.createQuestionGroup({ ...q }));
+    });
+    this.message.success('Modèle PSY CC chargé — enregistrez puis assignez-le au candidat admis');
   }
 
   loadQcm(): void {
@@ -80,13 +112,18 @@ export class RhQcmFormComponent implements OnInit {
           });
           this.questions.clear();
           (data.questions || []).forEach((q) => {
-            this.questions.push(this.fb.group({
-              questionText: [q.questionText, Validators.required],
-              optionA: [q.optionA, Validators.required],
-              optionB: [q.optionB, Validators.required],
-              optionC: [q.optionC || ''],
-              optionD: [q.optionD || ''],
-              correctOption: [q.correctOption || 'A', Validators.required]
+            this.questions.push(this.createQuestionGroup({
+              questionText: q.questionText,
+              optionA: q.optionA,
+              optionB: q.optionB,
+              optionC: q.optionC || '',
+              optionD: q.optionD || '',
+              correctOption: q.correctOption || 'A',
+              dimensionCode: q.dimensionCode || null,
+              scoreA: q.scoreA ?? null,
+              scoreB: q.scoreB ?? null,
+              scoreC: q.scoreC ?? null,
+              scoreD: q.scoreD ?? null
             }));
           });
           if (!this.questions.length) {
@@ -107,7 +144,20 @@ export class RhQcmFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = this.form.value as QcmRequest;
+    const raw = this.form.value;
+    const payload: QcmRequest = {
+      title: raw.title,
+      description: raw.description,
+      questions: (raw.questions || []).map((q: Record<string, unknown>, index: number) => ({
+        ...q,
+        orderIndex: index,
+        scoreA: q['scoreA'] === null || q['scoreA'] === '' ? undefined : Number(q['scoreA']),
+        scoreB: q['scoreB'] === null || q['scoreB'] === '' ? undefined : Number(q['scoreB']),
+        scoreC: q['scoreC'] === null || q['scoreC'] === '' ? undefined : Number(q['scoreC']),
+        scoreD: q['scoreD'] === null || q['scoreD'] === '' ? undefined : Number(q['scoreD']),
+        dimensionCode: q['dimensionCode'] || undefined
+      }))
+    };
     this.saving = true;
     const request$ = this.isEdit
       ? this.recruitmentService.updateQcm(this.qcmId, payload)

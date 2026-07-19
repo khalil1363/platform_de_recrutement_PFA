@@ -28,8 +28,18 @@
         <td>{{ item.zoneName }}</td>
         <td>{{ item.qcmTitle || '—' }}</td>
         <td><nz-tag [nzColor]="statusColor(item.status)">{{ item.status }}</nz-tag></td>
-        <td>
+        <td class="actions">
           <button nz-button nzSize="small" (click)="edit(item.recruitmentId)">Modifier</button>
+          <button
+            nz-button
+            nzSize="small"
+            nzDanger
+            nz-popconfirm
+            nzPopconfirmTitle="Supprimer ce recrutement et toutes ses candidatures ?"
+            (nzOnConfirm)="delete(item)"
+          >
+            Supprimer
+          </button>
         </td>
       </tr>
     </tbody>

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class RecruitmentService {
     private final QcmQuestionRepository qcmQuestionRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final ApplicationAnswerRepository applicationAnswerRepository;
+    private final InterviewRepository interviewRepository;
     private final UserClient userClient;
     private final InterviewEmailService interviewEmailService;
     private final CvAnalysisService cvAnalysisService;
@@ -101,7 +103,13 @@ public class RecruitmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Zone not found"));
         if (authUser.isRh()) ensureRhZone(authUser.getUserId(), zone.getZoneId());
         Company company = Company.builder()
-                .name(request.getName()).zoneId(zone.getZoneId()).address(request.getAddress()).build();
+                .name(request.getName())
+                .zoneId(zone.getZoneId())
+                .address(request.getAddress())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .googleMapsUrl(request.getGoogleMapsUrl())
+                .build();
         return toCompanyResponse(companyRepository.save(company), zone.getName());
     }
 
@@ -147,6 +155,23 @@ public class RecruitmentService {
         assignQcmIfPresent(recruitment, request.getQcmId());
         Recruitment saved = recruitmentRepository.save(recruitment);
         return toRecruitmentResponse(saved, true);
+    }
+
+    @Transactional
+    public void deleteRecruitment(String recruitmentId, AuthUser authUser) {
+        Recruitment recruitment = getRecruitmentOrThrow(recruitmentId);
+        if (authUser.isRh()) {
+            ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
+        }
+
+        List<JobApplication> applications = jobApplicationRepository.findByRecruitmentId(recruitmentId);
+        for (JobApplication application : applications) {
+            String applicationId = application.getApplicationId();
+            applicationAnswerRepository.deleteByApplicationId(applicationId);
+            interviewRepository.deleteByApplicationId(applicationId);
+            jobApplicationRepository.delete(application);
+        }
+        recruitmentRepository.delete(recruitment);
     }
 
     @Transactional(readOnly = true)
@@ -201,8 +226,17 @@ public class RecruitmentService {
 
         List<QcmQuestion> questions = getQuestionsForRecruitment(recruitment);
         if (questions.isEmpty()) throw new IllegalArgumentException("No QCM configured for this recruitment");
-        if (request.getAnswers() == null || request.getAnswers().size() != questions.size())
+
+        boolean violated = Boolean.TRUE.equals(request.getQcmViolated());
+        if (!violated && (request.getAnswers() == null || request.getAnswers().size() != questions.size())) {
             throw new IllegalArgumentException("All QCM questions must be answered");
+        }
+
+        Map<String, QcmAnswerRequest> answerMap = request.getAnswers() == null
+                ? Map.of()
+                : request.getAnswers().stream()
+                        .filter(a -> a.getQuestionId() != null)
+                        .collect(Collectors.toMap(QcmAnswerRequest::getQuestionId, a -> a, (a, b) -> a));
 
         int score = 0;
         JobApplication application = JobApplication.builder()
@@ -213,20 +247,20 @@ public class RecruitmentService {
                 .build();
         JobApplication saved = jobApplicationRepository.save(application);
 
-        Map<String, QcmQuestion> questionMap = questions.stream()
-                .collect(Collectors.toMap(QcmQuestion::getQuestionId, q -> q));
-        for (QcmAnswerRequest answer : request.getAnswers()) {
-            QcmQuestion question = questionMap.get(answer.getQuestionId());
-            if (question == null) throw new IllegalArgumentException("Invalid question id");
-            boolean correct = question.getCorrectOption().equalsIgnoreCase(answer.getSelectedOption());
+        for (QcmQuestion question : questions) {
+            QcmAnswerRequest answer = answerMap.get(question.getQuestionId());
+            String selected = answer != null ? answer.getSelectedOption() : null;
+            boolean correct = !violated
+                    && selected != null
+                    && question.getCorrectOption().equalsIgnoreCase(selected);
             if (correct) score++;
             applicationAnswerRepository.save(ApplicationAnswer.builder()
                     .applicationId(saved.getApplicationId())
                     .questionId(question.getQuestionId())
-                    .selectedOption(answer.getSelectedOption())
+                    .selectedOption(selected != null ? selected : "-")
                     .correct(correct).build());
         }
-        saved.setQcmScore(score);
+        saved.setQcmScore(violated ? 0 : score);
         jobApplicationRepository.save(saved);
         try {
             saved = cvAnalysisService.analyzeApplication(saved.getApplicationId());
@@ -293,22 +327,39 @@ public class RecruitmentService {
     @Transactional
     public ApplicationResponse updateApplicationStatus(
             String applicationId,
-            ApplicationStatus status,
-            LocalDateTime interviewAt,
-            LocalDateTime interviewEndAt,
-            Integer durationMinutes,
+            ApplicationStatusUpdateRequest request,
             AuthUser authUser) {
+        ApplicationStatus status = request.getStatus();
         if (status != ApplicationStatus.ACCEPTED && status != ApplicationStatus.REJECTED
-                && status != ApplicationStatus.UNDER_REVIEW) {
+                && status != ApplicationStatus.UNDER_REVIEW && status != ApplicationStatus.HIRED) {
             throw new IllegalArgumentException("Invalid application status");
         }
         JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("Application not found"));
         Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
         if (authUser.isRh()) ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
+
+        ApplicationStatus previousStatus = application.getStatus();
+        boolean physical = request.getInterviewType() != null
+                && "PHYSICAL".equalsIgnoreCase(request.getInterviewType().trim());
+
+        if (physical && previousStatus != ApplicationStatus.ACCEPTED) {
+            throw new IllegalArgumentException(
+                    "Planifiez d'abord l'entretien en ligne avant la reunion physique");
+        }
+
+        if (status == ApplicationStatus.HIRED) {
+            return confirmHire(application, recruitment, previousStatus, request, authUser);
+        }
+
         application.setStatus(status);
 
         if (status == ApplicationStatus.ACCEPTED) {
+            LocalDateTime interviewAt = request.getInterviewAt();
+            LocalDateTime interviewEndAt = request.getInterviewEndAt();
+            Integer durationMinutes = request.getDurationMinutes();
+            String interviewLocation = request.getInterviewLocation();
+
             if (interviewAt == null) {
                 throw new IllegalArgumentException("Interview date is required when accepting a candidate");
             }
@@ -317,56 +368,61 @@ public class RecruitmentService {
                 endAt = interviewAt.plusMinutes(durationMinutes);
             }
 
-            String candidateEmail = null;
-            String candidateName = "Candidat";
-            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, application.getCandidateUserId());
-            if (userResp.isSuccess() && userResp.getData() != null) {
-                UserDto candidate = userResp.getData();
-                candidateEmail = candidate.getEmail();
-                candidateName = (candidate.getFirstName() != null ? candidate.getFirstName() : "")
-                        + " " + (candidate.getLastName() != null ? candidate.getLastName() : "");
-                candidateName = candidateName.trim();
-                if (candidateName.isBlank()) {
-                    candidateName = candidate.getUsername() != null ? candidate.getUsername() : "Candidat";
-                }
-            }
-
-            String rhEmail = null;
-            String rhName = authUser.getUsername();
-            String rhMeetingLink = null;
-            ApiResponse<UserDto> rhResp = userClient.getUserById(internalApiKey, authUser.getUserId());
-            if (rhResp.isSuccess() && rhResp.getData() != null) {
-                UserDto rh = rhResp.getData();
-                rhEmail = rh.getEmail();
-                rhMeetingLink = rh.getMeetingLink();
-                rhName = ((rh.getFirstName() != null ? rh.getFirstName() : "")
-                        + " " + (rh.getLastName() != null ? rh.getLastName() : "")).trim();
-                if (rhName.isBlank()) {
-                    rhName = rh.getUsername();
-                }
-            }
+            CandidateContact candidate = resolveCandidate(application.getCandidateUserId());
+            RhContact rh = resolveRh(authUser);
 
             var scheduleResult = interviewService.scheduleInterview(
                     application,
                     recruitment,
                     authUser.getUserId(),
-                    candidateName,
+                    candidate.name(),
                     interviewAt,
                     endAt,
-                    rhMeetingLink);
+                    physical ? null : rh.meetingLink(),
+                    physical);
 
-            interviewEmailService.sendInterviewNotifications(
-                    candidateEmail,
-                    candidateName,
-                    rhEmail,
-                    rhName,
-                    recruitment.getTitle(),
-                    recruitment.getRegion(),
-                    scheduleResult.getInterview().getStartDateTime(),
-                    scheduleResult.getInterview().getEndDateTime(),
-                    scheduleResult.getMeetingLink(),
-                    scheduleResult.getMeetingProvider(),
-                    scheduleResult.getWarningMessage());
+            Company company = companyRepository.findByCompanyId(recruitment.getCompanyId()).orElse(null);
+            String companyName = company != null ? company.getName() : "";
+            String companyAddress = company != null && company.getAddress() != null
+                    ? company.getAddress()
+                    : "";
+
+            if (physical) {
+                String lieu = StringUtils.hasText(interviewLocation)
+                        ? interviewLocation.trim()
+                        : companyAddress;
+                if (!StringUtils.hasText(lieu)) {
+                    lieu = recruitment.getCity() != null ? recruitment.getCity() : "";
+                    if (StringUtils.hasText(recruitment.getRegion())) {
+                        lieu = StringUtils.hasText(lieu)
+                                ? lieu + ", " + recruitment.getRegion()
+                                : recruitment.getRegion();
+                    }
+                }
+                interviewEmailService.sendPhysicalInterviewInvitation(
+                        candidate.email(),
+                        candidate.name(),
+                        rh.email(),
+                        rh.name(),
+                        recruitment.getTitle(),
+                        companyName,
+                        companyAddress,
+                        lieu,
+                        scheduleResult.getInterview().getStartDateTime());
+            } else {
+                interviewEmailService.sendInterviewNotifications(
+                        candidate.email(),
+                        candidate.name(),
+                        rh.email(),
+                        rh.name(),
+                        recruitment.getTitle(),
+                        recruitment.getRegion(),
+                        scheduleResult.getInterview().getStartDateTime(),
+                        scheduleResult.getInterview().getEndDateTime(),
+                        scheduleResult.getMeetingLink(),
+                        scheduleResult.getMeetingProvider(),
+                        scheduleResult.getWarningMessage());
+            }
 
             JobApplication saved = jobApplicationRepository.save(application);
             ApplicationResponse response = toApplicationResponse(saved, recruitment, true);
@@ -386,6 +442,132 @@ public class RecruitmentService {
             application.setMeetingWarning(null);
         }
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationResponse> getHiredApplicationsForRh(AuthUser authUser) {
+        return getApplicationsForRh(authUser).stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.HIRED)
+                .toList();
+    }
+
+    private ApplicationResponse confirmHire(
+            JobApplication application,
+            Recruitment recruitment,
+            ApplicationStatus previousStatus,
+            ApplicationStatusUpdateRequest request,
+            AuthUser authUser) {
+        if (previousStatus != ApplicationStatus.ACCEPTED) {
+            throw new IllegalArgumentException(
+                    "La confirmation d'embauche n'est possible qu'apres l'acceptation du candidat");
+        }
+        if (!"PHYSICAL".equalsIgnoreCase(application.getMeetingProvider())) {
+            throw new IllegalArgumentException(
+                    "Planifiez d'abord l'entretien physique avant la confirmation d'embauche");
+        }
+        if (request.getHireStartDate() == null) {
+            throw new IllegalArgumentException("La date de prise de fonction est obligatoire");
+        }
+        if (!StringUtils.hasText(request.getHireNetSalary())) {
+            throw new IllegalArgumentException("La remuneration nette mensuelle est obligatoire");
+        }
+
+        Company company = companyRepository.findByCompanyId(recruitment.getCompanyId()).orElse(null);
+        String companyName = company != null ? company.getName() : "";
+        String companyAddress = company != null && StringUtils.hasText(company.getAddress())
+                ? company.getAddress().trim()
+                : "";
+        String companyMaps = company != null && StringUtils.hasText(company.getGoogleMapsUrl())
+                ? company.getGoogleMapsUrl().trim()
+                : "";
+
+        String integrationAddress = companyAddress;
+        String integrationGps = companyMaps;
+
+        String contractType = StringUtils.hasText(request.getHireContractType())
+                ? request.getHireContractType().trim()
+                : "Contrat à durée indéterminée (CDI), assorti d'une période d'essai de six (6) mois, renouvelable une seule fois, sous réserve d'éligibilité au contrat CIVP";
+        String workingHours = StringUtils.hasText(request.getHireWorkingHours())
+                ? request.getHireWorkingHours().trim()
+                : "08 heures par jour, du lundi au vendredi de 8h à 17h30, avec permanence le samedi de fin de mois de 08h00 à 12h00";
+        String benefits = StringUtils.hasText(request.getHireBenefits())
+                ? request.getHireBenefits().trim()
+                : DEFAULT_HIRE_BENEFITS;
+
+        application.setStatus(ApplicationStatus.HIRED);
+        application.setHiredAt(LocalDateTime.now());
+        application.setHireStartDate(request.getHireStartDate());
+        application.setHireContractType(contractType);
+        application.setHireNetSalary(request.getHireNetSalary().trim());
+        application.setHireWorkingHours(workingHours);
+        application.setHireBenefits(benefits);
+        application.setHireIntegrationAddress(integrationAddress);
+        application.setHireIntegrationGpsUrl(integrationGps);
+
+        CandidateContact candidate = resolveCandidate(application.getCandidateUserId());
+        RhContact rh = resolveRh(authUser);
+
+        interviewEmailService.sendHireConfirmation(
+                candidate.email(),
+                candidate.name(),
+                rh.email(),
+                rh.name(),
+                recruitment.getTitle(),
+                companyName,
+                request.getHireStartDate(),
+                contractType,
+                workingHours,
+                request.getHireNetSalary().trim(),
+                benefits,
+                integrationAddress,
+                integrationGps);
+
+        return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
+    }
+
+    private static final String DEFAULT_HIRE_BENEFITS = """
+            Prime de performance selon les résultats réalisés ;
+            Une allocation de 105 DT par mois, à partir de trois (3) dossiers déboursés minimum et jusqu’à 100 000 DT d’encours ;
+            Prime de portefeuille mensuelle calculée selon l’évolution du portefeuille, conformément aux dix (10) paliers définis ;
+            Tickets restaurant d’une valeur mensuelle de 170 DT ;
+            Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.
+            """.trim();
+
+    private record CandidateContact(String email, String name) {}
+    private record RhContact(String email, String name, String meetingLink) {}
+
+    private CandidateContact resolveCandidate(String candidateUserId) {
+        String email = null;
+        String name = "Candidat";
+        ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, candidateUserId);
+        if (userResp.isSuccess() && userResp.getData() != null) {
+            UserDto candidate = userResp.getData();
+            email = candidate.getEmail();
+            name = ((candidate.getFirstName() != null ? candidate.getFirstName() : "")
+                    + " " + (candidate.getLastName() != null ? candidate.getLastName() : "")).trim();
+            if (name.isBlank()) {
+                name = candidate.getUsername() != null ? candidate.getUsername() : "Candidat";
+            }
+        }
+        return new CandidateContact(email, name);
+    }
+
+    private RhContact resolveRh(AuthUser authUser) {
+        String email = null;
+        String name = authUser.getUsername();
+        String meetingLink = null;
+        ApiResponse<UserDto> rhResp = userClient.getUserById(internalApiKey, authUser.getUserId());
+        if (rhResp.isSuccess() && rhResp.getData() != null) {
+            UserDto rh = rhResp.getData();
+            email = rh.getEmail();
+            meetingLink = rh.getMeetingLink();
+            name = ((rh.getFirstName() != null ? rh.getFirstName() : "")
+                    + " " + (rh.getLastName() != null ? rh.getLastName() : "")).trim();
+            if (name.isBlank()) {
+                name = rh.getUsername();
+            }
+        }
+        return new RhContact(email, name, meetingLink);
     }
 
     // ---- Helpers ----
@@ -476,7 +658,10 @@ public class RecruitmentService {
 
     private CompanyResponse toCompanyResponse(Company c, String zoneName) {
         return CompanyResponse.builder().companyId(c.getCompanyId()).name(c.getName())
-                .zoneId(c.getZoneId()).zoneName(zoneName).address(c.getAddress()).active(c.isActive()).build();
+                .zoneId(c.getZoneId()).zoneName(zoneName).address(c.getAddress())
+                .latitude(c.getLatitude()).longitude(c.getLongitude())
+                .googleMapsUrl(c.getGoogleMapsUrl())
+                .active(c.isActive()).build();
     }
 
     private RhZoneAssignmentResponse toRhZoneAssignmentResponse(RhZoneAssignment assignment) {
@@ -553,6 +738,8 @@ public class RecruitmentService {
                             .correct(ans.isCorrect()).build();
                 }).toList();
 
+        Company company = companyRepository.findByCompanyId(r.getCompanyId()).orElse(null);
+
         return ApplicationResponse.builder()
                 .applicationId(a.getApplicationId()).recruitmentId(a.getRecruitmentId())
                 .recruitmentTitle(r.getTitle()).zoneName(getZoneName(r.getZoneId())).region(r.getRegion())
@@ -571,6 +758,17 @@ public class RecruitmentService {
                 .meetingProvider(a.getMeetingProvider())
                 .meetingId(a.getMeetingId())
                 .meetingWarning(a.getMeetingWarning())
+                .companyName(company != null ? company.getName() : null)
+                .companyAddress(company != null ? company.getAddress() : null)
+                .companyGoogleMapsUrl(company != null ? company.getGoogleMapsUrl() : null)
+                .hiredAt(a.getHiredAt())
+                .hireStartDate(a.getHireStartDate())
+                .hireContractType(a.getHireContractType())
+                .hireNetSalary(a.getHireNetSalary())
+                .hireWorkingHours(a.getHireWorkingHours())
+                .hireBenefits(a.getHireBenefits())
+                .hireIntegrationAddress(a.getHireIntegrationAddress())
+                .hireIntegrationGpsUrl(a.getHireIntegrationGpsUrl())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
     }

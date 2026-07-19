@@ -1,0 +1,20 @@
+Compétences|Score attendu poste (%)|Interprétation / Commentaire
+Score global|0.7|Bon fit global pour un commercial terrain / chargé de crédit
+Approche client|0.85|Difficulté à initier le contact, doit gagner en confiance
+Compréhension des besoins|0.8|Écoute et analyse à renforcer
+Argumentation|0.85|Capable de convaincre mais peut être plus incisif
+Satisfaction client|0.85|Très orienté client, gros point fort
+Relationnel|0.8|Bon relationnel, à améliorer pour réseautage
+Extraversion|0.8|Très sociable, à l’aise avec les clients
+Prise de décision|0.75|Hésitation sur décisions commerciales importantes
+Prise de recul|0.7|Vision stratégique limitée
+Gestion du stress|0.75|Bonne résistance, supporte la pression
+Orientation qualité|0.7|Très rigoureux, assure qualité des dossiers
+Gestion des risques|0.75|Bon sens du contrôle, utile en crédit
+Rigueur / règles|0.8|Très structuré, conformité respectée
+Initiative|0.8|Manque de proactivité, frein commercial
+Innovation|0.6|Peu créatif, préfère méthodes classiques
+Planification|0.7|Organisation moyenne, doit anticiper plus
+Leadership|0.75|Potentiel moyen, à développer pour piloter clients
+Mentorat|0.7|Bon accompagnement, peut aider les collègues
+Implication au travail|0.8|Très engagé, fort investissement personnel

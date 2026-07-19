@@ -177,6 +177,23 @@
   color: #666;
 }
 
+.agency-ready-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef7f1;
+  color: #35654d;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.agency-ready-field a {
+  color: #35654d;
+  font-weight: 600;
+}
+
 @media (max-width: 560px) {
   .interview-time-row {
     grid-template-columns: 1fr;

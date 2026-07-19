@@ -28,9 +28,12 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   selectedApplication: JobApplication | null = null;
   detailVisible = false;
   interviewModalVisible = false;
+  hireModalVisible = false;
   actionLoading = false;
   interviewForm!: FormGroup;
+  hireForm!: FormGroup;
   pendingApplication: JobApplication | null = null;
+  pendingInterviewType: 'ONLINE' | 'PHYSICAL' = 'ONLINE';
   cvPreviewVisible = false;
   cvPreviewLoading = false;
   cvPreviewSrc: SafeResourceUrl | null = null;
@@ -51,9 +54,33 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
     this.interviewForm = this.fb.group({
       interviewDate: [null, Validators.required],
       startTime: [null, Validators.required],
-      endTime: [null, Validators.required]
+      endTime: [null, Validators.required],
+      interviewLocation: ['']
+    });
+    this.hireForm = this.fb.group({
+      hireStartDate: [null, Validators.required],
+      hireNetSalary: ['', Validators.required],
+      hireContractType: [
+        "Contrat à durée indéterminée (CDI), assorti d'une période d'essai de six (6) mois, renouvelable une seule fois, sous réserve d'éligibilité au contrat CIVP"
+      ],
+      hireWorkingHours: [
+        '08 heures par jour, du lundi au vendredi de 8h à 17h30, avec permanence le samedi de fin de mois de 08h00 à 12h00'
+      ],
+      hireBenefits: [
+        `Prime de performance selon les résultats réalisés ;
+Une allocation de 105 DT par mois, à partir de trois (3) dossiers déboursés minimum et jusqu’à 100 000 DT d’encours ;
+Prime de portefeuille mensuelle calculée selon l’évolution du portefeuille, conformément aux dix (10) paliers définis ;
+Tickets restaurant d’une valeur mensuelle de 170 DT ;
+Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
+      ]
     });
     this.loadApplications();
+  }
+
+  get interviewModalTitle(): string {
+    return this.pendingInterviewType === 'PHYSICAL'
+      ? "Planifier l'entretien physique"
+      : "Planifier l'entretien en ligne";
   }
 
   ngOnDestroy(): void {
@@ -135,9 +162,10 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateStatus(app: JobApplication, status: ApplicationStatus): void {
+  updateStatus(app: JobApplication, status: ApplicationStatus, interviewType: 'ONLINE' | 'PHYSICAL' = 'ONLINE'): void {
     if (status === 'ACCEPTED') {
       this.pendingApplication = app;
+      this.pendingInterviewType = interviewType;
       const defaultStart = new Date();
       defaultStart.setHours(10, 0, 0, 0);
       const defaultEnd = new Date();
@@ -145,7 +173,8 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
       this.interviewForm.reset({
         interviewDate: null,
         startTime: defaultStart,
-        endTime: defaultEnd
+        endTime: defaultEnd,
+        interviewLocation: ''
       });
       this.interviewModalVisible = true;
       return;
@@ -174,7 +203,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const { interviewDate, startTime, endTime } = this.interviewForm.value;
+    const { interviewDate, startTime, endTime, interviewLocation } = this.interviewForm.value;
     const interviewAt = this.combineDateAndTime(interviewDate, startTime);
     const interviewEndAt = this.combineDateAndTime(interviewDate, endTime);
 
@@ -187,26 +216,35 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const isPhysical = this.pendingInterviewType === 'PHYSICAL';
     this.actionLoading = true;
     this.recruitmentService.updateApplicationStatus(this.pendingApplication.applicationId, {
       status: 'ACCEPTED',
       interviewAt: this.formatLocalDateTime(interviewAt),
-      interviewEndAt: this.formatLocalDateTime(interviewEndAt)
+      interviewEndAt: this.formatLocalDateTime(interviewEndAt),
+      interviewType: this.pendingInterviewType,
+      interviewLocation: isPhysical && interviewLocation?.trim() ? interviewLocation.trim() : null
     }).subscribe({
       next: (response) => {
         this.actionLoading = false;
         if (response.success) {
-          const meetLink = response.data?.googleMeetLink;
-          const warning = response.data?.meetingWarning;
-
-          if (warning) {
-            this.message.warning(warning, { nzDuration: 8000 });
-          } else if (meetLink) {
+          if (isPhysical) {
             this.message.success(
-              `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien de reunion envoye au candidat.`
+              `Entretien physique planifie le ${this.formatDisplayDate(interviewAt)}. Convocation envoyee au candidat.`
             );
           } else {
-            this.message.success('Candidature acceptee et entretien planifie');
+            const meetLink = response.data?.googleMeetLink;
+            const warning = response.data?.meetingWarning;
+
+            if (warning) {
+              this.message.warning(warning, { nzDuration: 8000 });
+            } else if (meetLink) {
+              this.message.success(
+                `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien de reunion envoye au candidat.`
+              );
+            } else {
+              this.message.success('Candidature acceptee et entretien planifie');
+            }
           }
 
           this.interviewModalVisible = false;
@@ -225,11 +263,60 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
     });
   }
 
+  openHireModal(app: JobApplication): void {
+    this.pendingApplication = app;
+    this.hireForm.patchValue({
+      hireStartDate: null,
+      hireNetSalary: ''
+    });
+    this.hireModalVisible = true;
+  }
+
+  confirmHire(): void {
+    if (!this.pendingApplication || this.hireForm.invalid) {
+      this.hireForm.markAllAsTouched();
+      return;
+    }
+    const value = this.hireForm.value;
+    const startDate: Date = value.hireStartDate;
+    const hireStartDate = this.formatLocalDate(startDate);
+
+    // Address + GPS always come from the linked agency (company) in DB.
+    this.actionLoading = true;
+    this.recruitmentService.updateApplicationStatus(this.pendingApplication.applicationId, {
+      status: 'HIRED',
+      hireStartDate,
+      hireNetSalary: value.hireNetSalary?.trim(),
+      hireContractType: value.hireContractType?.trim() || null,
+      hireWorkingHours: value.hireWorkingHours?.trim() || null,
+      hireBenefits: value.hireBenefits?.trim() || null,
+      hireIntegrationAddress: this.pendingApplication.companyAddress || null,
+      hireIntegrationGpsUrl: this.pendingApplication.companyGoogleMapsUrl || null
+    }).subscribe({
+      next: (response) => {
+        this.actionLoading = false;
+        if (response.success) {
+          this.message.success("Confirmation d'embauche envoyée au candidat");
+          this.hireModalVisible = false;
+          this.detailVisible = false;
+          this.pendingApplication = null;
+          this.loadApplications();
+          this.router.navigate(['/rh/hired']);
+        }
+      },
+      error: (err) => {
+        this.actionLoading = false;
+        this.message.error(err.error?.message || "Erreur lors de la confirmation d'embauche");
+      }
+    });
+  }
+
   cvUrl(path?: string): string | null {
     return this.recruitmentService.resolveFileUrl(path);
   }
 
   statusColor(status: string): string {
+    if (status === 'HIRED') return 'purple';
     if (status === 'ACCEPTED') return 'green';
     if (status === 'REJECTED') return 'red';
     if (status === 'UNDER_REVIEW') return 'blue';
@@ -241,6 +328,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
       SUBMITTED: 'Soumise',
       UNDER_REVIEW: 'En cours',
       ACCEPTED: 'Acceptée',
+      HIRED: 'Embauché',
       REJECTED: 'Rejetée'
     };
     return labels[status] || status;
@@ -322,6 +410,11 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   private formatLocalDateTime(date: Date): string {
     const pad = (value: number) => value.toString().padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+  }
+
+  private formatLocalDate(date: Date): string {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   private combineDateAndTime(dateValue: Date, timeValue: Date): Date | null {

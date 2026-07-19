@@ -1,5 +1,5 @@
 export type RecruitmentStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
-export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
+export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'HIRED' | 'REJECTED';
 
 export interface Zone {
   zoneId: string;
@@ -14,6 +14,9 @@ export interface Company {
   zoneId: string;
   zoneName?: string;
   address?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  googleMapsUrl?: string;
   active: boolean;
 }
 
@@ -26,6 +29,11 @@ export interface QcmQuestion {
   optionD?: string;
   correctOption?: string;
   orderIndex?: number;
+  dimensionCode?: string;
+  scoreA?: number;
+  scoreB?: number;
+  scoreC?: number;
+  scoreD?: number;
 }
 
 export interface Qcm {
@@ -130,6 +138,17 @@ export interface JobApplication {
   meetingProvider?: string;
   meetingId?: string;
   meetingWarning?: string;
+  companyName?: string;
+  companyAddress?: string;
+  companyGoogleMapsUrl?: string;
+  hiredAt?: string;
+  hireStartDate?: string;
+  hireContractType?: string;
+  hireNetSalary?: string;
+  hireWorkingHours?: string;
+  hireBenefits?: string;
+  hireIntegrationAddress?: string;
+  hireIntegrationGpsUrl?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
 }
@@ -139,6 +158,17 @@ export interface ApplicationStatusUpdateRequest {
   interviewAt?: string | null;
   interviewEndAt?: string | null;
   durationMinutes?: number | null;
+  /** ONLINE (default) or PHYSICAL */
+  interviewType?: 'ONLINE' | 'PHYSICAL';
+  /** Optional location override for physical interviews */
+  interviewLocation?: string | null;
+  hireStartDate?: string | null;
+  hireContractType?: string | null;
+  hireNetSalary?: string | null;
+  hireWorkingHours?: string | null;
+  hireBenefits?: string | null;
+  hireIntegrationAddress?: string | null;
+  hireIntegrationGpsUrl?: string | null;
 }
 
 export interface ZoneRequest {
@@ -150,6 +180,9 @@ export interface CompanyRequest {
   name: string;
   zoneId: string;
   address?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  googleMapsUrl?: string | null;
 }
 
 export interface RhZoneAssignmentRequest {
@@ -202,4 +235,43 @@ export interface ApplicationRequest {
   recruitmentId: string;
   cvFileUrl: string;
   answers: QcmAnswer[];
+  qcmViolated?: boolean;
+}
+
+export type HiredQcmStatus = 'ASSIGNED' | 'COMPLETED' | 'VIOLATED';
+
+export interface HiredQcmAssignment {
+  assignmentId: string;
+  applicationId: string;
+  candidateUserId: string;
+  recruitmentId: string;
+  recruitmentTitle?: string;
+  companyName?: string;
+  qcmId: string;
+  qcmTitle?: string;
+  status: HiredQcmStatus;
+  score?: number | null;
+  totalQuestions?: number | null;
+  overallFitPercent?: number | null;
+  qcmViolated?: boolean | null;
+  assignedAt?: string;
+  completedAt?: string;
+  candidate?: UserSummary;
+  questions?: QcmQuestion[];
+  answers?: ApplicationAnswer[];
+  dimensionScores?: DimensionScore[];
+}
+
+export interface DimensionScore {
+  dimensionCode: string;
+  dimensionLabel: string;
+  score: number;
+  expectedScore: number;
+  commentText?: string;
+  sortOrder?: number;
+}
+
+export interface HiredQcmSubmitRequest {
+  answers?: QcmAnswer[];
+  qcmViolated?: boolean;
 }

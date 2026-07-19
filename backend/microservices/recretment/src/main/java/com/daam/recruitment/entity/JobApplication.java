@@ -41,6 +41,21 @@ public class JobApplication {
     private String meetingId;
     @Column(columnDefinition = "TEXT")
     private String meetingWarning;
+    /** When status becomes HIRED */
+    private LocalDateTime hiredAt;
+    private java.time.LocalDate hireStartDate;
+    @Column(length = 512)
+    private String hireContractType;
+    @Column(length = 128)
+    private String hireNetSalary;
+    @Column(columnDefinition = "TEXT")
+    private String hireWorkingHours;
+    @Column(columnDefinition = "TEXT")
+    private String hireBenefits;
+    @Column(length = 512)
+    private String hireIntegrationAddress;
+    @Column(length = 512)
+    private String hireIntegrationGpsUrl;
     @CreationTimestamp private LocalDateTime appliedAt;
 
     @PrePersist void prePersist() {
