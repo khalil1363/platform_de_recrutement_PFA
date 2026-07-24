@@ -169,6 +169,16 @@ public class RecruitmentController {
                 recruitmentService.getRecruitments(user), HttpStatus.OK.value()));
     }
 
+    @GetMapping("/dashboard/coworking")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<CoworkingDashboardResponse>> getCoworkingDashboard(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ResponseEntity.ok(ApiResponse.success("Coworking dashboard",
+                recruitmentService.getCoworkingDashboard(user, year, month), HttpStatus.OK.value()));
+    }
+
     @GetMapping("/recruitments/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<RecruitmentResponse>> getRecruitment(

@@ -12,6 +12,7 @@ import { RhQcmListComponent } from './rh/rh-qcm-list/rh-qcm-list.component';
 import { RhQcmFormComponent } from './rh/rh-qcm-form/rh-qcm-form.component';
 
 import { RhHiredCandidatesComponent } from './rh/rh-hired-candidates/rh-hired-candidates.component';
+import { RhDashboardComponent } from './rh/rh-dashboard/rh-dashboard.component';
 
 const routes: Routes = [
   {
@@ -19,7 +20,8 @@ const routes: Routes = [
     component: RhLayoutComponent,
     canActivate: [authGuard, rhGuard],
     children: [
-      { path: '', redirectTo: 'recruitments', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: RhDashboardComponent },
       { path: 'recruitments', component: RhRecruitmentsComponent },
       { path: 'recruitments/new', component: RhRecruitmentFormComponent },
       { path: 'recruitments/:id/edit', component: RhRecruitmentFormComponent },
@@ -37,6 +39,7 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     RhLayoutComponent,
+    RhDashboardComponent,
     RhRecruitmentsComponent,
     RhRecruitmentFormComponent,
     RhQcmListComponent,

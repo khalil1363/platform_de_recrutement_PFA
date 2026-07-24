@@ -16,6 +16,7 @@
         <th>Titre</th>
         <th>Agence</th>
         <th>Zone</th>
+        <th>Coworking</th>
         <th>QCM</th>
         <th>Statut</th>
         <th>Actions</th>
@@ -26,6 +27,12 @@
         <td><strong>{{ item.title }}</strong></td>
         <td>{{ item.companyName }}</td>
         <td>{{ item.zoneName }}</td>
+        <td>
+          <nz-tag *ngIf="item.coworking" nzColor="cyan">
+            {{ item.coworkingMonth ? (item.coworkingMonth | date: 'MMM yyyy') : 'ON' }}
+          </nz-tag>
+          <span *ngIf="!item.coworking">—</span>
+        </td>
         <td>{{ item.qcmTitle || '—' }}</td>
         <td><nz-tag [nzColor]="statusColor(item.status)">{{ item.status }}</nz-tag></td>
         <td class="actions">

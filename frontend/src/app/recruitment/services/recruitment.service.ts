@@ -20,7 +20,8 @@ import {
   Qcm,
   QcmRequest,
   Zone,
-  ZoneRequest
+  ZoneRequest,
+  CoworkingDashboard
 } from '../models/recruitment.model';
 
 @Injectable({ providedIn: 'root' })
@@ -76,6 +77,17 @@ export class RecruitmentService {
 
   getRecruitments(): Observable<ApiResponse<Recruitment[]>> {
     return this.http.get<ApiResponse<Recruitment[]>>(`${this.apiUrl}/recruitments`);
+  }
+
+  getCoworkingDashboard(year?: number | null, month?: number | null): Observable<ApiResponse<CoworkingDashboard>> {
+    const params: Record<string, string> = {};
+    if (year != null && month != null) {
+      params['year'] = String(year);
+      params['month'] = String(month);
+    }
+    return this.http.get<ApiResponse<CoworkingDashboard>>(`${this.apiUrl}/dashboard/coworking`, {
+      params
+    });
   }
 
   getRecruitment(id: string): Observable<ApiResponse<Recruitment>> {

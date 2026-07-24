@@ -14,4 +14,5 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
     List<Recruitment> findByStatus(RecruitmentStatus status);
     List<Recruitment> findByCompanyId(String companyId);
     List<Recruitment> findByQcmId(String qcmId);
+    List<Recruitment> findByCoworkingTrueAndZoneIdIn(List<String> zoneIds);
 }

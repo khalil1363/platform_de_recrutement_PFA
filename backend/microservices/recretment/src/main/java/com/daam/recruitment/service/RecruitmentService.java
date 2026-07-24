@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -193,6 +194,117 @@ public class RecruitmentService {
     public List<RecruitmentResponse> getPublishedRecruitments() {
         return recruitmentRepository.findByStatus(RecruitmentStatus.PUBLISHED).stream()
                 .map(r -> toRecruitmentResponse(r, false)).toList();
+    }
+
+    /**
+     * Coworking dashboard for RH: totals, by agency, by post, and hired/rejected per agency.
+     * Optional year-month filter uses coworkingMonth (first day of month).
+     */
+    @Transactional(readOnly = true)
+    public CoworkingDashboardResponse getCoworkingDashboard(AuthUser authUser, Integer year, Integer month) {
+        List<String> zoneIds = authUser.isAdmin()
+                ? zoneRepository.findAll().stream().map(Zone::getZoneId).toList()
+                : getRhZoneIds(authUser.getUserId());
+        if (zoneIds.isEmpty()) {
+            return CoworkingDashboardResponse.builder()
+                    .totalCoworking(0)
+                    .filterMonthYear(year != null ? year.longValue() : null)
+                    .filterMonth(month)
+                    .byAgency(List.of())
+                    .byPost(List.of())
+                    .agencyOutcomes(List.of())
+                    .build();
+        }
+
+        LocalDate monthStart = null;
+        if (year != null && month != null) {
+            if (month < 1 || month > 12) {
+                throw new IllegalArgumentException("Month must be between 1 and 12");
+            }
+            monthStart = LocalDate.of(year, month, 1);
+        }
+
+        final LocalDate filterMonth = monthStart;
+        List<Recruitment> coworkings = recruitmentRepository.findByCoworkingTrueAndZoneIdIn(zoneIds).stream()
+                .filter(r -> filterMonth == null
+                        || (r.getCoworkingMonth() != null
+                        && r.getCoworkingMonth().getYear() == filterMonth.getYear()
+                        && r.getCoworkingMonth().getMonthValue() == filterMonth.getMonthValue()))
+                .toList();
+
+        Map<String, String> companyNames = new HashMap<>();
+        for (Recruitment r : coworkings) {
+            companyNames.computeIfAbsent(r.getCompanyId(), id ->
+                    companyRepository.findByCompanyId(id).map(Company::getName).orElse("Agence"));
+        }
+
+        Map<String, Long> byAgencyMap = coworkings.stream()
+                .collect(Collectors.groupingBy(Recruitment::getCompanyId, Collectors.counting()));
+        List<CoworkingAgencyStat> byAgency = byAgencyMap.entrySet().stream()
+                .map(e -> CoworkingAgencyStat.builder()
+                        .companyId(e.getKey())
+                        .companyName(companyNames.getOrDefault(e.getKey(), "Agence"))
+                        .coworkingCount(e.getValue())
+                        .build())
+                .sorted(Comparator.comparing(CoworkingAgencyStat::getCoworkingCount).reversed()
+                        .thenComparing(CoworkingAgencyStat::getCompanyName))
+                .toList();
+
+        Map<String, Long> byPostMap = coworkings.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getTitle() == null || r.getTitle().isBlank() ? "Sans titre" : r.getTitle().trim(),
+                        Collectors.counting()));
+        List<CoworkingPostStat> byPost = byPostMap.entrySet().stream()
+                .map(e -> CoworkingPostStat.builder()
+                        .title(e.getKey())
+                        .coworkingCount(e.getValue())
+                        .build())
+                .sorted(Comparator.comparing(CoworkingPostStat::getCoworkingCount).reversed()
+                        .thenComparing(CoworkingPostStat::getTitle))
+                .toList();
+
+        List<String> recruitmentIds = coworkings.stream().map(Recruitment::getRecruitmentId).toList();
+        Map<String, String> recruitmentCompany = coworkings.stream()
+                .collect(Collectors.toMap(Recruitment::getRecruitmentId, Recruitment::getCompanyId, (a, b) -> a));
+
+        Map<String, long[]> outcomes = new HashMap<>();
+        for (String companyId : byAgencyMap.keySet()) {
+            outcomes.put(companyId, new long[]{0L, 0L});
+        }
+        if (!recruitmentIds.isEmpty()) {
+            for (JobApplication app : jobApplicationRepository.findByRecruitmentIdIn(recruitmentIds)) {
+                String companyId = recruitmentCompany.get(app.getRecruitmentId());
+                if (companyId == null) continue;
+                long[] counts = outcomes.computeIfAbsent(companyId, id -> new long[]{0L, 0L});
+                if (app.getStatus() == ApplicationStatus.HIRED) {
+                    counts[0]++;
+                } else if (app.getStatus() == ApplicationStatus.REJECTED) {
+                    counts[1]++;
+                }
+            }
+        }
+
+        List<CoworkingAgencyOutcomeStat> agencyOutcomes = byAgency.stream()
+                .map(agency -> {
+                    long[] counts = outcomes.getOrDefault(agency.getCompanyId(), new long[]{0L, 0L});
+                    return CoworkingAgencyOutcomeStat.builder()
+                            .companyId(agency.getCompanyId())
+                            .companyName(agency.getCompanyName())
+                            .coworkingCount(agency.getCoworkingCount())
+                            .hiredCount(counts[0])
+                            .rejectedCount(counts[1])
+                            .build();
+                })
+                .toList();
+
+        return CoworkingDashboardResponse.builder()
+                .totalCoworking(coworkings.size())
+                .filterMonthYear(year != null ? year.longValue() : null)
+                .filterMonth(month)
+                .byAgency(byAgency)
+                .byPost(byPost)
+                .agencyOutcomes(agencyOutcomes)
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -717,6 +829,17 @@ public class RecruitmentService {
         r.setInternalReference(req.getInternalReference());
         r.setKeejobReference(req.getKeejobReference());
         if (req.getStatus() != null) r.setStatus(req.getStatus());
+
+        boolean coworking = Boolean.TRUE.equals(req.getCoworking());
+        r.setCoworking(coworking);
+        if (coworking) {
+            if (req.getCoworkingMonth() == null) {
+                throw new IllegalArgumentException("Coworking month is required when coworking is enabled");
+            }
+            r.setCoworkingMonth(req.getCoworkingMonth().withDayOfMonth(1));
+        } else {
+            r.setCoworkingMonth(null);
+        }
     }
 
     private ZoneResponse toZoneResponse(Zone zone) {
@@ -778,6 +901,8 @@ public class RecruitmentService {
                 .internalReference(r.getInternalReference()).keejobReference(r.getKeejobReference())
                 .status(r.getStatus()).createdAt(r.getCreatedAt())
                 .qcmId(r.getQcmId()).qcmTitle(qcmTitle)
+                .coworking(r.isCoworking())
+                .coworkingMonth(r.getCoworkingMonth())
                 .questions(questions)
                 .build();
     }

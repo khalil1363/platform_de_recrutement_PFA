@@ -73,7 +73,20 @@ export class RhRecruitmentFormComponent implements OnInit {
       internalReference: [''],
       keejobReference: [''],
       status: ['DRAFT'],
-      qcmId: [null]
+      qcmId: [null],
+      coworking: [false],
+      coworkingMonth: [null]
+    });
+
+    this.form.get('coworking')?.valueChanges.subscribe((enabled: boolean) => {
+      const monthControl = this.form.get('coworkingMonth');
+      if (enabled) {
+        monthControl?.setValidators([Validators.required]);
+      } else {
+        monthControl?.clearValidators();
+        monthControl?.setValue(null);
+      }
+      monthControl?.updateValueAndValidity();
     });
   }
 
@@ -132,8 +145,14 @@ export class RhRecruitmentFormComponent implements OnInit {
             internalReference: data.internalReference,
             keejobReference: data.keejobReference,
             status: data.status,
-            qcmId: data.qcmId || null
+            qcmId: data.qcmId || null,
+            coworking: !!data.coworking,
+            coworkingMonth: data.coworkingMonth ? new Date(data.coworkingMonth) : null
           });
+          if (data.coworking) {
+            this.form.get('coworkingMonth')?.setValidators([Validators.required]);
+            this.form.get('coworkingMonth')?.updateValueAndValidity();
+          }
         }
       },
       error: () => {
@@ -149,9 +168,19 @@ export class RhRecruitmentFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = { ...this.form.value } as RecruitmentRequest;
+    const raw = { ...this.form.value };
+    const payload = { ...raw } as RecruitmentRequest;
     if (!payload.qcmId) {
       payload.qcmId = null;
+    }
+    payload.coworking = !!raw.coworking;
+    if (payload.coworking && raw.coworkingMonth) {
+      const d = raw.coworkingMonth instanceof Date ? raw.coworkingMonth : new Date(raw.coworkingMonth);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      payload.coworkingMonth = `${y}-${m}-01`;
+    } else {
+      payload.coworkingMonth = null;
     }
     this.saving = true;
     const request$ = this.isEdit

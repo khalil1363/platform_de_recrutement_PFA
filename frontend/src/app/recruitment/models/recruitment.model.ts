@@ -93,6 +93,8 @@ export interface Recruitment {
   createdAt?: string;
   qcmId?: string | null;
   qcmTitle?: string;
+  coworking?: boolean;
+  coworkingMonth?: string | null;
   questions?: QcmQuestion[];
 }
 
@@ -289,6 +291,36 @@ export interface RecruitmentRequest {
   keejobReference?: string;
   status?: RecruitmentStatus;
   qcmId?: string | null;
+  coworking?: boolean;
+  coworkingMonth?: string | null;
+}
+
+export interface CoworkingAgencyStat {
+  companyId: string;
+  companyName: string;
+  coworkingCount: number;
+}
+
+export interface CoworkingPostStat {
+  title: string;
+  coworkingCount: number;
+}
+
+export interface CoworkingAgencyOutcomeStat {
+  companyId: string;
+  companyName: string;
+  coworkingCount: number;
+  hiredCount: number;
+  rejectedCount: number;
+}
+
+export interface CoworkingDashboard {
+  totalCoworking: number;
+  filterMonthYear?: number | null;
+  filterMonth?: number | null;
+  byAgency: CoworkingAgencyStat[];
+  byPost: CoworkingPostStat[];
+  agencyOutcomes: CoworkingAgencyOutcomeStat[];
 }
 
 export interface ApplicationRequest {

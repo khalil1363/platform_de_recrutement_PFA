@@ -1,0 +1,124 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Tableau de bord coworking</h2>
+    <p>Suivi des campagnes coworking, par agence et par poste</p>
+  </div>
+  <div class="header-filters">
+    <nz-date-picker
+      nzMode="month"
+      nzPlaceHolder="Filtrer par mois"
+      nzFormat="MMMM yyyy"
+      [ngModel]="filterMonth"
+      (ngModelChange)="onMonthChange($event)"
+      style="width: 200px"
+    ></nz-date-picker>
+    <button nz-button nzType="default" type="button" *ngIf="filterMonth" (click)="clearMonthFilter()">
+      Tous les mois
+    </button>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <div class="kpi-grid" *ngIf="dashboard">
+    <div class="kpi-card kpi-main">
+      <span class="kpi-label">Coworkings</span>
+      <strong class="kpi-value">{{ dashboard.totalCoworking }}</strong>
+      <span class="kpi-sub">recrutements coworking</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Agences</span>
+      <strong class="kpi-value">{{ dashboard.byAgency.length }}</strong>
+      <span class="kpi-sub">avec au moins 1 coworking</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Postes</span>
+      <strong class="kpi-value">{{ dashboard.byPost.length }}</strong>
+      <span class="kpi-sub">titres distincts</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Embauches</span>
+      <strong class="kpi-value success">{{ totalHired }}</strong>
+      <span class="kpi-sub">candidats embauchés</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Rejets</span>
+      <strong class="kpi-value danger">{{ totalRejected }}</strong>
+      <span class="kpi-sub">candidats rejetés</span>
+    </div>
+  </div>
+
+  <div class="dash-grid" *ngIf="dashboard">
+    <section class="dash-card">
+      <div class="dash-card-head">
+        <h3>Coworking par agence</h3>
+      </div>
+      <nz-empty *ngIf="!dashboard.byAgency.length" nzNotFoundContent="Aucun coworking"></nz-empty>
+      <div class="bar-list" *ngIf="dashboard.byAgency.length">
+        <div class="bar-row" *ngFor="let item of dashboard.byAgency">
+          <div class="bar-meta">
+            <strong>{{ item.companyName }}</strong>
+            <span>{{ item.coworkingCount }}</span>
+          </div>
+          <div class="bar-track">
+            <div
+              class="bar-fill agency"
+              [style.width]="barWidth(item.coworkingCount, maxAgencyCount())"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dash-card">
+      <div class="dash-card-head">
+        <h3>Coworking par poste</h3>
+      </div>
+      <nz-empty *ngIf="!dashboard.byPost.length" nzNotFoundContent="Aucun poste"></nz-empty>
+      <div class="bar-list" *ngIf="dashboard.byPost.length">
+        <div class="bar-row" *ngFor="let item of dashboard.byPost">
+          <div class="bar-meta">
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.coworkingCount }}</span>
+          </div>
+          <div class="bar-track">
+            <div
+              class="bar-fill post"
+              [style.width]="barWidth(item.coworkingCount, maxPostCount())"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="dash-card outcomes" *ngIf="dashboard">
+    <div class="dash-card-head">
+      <h3>Résultats par agence</h3>
+      <p>Candidats embauchés et rejetés sur les recrutements coworking</p>
+    </div>
+    <nz-empty *ngIf="!dashboard.agencyOutcomes.length" nzNotFoundContent="Aucune donnée"></nz-empty>
+    <nz-table
+      *ngIf="dashboard.agencyOutcomes.length"
+      [nzData]="dashboard.agencyOutcomes"
+      [nzFrontPagination]="false"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Agence</th>
+          <th>Coworkings</th>
+          <th>Embauchés</th>
+          <th>Rejetés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of dashboard.agencyOutcomes">
+          <td><strong>{{ row.companyName }}</strong></td>
+          <td>{{ row.coworkingCount }}</td>
+          <td><nz-tag nzColor="success">{{ row.hiredCount }}</nz-tag></td>
+          <td><nz-tag nzColor="error">{{ row.rejectedCount }}</nz-tag></td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </section>
+</nz-spin>

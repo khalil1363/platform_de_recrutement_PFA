@@ -59,6 +59,28 @@
             <nz-form-control><input nz-input type="number" formControlName="salaryMax" /></nz-form-control>
           </nz-form-item>
         </div>
+
+        <div class="coworking-row">
+          <nz-form-item class="coworking-toggle">
+            <nz-form-label>Coworking</nz-form-label>
+            <nz-form-control>
+              <nz-switch formControlName="coworking" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+              <span class="coworking-hint">Activez si ce recrutement fait partie d'une campagne coworking</span>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngIf="form.value.coworking">
+            <nz-form-label nzRequired>Mois coworking</nz-form-label>
+            <nz-form-control nzErrorTip="Sélectionnez le mois">
+              <nz-date-picker
+                formControlName="coworkingMonth"
+                nzMode="month"
+                nzPlaceHolder="Choisir le mois"
+                nzFormat="MMMM yyyy"
+                style="width: 100%"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
       </section>
 
       <section class="form-section">

@@ -20,6 +20,10 @@
     <div class="sider-nav" [class.collapsed]="isCollapsed">
       <p class="nav-section-label" *ngIf="!isCollapsed">Menu principal</p>
       <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+        <li nz-menu-item routerLink="/rh/dashboard" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+          <span>Dashboard</span>
+        </li>
         <li nz-menu-item routerLink="/rh/recruitments" routerLinkActive="ant-menu-item-selected">
           <span nz-icon nzType="solution" nzTheme="outline"></span>
           <span>Recrutements</span>

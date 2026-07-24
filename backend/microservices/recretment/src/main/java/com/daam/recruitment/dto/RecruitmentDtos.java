@@ -98,6 +98,10 @@ public final class RecruitmentDtos {
         private String keejobReference;
         private RecruitmentStatus status;
         private String qcmId;
+        /** Toggle coworking campaign for this recruitment. */
+        private Boolean coworking;
+        /** First day of month, or any day in month (normalized server-side). */
+        private LocalDate coworkingMonth;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -137,7 +141,41 @@ public final class RecruitmentDtos {
         private LocalDateTime createdAt;
         private String qcmId;
         private String qcmTitle;
+        private boolean coworking;
+        private LocalDate coworkingMonth;
         private List<QcmQuestionResponse> questions;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CoworkingDashboardResponse {
+        private long totalCoworking;
+        private Long filterMonthYear;
+        private Integer filterMonth;
+        private List<CoworkingAgencyStat> byAgency;
+        private List<CoworkingPostStat> byPost;
+        private List<CoworkingAgencyOutcomeStat> agencyOutcomes;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CoworkingAgencyStat {
+        private String companyId;
+        private String companyName;
+        private long coworkingCount;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CoworkingPostStat {
+        private String title;
+        private long coworkingCount;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CoworkingAgencyOutcomeStat {
+        private String companyId;
+        private String companyName;
+        private long coworkingCount;
+        private long hiredCount;
+        private long rejectedCount;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

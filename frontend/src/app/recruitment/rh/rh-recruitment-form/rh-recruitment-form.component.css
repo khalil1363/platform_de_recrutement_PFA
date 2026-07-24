@@ -132,9 +132,26 @@
   padding: 20px 0 4px;
 }
 
+.coworking-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--daam-border);
+}
+
+.coworking-toggle .coworking-hint {
+  display: block;
+  margin-top: 8px;
+  color: var(--daam-text-muted);
+  font-size: 0.85rem;
+}
+
 @media (max-width: 768px) {
   .form-grid,
-  .options-grid {
+  .options-grid,
+  .coworking-row {
     grid-template-columns: 1fr;
   }
 

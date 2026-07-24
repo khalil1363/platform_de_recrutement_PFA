@@ -55,6 +55,12 @@ public class Recruitment {
     @Enumerated(EnumType.STRING)
     @Builder.Default private RecruitmentStatus status = RecruitmentStatus.DRAFT;
     private String qcmId;
+    /** When true, this recruitment is part of a coworking campaign. */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean coworking = false;
+    /** First day of the coworking month (e.g. 2026-07-01). Null when coworking is off. */
+    private LocalDate coworkingMonth;
     @Column(nullable = false) private String createdByRhUserId;
     @CreationTimestamp private LocalDateTime createdAt;
     @UpdateTimestamp private LocalDateTime updatedAt;
