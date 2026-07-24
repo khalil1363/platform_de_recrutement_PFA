@@ -15,15 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Excel listing of RH candidates with one sheet per application month
- * (like "Juin 2026", "Juillet 2026") plus sheets per recrutement / agence.
+ * Excel: one sheet per interview month + one "Recrutements Agences" index sheet.
  */
 @Service
 @RequiredArgsConstructor
@@ -34,7 +32,7 @@ public class CandidatesMonthlyExcelService {
             "N° DE TELEPHONE",
             "EMAIL",
             "PROVENANCE",
-            "DIP",
+            "IMF",
             "INTITULE DU POSTE",
             "AFFECTATION",
             "DATE DE L'ENTRETIEN",
@@ -57,17 +55,14 @@ public class CandidatesMonthlyExcelService {
 
     @Transactional(readOnly = true)
     public byte[] exportForRh(AuthUser authUser) {
-        List<ApplicationResponse> applications = recruitmentService.getApplicationsForRh(authUser);
+        List<ApplicationResponse> applications = recruitmentService.getApplicationsForRh(authUser).stream()
+                .filter(a -> a.getStatus() == ApplicationStatus.HIRED
+                        || a.getStatus() == ApplicationStatus.REJECTED)
+                .toList();
 
         Map<YearMonth, List<ApplicationResponse>> byMonth = applications.stream()
                 .collect(Collectors.groupingBy(
-                        a -> {
-                            LocalDateTime at = a.getAppliedAt();
-                            if (at == null) {
-                                return YearMonth.now();
-                            }
-                            return YearMonth.from(at);
-                        },
+                        this::monthKey,
                         TreeMap::new,
                         Collectors.toList()
                 ));
@@ -111,64 +106,31 @@ public class CandidatesMonthlyExcelService {
             Set<String> usedSheetNames = new HashSet<>();
 
             if (byMonth.isEmpty()) {
-                Sheet empty = workbook.createSheet("Listing");
-                empty.createRow(0).createCell(0).setCellValue("Aucune candidature pour votre zone.");
+                Sheet empty = workbook.createSheet("Vide");
+                empty.createRow(0).createCell(0).setCellValue("Aucune candidature Embauché ou Rejeté.");
             } else {
                 for (Map.Entry<YearMonth, List<ApplicationResponse>> entry : byMonth.entrySet()) {
                     YearMonth ym = entry.getKey();
-                    List<ApplicationResponse> rows = entry.getValue().stream()
-                            .sorted(Comparator.comparing(
-                                    ApplicationResponse::getAppliedAt,
-                                    Comparator.nullsLast(Comparator.reverseOrder())))
+                    List<ApplicationResponse> monthRows = entry.getValue().stream()
+                            .sorted(Comparator
+                                    .comparing(this::sortDate, Comparator.nullsLast(Comparator.naturalOrder()))
+                                    .thenComparing(a -> a.getStatus() == ApplicationStatus.HIRED ? 0 : 1))
                             .toList();
 
                     String monthLabel = sheetNameFor(ym);
-                    String sheetName = uniqueSheetName(monthLabel, usedSheetNames);
                     writeCandidatesSheet(
                             workbook,
-                            sheetName,
-                            "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR),
-                            rows,
+                            uniqueSheetName(monthLabel, usedSheetNames),
+                            "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR) + " (Embauché + Rejeté)",
+                            monthRows,
                             headerStyle,
                             titleStyle,
                             textStyle,
-                            altRowStyle,
-                            false
-                    );
-                }
-
-                // Sheets next to month tabs: one per recrutement + agence
-                for (Map.Entry<String, List<ApplicationResponse>> entry : byRecruitmentAgency.entrySet()) {
-                    List<ApplicationResponse> rows = entry.getValue().stream()
-                            .sorted(Comparator.comparing(
-                                    ApplicationResponse::getAppliedAt,
-                                    Comparator.nullsLast(Comparator.reverseOrder())))
-                            .toList();
-                    if (rows.isEmpty()) {
-                        continue;
-                    }
-                    ApplicationResponse sample = rows.get(0);
-                    String recruitmentName = firstNonBlank(sample.getRecruitmentTitle(), "Recrutement");
-                    String agenceName = resolveAgenceName(sample);
-                    String sheetName = uniqueSheetName(
-                            sheetNameForRecruitmentAgency(recruitmentName, agenceName),
-                            usedSheetNames
-                    );
-                    writeCandidatesSheet(
-                            workbook,
-                            sheetName,
-                            "DAAM - " + recruitmentName + " | Agence: " + agenceName,
-                            rows,
-                            headerStyle,
-                            titleStyle,
-                            textStyle,
-                            altRowStyle,
-                            true
+                            altRowStyle
                     );
                 }
             }
 
-            // Index: recrutement + agence (easy click overview)
             writeRecruitmentAgencyIndex(
                     workbook,
                     byRecruitmentAgency,
@@ -178,42 +140,6 @@ public class CandidatesMonthlyExcelService {
                     altRowStyle,
                     usedSheetNames
             );
-
-            // Summary listing sheet
-            Sheet listing = workbook.createSheet(uniqueSheetName("Listing", usedSheetNames));
-            Row listingTitle = listing.createRow(0);
-            listingTitle.createCell(0).setCellValue("DAAM - LISTING CANDIDATS (tous mois)");
-            listingTitle.getCell(0).setCellStyle(titleStyle);
-            Row listingHeader = listing.createRow(2);
-            for (int i = 0; i < HEADERS.length; i++) {
-                Cell cell = listingHeader.createCell(i);
-                cell.setCellValue(HEADERS[i]);
-                cell.setCellStyle(headerStyle);
-            }
-            int lr = 3;
-            List<ApplicationResponse> all = applications.stream()
-                    .sorted(Comparator.comparing(
-                            ApplicationResponse::getAppliedAt,
-                            Comparator.nullsLast(Comparator.reverseOrder())))
-                    .toList();
-            for (ApplicationResponse app : all) {
-                Row row = listing.createRow(lr);
-                CellStyle style = (lr % 2 == 0) ? altRowStyle : textStyle;
-                String[] values = toRow(app);
-                for (int c = 0; c < values.length; c++) {
-                    Cell cell = row.createCell(c);
-                    cell.setCellValue(values[c] != null ? values[c] : "");
-                    cell.setCellStyle(style);
-                }
-                lr++;
-            }
-            for (int i = 0; i < HEADERS.length; i++) {
-                listing.setColumnWidth(i, columnWidth(i));
-            }
-            listing.createFreezePane(0, 3);
-            if (lr > 3) {
-                listing.setAutoFilter(new CellRangeAddress(2, lr - 1, 0, HEADERS.length - 1));
-            }
 
             workbook.write(out);
             return out.toByteArray();
@@ -230,8 +156,7 @@ public class CandidatesMonthlyExcelService {
             XSSFCellStyle headerStyle,
             XSSFCellStyle titleStyle,
             CellStyle textStyle,
-            XSSFCellStyle altRowStyle,
-            boolean showRecruitmentAgencyMeta) {
+            XSSFCellStyle altRowStyle) {
         Sheet sheet = workbook.createSheet(sheetName);
 
         Row title = sheet.createRow(0);
@@ -239,13 +164,6 @@ public class CandidatesMonthlyExcelService {
         titleCell.setCellValue(titleText);
         titleCell.setCellStyle(titleStyle);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, HEADERS.length - 1));
-
-        if (showRecruitmentAgencyMeta && !rows.isEmpty()) {
-            ApplicationResponse sample = rows.get(0);
-            Row meta = sheet.createRow(1);
-            meta.createCell(0).setCellValue("Recrutement: " + firstNonBlank(sample.getRecruitmentTitle(), "-"));
-            meta.createCell(1).setCellValue("Agence: " + resolveAgenceName(sample));
-        }
 
         Row header = sheet.createRow(2);
         header.setHeightInPoints(32);
@@ -302,7 +220,7 @@ public class CandidatesMonthlyExcelService {
             if (group.isEmpty()) continue;
             ApplicationResponse sample = group.get(0);
             String months = group.stream()
-                    .map(a -> a.getAppliedAt() != null ? YearMonth.from(a.getAppliedAt()) : YearMonth.now())
+                    .map(this::monthKey)
                     .distinct()
                     .sorted()
                     .map(this::sheetNameFor)
@@ -345,9 +263,8 @@ public class CandidatesMonthlyExcelService {
                 app.getKeejobReference() != null && !app.getKeejobReference().isBlank() ? "KEEJOB" : null,
                 "Plateforme DAAM"
         );
-        String dip = firstNonBlank(app.getDiplomeEcole());
+        String IMF = firstNonBlank(app.getDiplomeEcole());
         String poste = firstNonBlank(app.getProfilMetier(), app.getRecruitmentTitle());
-        // AFFECTATION = nom de l'agence
         String affectation = firstNonBlank(app.getAffectation(), resolveAgenceName(app));
         String interviewDate = app.getInterviewAt() != null ? app.getInterviewAt().format(DATE_FMT) : "";
         String interviewTime = app.getInterviewAt() != null ? app.getInterviewAt().format(TIME_FMT) : "";
@@ -370,7 +287,7 @@ public class CandidatesMonthlyExcelService {
                 c != null && c.getPhoneNumber() != null ? c.getPhoneNumber() : "",
                 c != null && c.getEmail() != null ? c.getEmail() : "",
                 provenance != null ? provenance : "",
-                dip != null ? dip : "",
+                IMF != null ? IMF : "",
                 poste != null ? poste.toUpperCase(FR) : "",
                 affectation != null ? affectation : "",
                 interviewDate,
@@ -402,21 +319,35 @@ public class CandidatesMonthlyExcelService {
             case SUBMITTED -> "SOUMISE";
             case UNDER_REVIEW -> "EN COURS";
             case ACCEPTED -> "OK";
-            case REJECTED -> "NON RETENU";
+            case REJECTED -> "REJETÉ";
             case HIRED -> "EMBAUCHÉ";
         };
+    }
+
+    /** Month sheet key: interview date, else hire date, else application date. */
+    private YearMonth monthKey(ApplicationResponse a) {
+        if (a.getInterviewAt() != null) {
+            return YearMonth.from(a.getInterviewAt());
+        }
+        if (a.getHiredAt() != null) {
+            return YearMonth.from(a.getHiredAt());
+        }
+        if (a.getAppliedAt() != null) {
+            return YearMonth.from(a.getAppliedAt());
+        }
+        return YearMonth.now();
+    }
+
+    private java.time.LocalDateTime sortDate(ApplicationResponse a) {
+        if (a.getInterviewAt() != null) return a.getInterviewAt();
+        if (a.getHiredAt() != null) return a.getHiredAt();
+        return a.getAppliedAt();
     }
 
     private String sheetNameFor(YearMonth ym) {
         String month = ym.getMonth().getDisplayName(java.time.format.TextStyle.FULL, FR);
         month = month.substring(0, 1).toUpperCase(FR) + month.substring(1);
-        String name = month + " " + ym.getYear();
-        return sanitizeSheetName(name);
-    }
-
-    private String sheetNameForRecruitmentAgency(String recruitmentName, String agenceName) {
-        String raw = firstNonBlank(recruitmentName, "Recrutement") + " - " + firstNonBlank(agenceName, "Agence");
-        return sanitizeSheetName(raw);
+        return sanitizeSheetName(month + " " + ym.getYear());
     }
 
     private String sanitizeSheetName(String name) {
