@@ -11,6 +11,7 @@ import {
   HiredQcmAssignment,
   HiredQcmSubmitRequest,
   JobApplication,
+  ApplicationTrackingUpdateRequest,
   Recruitment,
   RecruitmentRequest,
   RhZoneAssignment,
@@ -119,6 +120,22 @@ export class RecruitmentService {
 
   getRhApplications(): Observable<ApiResponse<JobApplication[]>> {
     return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications`);
+  }
+
+  updateApplicationTracking(
+    applicationId: string,
+    request: ApplicationTrackingUpdateRequest
+  ): Observable<ApiResponse<JobApplication>> {
+    return this.http.patch<ApiResponse<JobApplication>>(
+      `${this.apiUrl}/applications/${applicationId}/tracking`,
+      request
+    );
+  }
+
+  exportCandidatesMonthlyExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/applications/export.xlsx`, {
+      responseType: 'blob'
+    });
   }
 
   getHiredApplications(): Observable<ApiResponse<JobApplication[]>> {

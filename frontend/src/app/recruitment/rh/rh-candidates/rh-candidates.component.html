@@ -3,6 +3,10 @@
     <h2>Candidatures par offre</h2>
     <p>Chaque recrutement a son classement CV (meilleur match en premier)</p>
   </div>
+  <button nz-button nzType="primary" [nzLoading]="exportLoading" (click)="exportMonthlyExcel()">
+    <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+    Export Excel (par mois)
+  </button>
 </div>
 
 <nz-spin [nzSpinning]="loading">
@@ -136,6 +140,91 @@
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Statut">{{ statusLabel(selectedApplication.status) }}</nz-descriptions-item>
       </nz-descriptions>
+
+      <div class="tracking-block">
+        <div class="tracking-header">
+          <h4>Fiche suivi Excel (champs RH)</h4>
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="small"
+            type="button"
+            [nzLoading]="trackingSaving"
+            (click)="saveTracking()"
+          >
+            Enregistrer la fiche
+          </button>
+        </div>
+        <p class="tracking-hint">
+          Colonnes Excel exactes : NOM DU CANDIDAT, N° DE TELEPHONE, EMAIL, PROVENANCE, DIP,
+          INTITULE DU POSTE, AFFECTATION, DATE DE L'ENTRETIEN, HEURE DE L'ENTRETIEN, STATUT,
+          DATE DE CONFIRMATION, DESISTEMENT, CONTRAT, COMPOSANTE, DATE D'INTEGRATION, PRETENTION, OBSERVATION.
+        </p>
+        <form nz-form [formGroup]="trackingForm" class="tracking-form">
+          <div class="tracking-grid">
+            <nz-form-item>
+              <nz-form-label>Provenance</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="provenance" placeholder="Ex: KEEJOB, Plateforme DAAM" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>DIP</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="diplomeEcole" placeholder="Diplôme / école" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Intitulé du poste</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="profilMetier" placeholder="Ex: Chargé(e) de crédit" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Affectation</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="affectation" placeholder="Nom de l'agence" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Désistement</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="desistement" placeholder="Ex: Oui / Non / motif" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Contrat</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="dureeContrat" placeholder="Ex: CDI, CIVP, 6 mois" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Composante</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="composante" placeholder="Composante" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Date d'intégration</nz-form-label>
+              <nz-form-control>
+                <nz-date-picker formControlName="dateDebutMission" nzFormat="yyyy-MM-dd" class="interview-picker"></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Prétention</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="pretention" placeholder="Ex: 1200 DT" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <nz-form-item>
+            <nz-form-label>Observation</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="observation" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </div>
 
       <div class="cv-analysis" *ngIf="selectedApplication.cvAnalysisSummary || selectedApplication.cvMatchScore != null">
         <div class="cv-analysis-header">

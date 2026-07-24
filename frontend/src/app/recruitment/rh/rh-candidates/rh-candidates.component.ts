@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../../core/services/auth.service';
 import { RecruitmentService } from '../../services/recruitment.service';
-import { ApplicationStatus, JobApplication } from '../../models/recruitment.model';
+import { ApplicationStatus, ApplicationTrackingUpdateRequest, JobApplication } from '../../models/recruitment.model';
 
 interface RecruitmentApplicationsGroup {
   recruitmentId: string;
@@ -39,6 +39,9 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   cvPreviewSrc: SafeResourceUrl | null = null;
   cvObjectUrl: string | null = null;
   analyzeLoading = false;
+  exportLoading = false;
+  trackingSaving = false;
+  trackingForm!: FormGroup;
 
   constructor(
     readonly authService: AuthService,
@@ -74,6 +77,18 @@ Tickets restaurant d’une valeur mensuelle de 170 DT ;
 Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       ]
     });
+    this.trackingForm = this.fb.group({
+      provenance: [''],
+      diplomeEcole: [''],
+      profilMetier: [''],
+      affectation: [''],
+      desistement: [''],
+      dureeContrat: [''],
+      composante: [''],
+      dateDebutMission: [null],
+      pretention: [''],
+      observation: ['']
+    });
     this.loadApplications();
   }
 
@@ -107,7 +122,91 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
   openDetails(app: JobApplication): void {
     this.selectedApplication = app;
     this.hideCvPreview();
+    this.patchTrackingForm(app);
     this.detailVisible = true;
+  }
+
+  exportMonthlyExcel(): void {
+    this.exportLoading = true;
+    this.recruitmentService.exportCandidatesMonthlyExcel().subscribe({
+      next: (blob) => {
+        this.exportLoading = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'daam-candidats-par-mois.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.message.success('Export Excel téléchargé (une feuille par mois)');
+      },
+      error: () => {
+        this.exportLoading = false;
+        this.message.error('Erreur lors de l\'export Excel');
+      }
+    });
+  }
+
+  saveTracking(): void {
+    if (!this.selectedApplication) {
+      return;
+    }
+    const value = this.trackingForm.value;
+    const request: ApplicationTrackingUpdateRequest = {
+      provenance: value.provenance,
+      diplomeEcole: value.diplomeEcole,
+      profilMetier: value.profilMetier,
+      affectation: value.affectation,
+      desistement: value.desistement,
+      dureeContrat: value.dureeContrat,
+      composante: value.composante,
+      dateDebutMission: this.formatLocalDateOrNull(value.dateDebutMission),
+      pretention: value.pretention,
+      observation: value.observation
+    };
+    this.trackingSaving = true;
+    this.recruitmentService.updateApplicationTracking(this.selectedApplication.applicationId, request).subscribe({
+      next: (response) => {
+        this.trackingSaving = false;
+        if (response.success && response.data) {
+          this.selectedApplication = response.data;
+          this.applications = this.applications.map((a) =>
+            a.applicationId === response.data!.applicationId ? response.data! : a
+          );
+          this.rebuildGroups();
+          this.message.success('Fiche suivi enregistrée — sera incluse dans l\'export Excel');
+        }
+      },
+      error: (err) => {
+        this.trackingSaving = false;
+        this.message.error(err.error?.message || 'Erreur lors de l\'enregistrement');
+      }
+    });
+  }
+
+  private patchTrackingForm(app: JobApplication): void {
+    this.trackingForm.reset({
+      provenance: app.provenance || (app.keejobReference ? 'KEEJOB' : 'Plateforme DAAM'),
+      diplomeEcole: app.diplomeEcole || '',
+      profilMetier: app.profilMetier || app.recruitmentTitle || '',
+      affectation: app.affectation || app.companyName || app.zoneName || '',
+      desistement: app.desistement || '',
+      dureeContrat: app.dureeContrat || app.hireContractType || app.formatMission || '',
+      composante: app.composante || app.imf || app.companyName || '',
+      dateDebutMission: app.dateDebutMission
+        ? new Date(app.dateDebutMission)
+        : app.hireStartDate
+          ? new Date(app.hireStartDate)
+          : null,
+      pretention: app.pretention || app.disponibilite || app.salaireActuel || app.prixMois || '',
+      observation: app.observation || app.commentairesRh || app.remarquesRh || ''
+    });
+  }
+
+  private formatLocalDateOrNull(date: Date | null): string | null {
+    if (!date) {
+      return null;
+    }
+    return this.formatLocalDate(date);
   }
 
   toggleCvPreview(): void {

@@ -149,8 +149,67 @@ export interface JobApplication {
   hireBenefits?: string;
   hireIntegrationAddress?: string;
   hireIntegrationGpsUrl?: string;
+  /** RH Excel suivi fields (editable) */
+  provenance?: string;
+  imf?: string;
+  profilMetier?: string;
+  experienceYears?: string;
+  situationPerso?: string;
+  salaireActuel?: string;
+  disponibilite?: string;
+  commentairesRh?: string;
+  contactName?: string;
+  commercialName?: string;
+  codeDossier?: string;
+  diplomeEcole?: string;
+  formatMission?: string;
+  dateDebutMission?: string;
+  dateFinMission?: string;
+  dureeContrat?: string;
+  prixMois?: string;
+  competence?: string;
+  aNegocier?: string;
+  deplacement?: string;
+  pretention?: string;
+  remarquesRh?: string;
+  affectation?: string;
+  desistement?: string;
+  composante?: string;
+  observation?: string;
+  keejobReference?: string;
+  internalReference?: string;
+  city?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
+}
+
+export interface ApplicationTrackingUpdateRequest {
+  provenance?: string | null;
+  imf?: string | null;
+  profilMetier?: string | null;
+  experienceYears?: string | null;
+  situationPerso?: string | null;
+  salaireActuel?: string | null;
+  disponibilite?: string | null;
+  commentairesRh?: string | null;
+  contactName?: string | null;
+  commercialName?: string | null;
+  codeDossier?: string | null;
+  diplomeEcole?: string | null;
+  formatMission?: string | null;
+  dateDebutMission?: string | null;
+  dateFinMission?: string | null;
+  dureeContrat?: string | null;
+  prixMois?: string | null;
+  competence?: string | null;
+  aNegocier?: string | null;
+  deplacement?: string | null;
+  pretention?: string | null;
+  remarquesRh?: string | null;
+  affectation?: string | null;
+  desistement?: string | null;
+  composante?: string | null;
+  observation?: string | null;
 }
 
 export interface ApplicationStatusUpdateRequest {

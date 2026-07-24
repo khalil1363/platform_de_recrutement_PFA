@@ -3,6 +3,7 @@ package com.daam.recruitment.controller;
 import com.daam.recruitment.dto.RecruitmentDtos.*;
 import com.daam.recruitment.response.ApiResponse;
 import com.daam.recruitment.security.AuthUser;
+import com.daam.recruitment.service.CandidatesMonthlyExcelService;
 import com.daam.recruitment.service.CvStorageService;
 import com.daam.recruitment.service.HiredEvaluationsExcelService;
 import com.daam.recruitment.service.HiredQcmService;
@@ -32,6 +33,7 @@ public class RecruitmentController {
     private final HiredQcmService hiredQcmService;
     private final TalentReportPdfService talentReportPdfService;
     private final HiredEvaluationsExcelService hiredEvaluationsExcelService;
+    private final CandidatesMonthlyExcelService candidatesMonthlyExcelService;
     private final CvStorageService cvStorageService;
 
     // ---- Public ----
@@ -225,6 +227,30 @@ public class RecruitmentController {
         return ResponseEntity.ok(ApiResponse.success("Application status updated",
                 recruitmentService.updateApplicationStatus(applicationId, request, user),
                 HttpStatus.OK.value()));
+    }
+
+    @PatchMapping("/applications/{applicationId}/tracking")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplicationTracking(
+            @PathVariable String applicationId,
+            @RequestBody ApplicationTrackingUpdateRequest request,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success("Fiche candidat mise à jour",
+                recruitmentService.updateApplicationTracking(applicationId, request, user),
+                HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/applications/export.xlsx")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<byte[]> exportCandidatesMonthlyExcel(
+            @AuthenticationPrincipal AuthUser user) {
+        byte[] xlsx = candidatesMonthlyExcelService.exportForRh(user);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"daam-candidats-par-mois.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(xlsx);
     }
 
     @GetMapping("/applications/hired")

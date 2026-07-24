@@ -226,6 +226,37 @@ public final class RecruitmentDtos {
         private Boolean qcmViolated;
     }
 
+    /** RH can complete Excel suivi fields missing from auto application data. */
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class ApplicationTrackingUpdateRequest {
+        private String provenance;
+        private String imf;
+        private String profilMetier;
+        private String experienceYears;
+        private String situationPerso;
+        private String salaireActuel;
+        private String disponibilite;
+        private String commentairesRh;
+        private String contactName;
+        private String commercialName;
+        private String codeDossier;
+        private String diplomeEcole;
+        private String formatMission;
+        private java.time.LocalDate dateDebutMission;
+        private java.time.LocalDate dateFinMission;
+        private String dureeContrat;
+        private String prixMois;
+        private String competence;
+        private String aNegocier;
+        private String deplacement;
+        private String pretention;
+        private String remarquesRh;
+        private String affectation;
+        private String desistement;
+        private String composante;
+        private String observation;
+    }
+
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class ApplicationResponse {
         private String applicationId;
@@ -233,6 +264,7 @@ public final class RecruitmentDtos {
         private String recruitmentTitle;
         private String zoneName;
         private String region;
+        private String city;
         private String candidateUserId;
         private UserSummary candidate;
         private String cvFileUrl;
@@ -262,6 +294,34 @@ public final class RecruitmentDtos {
         private String hireBenefits;
         private String hireIntegrationAddress;
         private String hireIntegrationGpsUrl;
+        private String provenance;
+        private String imf;
+        private String profilMetier;
+        private String experienceYears;
+        private String situationPerso;
+        private String salaireActuel;
+        private String disponibilite;
+        private String commentairesRh;
+        private String contactName;
+        private String commercialName;
+        private String codeDossier;
+        private String diplomeEcole;
+        private String formatMission;
+        private java.time.LocalDate dateDebutMission;
+        private java.time.LocalDate dateFinMission;
+        private String dureeContrat;
+        private String prixMois;
+        private String competence;
+        private String aNegocier;
+        private String deplacement;
+        private String pretention;
+        private String remarquesRh;
+        private String affectation;
+        private String desistement;
+        private String composante;
+        private String observation;
+        private String keejobReference;
+        private String internalReference;
         private LocalDateTime appliedAt;
         private List<ApplicationAnswerResponse> answers;
     }

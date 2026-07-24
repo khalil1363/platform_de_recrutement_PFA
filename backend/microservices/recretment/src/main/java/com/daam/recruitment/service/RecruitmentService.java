@@ -302,6 +302,52 @@ public class RecruitmentService {
                 .toList();
     }
 
+    @Transactional
+    public ApplicationResponse updateApplicationTracking(
+            String applicationId,
+            ApplicationTrackingUpdateRequest request,
+            AuthUser authUser) {
+        JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+        Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
+        if (authUser.isRh()) {
+            ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
+        }
+        if (request.getProvenance() != null) application.setProvenance(blankToNull(request.getProvenance()));
+        if (request.getImf() != null) application.setImf(blankToNull(request.getImf()));
+        if (request.getProfilMetier() != null) application.setProfilMetier(blankToNull(request.getProfilMetier()));
+        if (request.getExperienceYears() != null) application.setExperienceYears(blankToNull(request.getExperienceYears()));
+        if (request.getSituationPerso() != null) application.setSituationPerso(blankToNull(request.getSituationPerso()));
+        if (request.getSalaireActuel() != null) application.setSalaireActuel(blankToNull(request.getSalaireActuel()));
+        if (request.getDisponibilite() != null) application.setDisponibilite(blankToNull(request.getDisponibilite()));
+        if (request.getCommentairesRh() != null) application.setCommentairesRh(blankToNull(request.getCommentairesRh()));
+        if (request.getContactName() != null) application.setContactName(blankToNull(request.getContactName()));
+        if (request.getCommercialName() != null) application.setCommercialName(blankToNull(request.getCommercialName()));
+        if (request.getCodeDossier() != null) application.setCodeDossier(blankToNull(request.getCodeDossier()));
+        if (request.getDiplomeEcole() != null) application.setDiplomeEcole(blankToNull(request.getDiplomeEcole()));
+        if (request.getFormatMission() != null) application.setFormatMission(blankToNull(request.getFormatMission()));
+        if (request.getDateDebutMission() != null) application.setDateDebutMission(request.getDateDebutMission());
+        if (request.getDateFinMission() != null) application.setDateFinMission(request.getDateFinMission());
+        if (request.getDureeContrat() != null) application.setDureeContrat(blankToNull(request.getDureeContrat()));
+        if (request.getPrixMois() != null) application.setPrixMois(blankToNull(request.getPrixMois()));
+        if (request.getCompetence() != null) application.setCompetence(blankToNull(request.getCompetence()));
+        if (request.getANegocier() != null) application.setANegocier(blankToNull(request.getANegocier()));
+        if (request.getDeplacement() != null) application.setDeplacement(blankToNull(request.getDeplacement()));
+        if (request.getPretention() != null) application.setPretention(blankToNull(request.getPretention()));
+        if (request.getRemarquesRh() != null) application.setRemarquesRh(blankToNull(request.getRemarquesRh()));
+        if (request.getAffectation() != null) application.setAffectation(blankToNull(request.getAffectation()));
+        if (request.getDesistement() != null) application.setDesistement(blankToNull(request.getDesistement()));
+        if (request.getComposante() != null) application.setComposante(blankToNull(request.getComposante()));
+        if (request.getObservation() != null) application.setObservation(blankToNull(request.getObservation()));
+        return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
+    }
+
+    private String blankToNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private JobApplication ensureCvAnalyzed(JobApplication application) {
         if (application.getCvMatchScore() != null || application.getCvFileUrl() == null
                 || application.getCvFileUrl().isBlank()) {
@@ -742,7 +788,8 @@ public class RecruitmentService {
 
         return ApplicationResponse.builder()
                 .applicationId(a.getApplicationId()).recruitmentId(a.getRecruitmentId())
-                .recruitmentTitle(r.getTitle()).zoneName(getZoneName(r.getZoneId())).region(r.getRegion())
+                .recruitmentTitle(r.getTitle()).zoneName(getZoneName(r.getZoneId()))
+                .region(r.getRegion()).city(r.getCity())
                 .candidateUserId(a.getCandidateUserId())
                 .candidate(candidate).cvFileUrl(a.getCvFileUrl()).status(a.getStatus())
                 .qcmScore(a.getQcmScore()).qcmTotalQuestions(a.getQcmTotalQuestions())
@@ -769,6 +816,34 @@ public class RecruitmentService {
                 .hireBenefits(a.getHireBenefits())
                 .hireIntegrationAddress(a.getHireIntegrationAddress())
                 .hireIntegrationGpsUrl(a.getHireIntegrationGpsUrl())
+                .provenance(a.getProvenance())
+                .imf(a.getImf())
+                .profilMetier(a.getProfilMetier())
+                .experienceYears(a.getExperienceYears())
+                .situationPerso(a.getSituationPerso())
+                .salaireActuel(a.getSalaireActuel())
+                .disponibilite(a.getDisponibilite())
+                .commentairesRh(a.getCommentairesRh())
+                .contactName(a.getContactName())
+                .commercialName(a.getCommercialName())
+                .codeDossier(a.getCodeDossier())
+                .diplomeEcole(a.getDiplomeEcole())
+                .formatMission(a.getFormatMission())
+                .dateDebutMission(a.getDateDebutMission())
+                .dateFinMission(a.getDateFinMission())
+                .dureeContrat(a.getDureeContrat())
+                .prixMois(a.getPrixMois())
+                .competence(a.getCompetence())
+                .aNegocier(a.getANegocier())
+                .deplacement(a.getDeplacement())
+                .pretention(a.getPretention())
+                .remarquesRh(a.getRemarquesRh())
+                .affectation(a.getAffectation())
+                .desistement(a.getDesistement())
+                .composante(a.getComposante())
+                .observation(a.getObservation())
+                .keejobReference(r.getKeejobReference())
+                .internalReference(r.getInternalReference())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
     }

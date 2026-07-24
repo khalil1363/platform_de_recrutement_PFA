@@ -56,6 +56,60 @@ public class JobApplication {
     private String hireIntegrationAddress;
     @Column(length = 512)
     private String hireIntegrationGpsUrl;
+
+    /** RH listing / Excel suivi fields (optional, filled by RH). */
+    @Column(length = 255)
+    private String provenance;
+    @Column(length = 255)
+    private String imf;
+    @Column(length = 255)
+    private String profilMetier;
+    @Column(length = 64)
+    private String experienceYears;
+    @Column(length = 255)
+    private String situationPerso;
+    @Column(length = 128)
+    private String salaireActuel;
+    @Column(length = 255)
+    private String disponibilite;
+    @Column(columnDefinition = "TEXT")
+    private String commentairesRh;
+    @Column(length = 255)
+    private String contactName;
+    @Column(length = 255)
+    private String commercialName;
+    /** Excel titres: CODE DU DOSSIER, DIPLÔME, FORMAT, missions, prix, compétence */
+    @Column(length = 128)
+    private String codeDossier;
+    @Column(length = 255)
+    private String diplomeEcole;
+    @Column(length = 128)
+    private String formatMission;
+    private java.time.LocalDate dateDebutMission;
+    private java.time.LocalDate dateFinMission;
+    @Column(length = 128)
+    private String dureeContrat;
+    @Column(length = 128)
+    private String prixMois;
+    @Column(columnDefinition = "TEXT")
+    private String competence;
+    @Column(length = 255)
+    private String aNegocier;
+    @Column(length = 255)
+    private String deplacement;
+    @Column(length = 255)
+    private String pretention;
+    @Column(columnDefinition = "TEXT")
+    private String remarquesRh;
+    @Column(length = 255)
+    private String affectation;
+    @Column(length = 255)
+    private String desistement;
+    @Column(length = 255)
+    private String composante;
+    @Column(columnDefinition = "TEXT")
+    private String observation;
+
     @CreationTimestamp private LocalDateTime appliedAt;
 
     @PrePersist void prePersist() {
