@@ -278,6 +278,7 @@ public class HiredQcmService {
                     .username(u.getUsername())
                     .email(u.getEmail())
                     .phoneNumber(u.getPhoneNumber())
+                    .cin(u.getCin())
                     .profileImageUrl(u.getProfileImageUrl())
                     .build();
         }

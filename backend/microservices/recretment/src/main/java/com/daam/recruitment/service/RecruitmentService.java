@@ -289,6 +289,28 @@ public class RecruitmentService {
                 }).toList();
     }
 
+    /**
+     * Full application history for a candidate (all recruitments), for RH review.
+     */
+    @Transactional(readOnly = true)
+    public List<ApplicationResponse> getCandidateApplicationHistory(String candidateUserId, AuthUser authUser) {
+        if (!authUser.isRh() && !authUser.isAdmin()) {
+            throw new IllegalArgumentException("Only RH or Admin can view candidate history");
+        }
+        if (!StringUtils.hasText(candidateUserId)) {
+            throw new IllegalArgumentException("Candidate user id is required");
+        }
+        return jobApplicationRepository.findByCandidateUserId(candidateUserId.trim()).stream()
+                .map(a -> {
+                    Recruitment r = getRecruitmentOrThrow(a.getRecruitmentId());
+                    return toApplicationResponse(a, r, true);
+                })
+                .sorted(Comparator.comparing(
+                        ApplicationResponse::getAppliedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+    }
+
     @Transactional
     public List<ApplicationResponse> getApplicationsForRh(AuthUser authUser) {
         List<String> zoneIds = getRhZoneIds(authUser.getUserId());
@@ -769,7 +791,9 @@ public class RecruitmentService {
                 candidate = UserSummary.builder().userId(u.getUserId())
                         .firstName(u.getFirstName()).lastName(u.getLastName())
                         .username(u.getUsername()).email(u.getEmail())
-                        .phoneNumber(u.getPhoneNumber()).profileImageUrl(u.getProfileImageUrl()).build();
+                        .phoneNumber(u.getPhoneNumber())
+                        .cin(u.getCin())
+                        .profileImageUrl(u.getProfileImageUrl()).build();
             }
         }
 

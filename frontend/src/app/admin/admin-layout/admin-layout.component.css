@@ -1,14 +1,9 @@
-.user-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  color: var(--daam-text);
-  padding: 6px 10px;
-  border-radius: 10px;
-  transition: background 0.2s;
+:host {
+  display: block;
 }
 
-.user-dropdown:hover {
-  background: var(--daam-gradient-soft);
+@media (max-width: 768px) {
+  .user-name {
+    display: none;
+  }
 }

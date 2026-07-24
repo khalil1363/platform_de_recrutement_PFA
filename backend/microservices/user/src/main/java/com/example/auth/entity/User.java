@@ -49,6 +49,10 @@ public class User implements Serializable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    /** Numéro CIN (Carte d'Identité Nationale) — required for candidates at signup. */
+    @Column(name = "cin", length = 20, unique = true)
+    private String cin;
+
     private String address;
 
     @Column(name = "profile_image_url")

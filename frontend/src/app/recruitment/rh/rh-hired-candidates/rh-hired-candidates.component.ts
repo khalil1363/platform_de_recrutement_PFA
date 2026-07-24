@@ -11,9 +11,14 @@ import { HiredQcmAssignment, JobApplication, Qcm } from '../../models/recruitmen
 })
 export class RhHiredCandidatesComponent implements OnInit {
   applications: JobApplication[] = [];
+  filteredApplications: JobApplication[] = [];
   loading = false;
   selected: JobApplication | null = null;
   detailVisible = false;
+
+  filterFirstName = '';
+  filterLastName = '';
+  filterCin = '';
 
   qcmModalVisible = false;
   qcms: Qcm[] = [];
@@ -86,6 +91,7 @@ export class RhHiredCandidatesComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.applications = response.data;
+          this.applyFilters();
         }
       },
       error: () => {
@@ -93,6 +99,30 @@ export class RhHiredCandidatesComponent implements OnInit {
         this.message.error('Erreur de chargement des candidats admis');
       }
     });
+  }
+
+  applyFilters(): void {
+    const first = this.filterFirstName.trim().toLowerCase();
+    const last = this.filterLastName.trim().toLowerCase();
+    const cin = this.filterCin.trim().toLowerCase();
+
+    this.filteredApplications = this.applications.filter((app) => {
+      const c = app.candidate;
+      if (!c) {
+        return !first && !last && !cin;
+      }
+      const matchFirst = !first || (c.firstName || '').toLowerCase().includes(first);
+      const matchLast = !last || (c.lastName || '').toLowerCase().includes(last);
+      const matchCin = !cin || (c.cin || '').toLowerCase().includes(cin);
+      return matchFirst && matchLast && matchCin;
+    });
+  }
+
+  clearFilters(): void {
+    this.filterFirstName = '';
+    this.filterLastName = '';
+    this.filterCin = '';
+    this.applyFilters();
   }
 
   openDetails(app: JobApplication): void {

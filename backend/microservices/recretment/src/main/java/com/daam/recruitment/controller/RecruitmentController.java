@@ -218,6 +218,16 @@ public class RecruitmentController {
                 recruitmentService.getApplicationsForRh(user), HttpStatus.OK.value()));
     }
 
+    @GetMapping("/applications/history/{candidateUserId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getCandidateApplicationHistory(
+            @PathVariable String candidateUserId,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success("Candidate application history",
+                recruitmentService.getCandidateApplicationHistory(candidateUserId, user),
+                HttpStatus.OK.value()));
+    }
+
     @PatchMapping("/applications/{applicationId}/status")
     @PreAuthorize("hasAuthority('ROLE_RH')")
     public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplicationStatus(

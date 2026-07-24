@@ -1,43 +1,69 @@
-<nz-layout class="user-layout">
+<nz-layout class="app-shell user-layout">
   <nz-sider
-    class="user-sider"
+    class="shell-sider"
     nzCollapsible
     [(nzCollapsed)]="isCollapsed"
     [nzTrigger]="null"
-    nzWidth="260px"
+    [nzWidth]="280"
     nzTheme="dark"
   >
-    <div class="sider-logo" [class.collapsed]="isCollapsed">
-      <img src="daam-logo.png" alt="DAAM" class="sider-logo-img" />
-      <span *ngIf="!isCollapsed" class="sider-logo-text">DAAM RH</span>
+    <div class="sider-brand" [class.collapsed]="isCollapsed">
+      <div class="brand-logo-wrap">
+        <img src="daam-logo.png" alt="DAAM" />
+      </div>
+      <div class="sider-brand-text" *ngIf="!isCollapsed">
+        <span class="brand-title">DAAM RH</span>
+        <span class="brand-subtitle">Espace personnel</span>
+      </div>
     </div>
 
-    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-menu-item routerLink="/jobs" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="solution" nzTheme="outline"></span>
-        <span>Offres d'emploi</span>
-      </li>
-      <li nz-menu-item routerLink="/jobs/applications/my" routerLinkActive="ant-menu-item-selected" *ngIf="authService.isCandidate()">
-        <span nz-icon nzType="file-text" nzTheme="outline"></span>
-        <span>Mes candidatures</span>
-      </li>
-      <li nz-menu-item routerLink="/rh/recruitments" routerLinkActive="ant-menu-item-selected" *ngIf="authService.isRh() || authService.isAdmin()">
-        <span nz-icon nzType="team" nzTheme="outline"></span>
-        <span>Espace RH</span>
-      </li>
-      <li nz-menu-item routerLink="/profile" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="idcard" nzTheme="outline"></span>
-        <span>Mon profil</span>
-      </li>
-      <li nz-menu-item *ngIf="authService.isAdmin()" (click)="goToAdmin()">
-        <span nz-icon nzType="team" nzTheme="outline"></span>
-        <span>Administration</span>
-      </li>
-    </ul>
+    <div class="sider-nav" [class.collapsed]="isCollapsed">
+      <p class="nav-section-label" *ngIf="!isCollapsed">Navigation</p>
+      <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+        <li nz-menu-item routerLink="/jobs" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="solution" nzTheme="outline"></span>
+          <span>Offres d'emploi</span>
+        </li>
+        <li nz-menu-item routerLink="/jobs/applications/my" routerLinkActive="ant-menu-item-selected" *ngIf="authService.isCandidate()">
+          <span nz-icon nzType="file-text" nzTheme="outline"></span>
+          <span>Mes candidatures</span>
+        </li>
+        <li nz-menu-item routerLink="/rh/recruitments" routerLinkActive="ant-menu-item-selected" *ngIf="authService.isRh() || authService.isAdmin()">
+          <span nz-icon nzType="team" nzTheme="outline"></span>
+          <span>Espace RH</span>
+        </li>
+        <li nz-menu-item routerLink="/profile" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="idcard" nzTheme="outline"></span>
+          <span>Mon profil</span>
+        </li>
+        <li nz-menu-item *ngIf="authService.isAdmin()" (click)="goToAdmin()">
+          <span nz-icon nzType="setting" nzTheme="outline"></span>
+          <span>Administration</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sider-profile" *ngIf="!isCollapsed && currentUser">
+      <nz-avatar
+        [nzSize]="40"
+        [nzSrc]="authService.resolveImageUrl(currentUser.profileImageUrl) || undefined"
+        nzIcon="user"
+      ></nz-avatar>
+      <div class="sider-profile-info">
+        <strong>{{ currentUser.firstName }} {{ currentUser.lastName }}</strong>
+        <span>{{ getRoleLabel(currentUser.role) }}</span>
+      </div>
+    </div>
+
+    <div class="sider-footer" *ngIf="!isCollapsed">
+      <div class="sider-footer-card">
+        <p>Votre espace personnel DAAM pour gérer candidatures et profil.</p>
+      </div>
+    </div>
   </nz-sider>
 
-  <nz-layout>
-    <nz-header class="user-header">
+  <nz-layout class="shell-main">
+    <nz-header class="shell-header">
       <div class="header-left">
         <button nz-button nzType="text" class="trigger-btn" (click)="isCollapsed = !isCollapsed">
           <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" nzTheme="outline"></span>
@@ -46,13 +72,12 @@
       </div>
 
       <div class="header-right" *ngIf="currentUser">
-        <nz-tag [nzColor]="'green'">{{ getRoleLabel(currentUser.role) }}</nz-tag>
+        <span class="role-pill">{{ getRoleLabel(currentUser.role) }}</span>
         <a nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click" class="user-dropdown">
           <nz-avatar
             [nzSize]="36"
             [nzSrc]="authService.resolveImageUrl(currentUser.profileImageUrl) || undefined"
             nzIcon="user"
-            class="user-avatar"
           ></nz-avatar>
           <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
           <span nz-icon nzType="down" nzTheme="outline"></span>
@@ -77,8 +102,10 @@
       </div>
     </nz-header>
 
-    <nz-content class="user-content">
-      <router-outlet></router-outlet>
+    <nz-content class="shell-content">
+      <div class="content-panel">
+        <router-outlet></router-outlet>
+      </div>
     </nz-content>
   </nz-layout>
 </nz-layout>

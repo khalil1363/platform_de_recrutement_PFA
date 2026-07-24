@@ -10,18 +10,48 @@
   </div>
 
   <nz-spin [nzSpinning]="loading">
+    <div class="filter-bar">
+      <input
+        nz-input
+        placeholder="Prénom"
+        [(ngModel)]="filterFirstName"
+        (ngModelChange)="applyFilters()"
+        class="filter-input"
+      />
+      <input
+        nz-input
+        placeholder="Nom"
+        [(ngModel)]="filterLastName"
+        (ngModelChange)="applyFilters()"
+        class="filter-input"
+      />
+      <input
+        nz-input
+        placeholder="CIN"
+        [(ngModel)]="filterCin"
+        (ngModelChange)="applyFilters()"
+        class="filter-input filter-cin"
+        maxlength="8"
+      />
+      <button nz-button nzType="default" type="button" (click)="clearFilters()">
+        <span nz-icon nzType="clear" nzTheme="outline"></span>
+        Réinitialiser
+      </button>
+    </div>
+
     <nz-table
       #usersTable
-      [nzData]="users"
+      [nzData]="filteredUsers"
       [nzPageSize]="10"
       nzShowSizeChanger
       [nzFrontPagination]="true"
-      [nzScroll]="{ x: '1000px' }"
+      [nzScroll]="{ x: '1100px' }"
     >
       <thead>
         <tr>
           <th nzWidth="60px"></th>
           <th>Nom</th>
+          <th>CIN</th>
           <th>Email</th>
           <th>Utilisateur</th>
           <th>Rôle</th>
@@ -41,6 +71,7 @@
             ></nz-avatar>
           </td>
           <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.cin || '—' }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.username }}</td>
           <td>
@@ -83,7 +114,7 @@
       </tbody>
     </nz-table>
 
-    <nz-empty *ngIf="!loading && users.length === 0" nzNotFoundContent="Aucun utilisateur"></nz-empty>
+    <nz-empty *ngIf="!loading && filteredUsers.length === 0" nzNotFoundContent="Aucun utilisateur"></nz-empty>
   </nz-spin>
 
 <nz-modal
@@ -143,6 +174,13 @@
         <nz-form-label nzRequired>Email</nz-form-label>
         <nz-form-control nzErrorTip="Email invalide">
           <input nz-input formControlName="email" placeholder="email@daam.tn" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>CIN</nz-form-label>
+        <nz-form-control nzErrorTip="CIN invalide (8 chiffres)">
+          <input nz-input formControlName="cin" placeholder="8 chiffres" maxlength="8" />
         </nz-form-control>
       </nz-form-item>
 

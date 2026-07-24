@@ -44,6 +44,16 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   trackingSaving = false;
   trackingForm!: FormGroup;
 
+  filterFirstName = '';
+  filterLastName = '';
+  filterCin = '';
+
+  historyVisible = false;
+  historyLoading = false;
+  historyApplications: JobApplication[] = [];
+  historyCandidate: JobApplication | null = null;
+  historyExpandedId: string | null = null;
+
   constructor(
     readonly authService: AuthService,
     private readonly recruitmentService: RecruitmentService,
@@ -99,6 +109,12 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       : "Planifier l'entretien en ligne";
   }
 
+  get historyModalTitle(): string {
+    const c = this.historyCandidate?.candidate;
+    if (!c) return 'Historique des candidatures';
+    return `Historique — ${c.firstName} ${c.lastName}`;
+  }
+
   ngOnDestroy(): void {
     this.revokeCvObjectUrl();
   }
@@ -125,6 +141,59 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
     this.hideCvPreview();
     this.patchTrackingForm(app);
     this.detailVisible = true;
+  }
+
+  openHistory(app: JobApplication): void {
+    this.historyCandidate = app;
+    this.historyVisible = true;
+    this.historyLoading = true;
+    this.historyApplications = [];
+    this.historyExpandedId = null;
+
+    this.recruitmentService.getCandidateApplicationHistory(app.candidateUserId).subscribe({
+      next: (response) => {
+        this.historyLoading = false;
+        if (response.success && response.data) {
+          this.historyApplications = response.data;
+          const others = response.data.filter((a) => a.applicationId !== app.applicationId);
+          if (others.length > 0) {
+            this.historyExpandedId = others[0].applicationId;
+          } else if (response.data.length === 1) {
+            this.historyExpandedId = response.data[0].applicationId;
+          }
+        }
+      },
+      error: () => {
+        this.historyLoading = false;
+        this.message.error("Impossible de charger l'historique du candidat");
+      }
+    });
+  }
+
+  closeHistory(): void {
+    this.historyVisible = false;
+    this.historyCandidate = null;
+    this.historyApplications = [];
+    this.historyExpandedId = null;
+  }
+
+  toggleHistoryPanel(applicationId: string): void {
+    this.historyExpandedId = this.historyExpandedId === applicationId ? null : applicationId;
+  }
+
+  previousApplicationsCount(): number {
+    if (!this.historyCandidate) {
+      return 0;
+    }
+    return this.historyApplications.filter(
+      (a) => a.applicationId !== this.historyCandidate!.applicationId
+    ).length;
+  }
+
+  interviewTypeLabel(app: JobApplication): string {
+    if (app.meetingProvider === 'PHYSICAL') return 'Entretien physique';
+    if (app.googleMeetLink || app.meetingProvider) return 'Entretien en ligne';
+    return '—';
   }
 
   exportMonthlyExcel(): void {
@@ -463,8 +532,9 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
 
   private rebuildGroups(): void {
     const byRecruitment = new Map<string, RecruitmentApplicationsGroup>();
+    const filtered = this.getFilteredApplications();
 
-    for (const app of this.applications) {
+    for (const app of filtered) {
       const key = app.recruitmentId;
       let group = byRecruitment.get(key);
       if (!group) {
@@ -490,6 +560,34 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
         })
       }))
       .sort((a, b) => a.recruitmentTitle.localeCompare(b.recruitmentTitle, 'fr'));
+  }
+
+  getFilteredApplications(): JobApplication[] {
+    const first = this.filterFirstName.trim().toLowerCase();
+    const last = this.filterLastName.trim().toLowerCase();
+    const cin = this.filterCin.trim().toLowerCase();
+
+    return this.applications.filter((app) => {
+      const c = app.candidate;
+      if (!c) {
+        return !first && !last && !cin;
+      }
+      const matchFirst = !first || (c.firstName || '').toLowerCase().includes(first);
+      const matchLast = !last || (c.lastName || '').toLowerCase().includes(last);
+      const matchCin = !cin || (c.cin || '').toLowerCase().includes(cin);
+      return matchFirst && matchLast && matchCin;
+    });
+  }
+
+  applyFilters(): void {
+    this.rebuildGroups();
+  }
+
+  clearFilters(): void {
+    this.filterFirstName = '';
+    this.filterLastName = '';
+    this.filterCin = '';
+    this.rebuildGroups();
   }
 
   private loadCvPreview(): void {

@@ -10,14 +10,50 @@
 </div>
 
 <nz-spin [nzSpinning]="loading">
-  <div class="empty-state" *ngIf="!loading && applications.length === 0">
-    <p>Aucun candidat admis pour le moment.</p>
+  <div class="filter-bar">
+    <input
+      nz-input
+      placeholder="Prénom"
+      [(ngModel)]="filterFirstName"
+      (ngModelChange)="applyFilters()"
+      class="filter-input"
+    />
+    <input
+      nz-input
+      placeholder="Nom"
+      [(ngModel)]="filterLastName"
+      (ngModelChange)="applyFilters()"
+      class="filter-input"
+    />
+    <input
+      nz-input
+      placeholder="CIN"
+      [(ngModel)]="filterCin"
+      (ngModelChange)="applyFilters()"
+      class="filter-input filter-cin"
+      maxlength="8"
+    />
+    <button nz-button nzType="default" type="button" (click)="clearFilters()">
+      <span nz-icon nzType="clear" nzTheme="outline"></span>
+      Réinitialiser
+    </button>
   </div>
 
-  <nz-table *ngIf="applications.length" [nzData]="applications" [nzFrontPagination]="true" [nzPageSize]="10">
+  <div class="empty-state" *ngIf="!loading && filteredApplications.length === 0">
+    <p>{{ applications.length ? 'Aucun résultat pour ces filtres.' : 'Aucun candidat admis pour le moment.' }}</p>
+  </div>
+
+  <nz-table
+    *ngIf="filteredApplications.length"
+    #hiredTable
+    [nzData]="filteredApplications"
+    [nzFrontPagination]="true"
+    [nzPageSize]="10"
+  >
     <thead>
       <tr>
         <th>Candidat</th>
+        <th>CIN</th>
         <th>Poste</th>
         <th>Agence</th>
         <th>Prise de fonction</th>
@@ -27,7 +63,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let app of applications">
+      <tr *ngFor="let app of hiredTable.data">
         <td>
           <div class="candidate-cell">
             <nz-avatar
@@ -40,6 +76,7 @@
             </div>
           </div>
         </td>
+        <td>{{ app.candidate?.cin || '-' }}</td>
         <td>{{ app.recruitmentTitle }}</td>
         <td>{{ app.companyName || app.zoneName || '-' }}</td>
         <td>{{ app.hireStartDate | date:'dd/MM/yyyy' }}</td>
@@ -70,6 +107,7 @@
           {{ app.candidate?.firstName }} {{ app.candidate?.lastName }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Email">{{ app.candidate?.email || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="CIN">{{ app.candidate?.cin || '-' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Téléphone">{{ app.candidate?.phoneNumber || '-' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Poste" [nzSpan]="2">{{ app.recruitmentTitle }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Agence">{{ app.companyName || '-' }}</nz-descriptions-item>

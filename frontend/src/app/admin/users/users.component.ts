@@ -14,6 +14,7 @@ import { UserProfile } from '../../models/auth.model';
 })
 export class UsersComponent implements OnInit {
   users: UserProfile[] = [];
+  filteredUsers: UserProfile[] = [];
   loading = false;
   isModalVisible = false;
   isEditMode = false;
@@ -22,6 +23,10 @@ export class UsersComponent implements OnInit {
   profileImagePreview: string | null = null;
   selectedUser: UserProfile | null = null;
   userForm!: FormGroup;
+
+  filterFirstName = '';
+  filterLastName = '';
+  filterCin = '';
 
   readonly roleOptions = [
     { label: 'RH', value: 'ROLE_RH' },
@@ -48,6 +53,7 @@ export class UsersComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.users = response.data;
+          this.applyFilters();
         }
       },
       error: () => {
@@ -55,6 +61,26 @@ export class UsersComponent implements OnInit {
         this.message.error('Erreur lors du chargement des utilisateurs');
       }
     });
+  }
+
+  applyFilters(): void {
+    const first = this.filterFirstName.trim().toLowerCase();
+    const last = this.filterLastName.trim().toLowerCase();
+    const cin = this.filterCin.trim().toLowerCase();
+
+    this.filteredUsers = this.users.filter((user) => {
+      const matchFirst = !first || (user.firstName || '').toLowerCase().includes(first);
+      const matchLast = !last || (user.lastName || '').toLowerCase().includes(last);
+      const matchCin = !cin || (user.cin || '').toLowerCase().includes(cin);
+      return matchFirst && matchLast && matchCin;
+    });
+  }
+
+  clearFilters(): void {
+    this.filterFirstName = '';
+    this.filterLastName = '';
+    this.filterCin = '';
+    this.applyFilters();
   }
 
   openCreateModal(): void {
@@ -77,6 +103,7 @@ export class UsersComponent implements OnInit {
       username: user.username,
       email: user.email,
       role: user.role,
+      cin: user.cin || '',
       phoneNumber: user.phoneNumber || '',
       address: user.address || '',
       profileImageUrl: user.profileImageUrl || '',
@@ -102,6 +129,11 @@ export class UsersComponent implements OnInit {
     }
 
     const raw = { ...this.userForm.value };
+    if (raw.cin) {
+      raw.cin = String(raw.cin).trim();
+    } else {
+      delete raw.cin;
+    }
     if (!raw.phoneNumber) delete raw.phoneNumber;
     if (!raw.address) delete raw.address;
     if (!raw.profileImageUrl) delete raw.profileImageUrl;
@@ -226,6 +258,7 @@ export class UsersComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       role: ['ROLE_RH', [Validators.required]],
+      cin: ['', [Validators.pattern(/^(\d{8})?$/)]],
       phoneNumber: [''],
       address: [''],
       profileImageUrl: [''],

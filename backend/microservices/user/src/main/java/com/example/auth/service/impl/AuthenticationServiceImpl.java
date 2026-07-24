@@ -5,6 +5,7 @@ import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.entity.User;
 import com.example.auth.enumeration.Role;
+import com.example.auth.exception.CinAlreadyExistsException;
 import com.example.auth.exception.EmailAlreadyExistsException;
 import com.example.auth.exception.UsernameAlreadyExistsException;
 import com.example.auth.repository.UserRepository;
@@ -48,6 +49,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
+        String cin = request.getCin() != null ? request.getCin().trim() : null;
+        if (cin != null && userRepository.existsByCin(cin)) {
+            throw new CinAlreadyExistsException("CIN already exists");
+        }
 
         Date now = new Date();
         User user = User.builder()
@@ -57,6 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .cin(cin)
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
                 .profileImageUrl(request.getProfileImageUrl())

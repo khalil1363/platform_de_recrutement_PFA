@@ -6,6 +6,7 @@ import com.example.auth.dto.UpdateProfileRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.entity.User;
 import com.example.auth.enumeration.Role;
+import com.example.auth.exception.CinAlreadyExistsException;
 import com.example.auth.exception.EmailAlreadyExistsException;
 import com.example.auth.exception.InvalidRoleException;
 import com.example.auth.exception.OperationNotAllowedException;
@@ -83,6 +84,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
+        String cin = normalizeCin(request.getCin());
+        if (cin != null && userRepository.existsByCin(cin)) {
+            throw new CinAlreadyExistsException("CIN already exists");
+        }
 
         String roleAuthority = resolveRoleAuthority(request.getRole());
         Date now = new Date();
@@ -94,6 +99,7 @@ public class UserServiceImpl implements UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .cin(cin)
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
                 .profileImageUrl(request.getProfileImageUrl())
@@ -132,9 +138,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmailAndUserIdNot(request.getEmail(), user.getUserId())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
+        ensureCinAvailable(normalizeCin(request.getCin()), user.getUserId());
 
         applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
-                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl(), request.getMeetingLink());
+                request.getCin(), request.getPhoneNumber(), request.getAddress(),
+                request.getProfileImageUrl(), request.getMeetingLink());
 
         if (StringUtils.hasText(request.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -155,10 +163,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmailAndUserIdNot(request.getEmail(), userId)) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
+        ensureCinAvailable(normalizeCin(request.getCin()), userId);
 
         String roleAuthority = resolveRoleAuthority(request.getRole());
         applyProfileFields(user, request.getFirstName(), request.getLastName(), request.getEmail(),
-                request.getPhoneNumber(), request.getAddress(), request.getProfileImageUrl(), request.getMeetingLink());
+                request.getCin(), request.getPhoneNumber(), request.getAddress(),
+                request.getProfileImageUrl(), request.getMeetingLink());
 
         user.setRole(roleAuthority);
         user.getAuthorities().clear();
@@ -188,14 +198,29 @@ public class UserServiceImpl implements UserService {
     }
 
     private void applyProfileFields(User user, String firstName, String lastName, String email,
-                                    String phoneNumber, String address, String profileImageUrl, String meetingLink) {
+                                    String cin, String phoneNumber, String address,
+                                    String profileImageUrl, String meetingLink) {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
+        user.setCin(normalizeCin(cin));
         user.setPhoneNumber(phoneNumber);
         user.setAddress(address);
         user.setProfileImageUrl(profileImageUrl);
         user.setMeetingLink(meetingLink);
+    }
+
+    private String normalizeCin(String cin) {
+        if (!StringUtils.hasText(cin)) {
+            return null;
+        }
+        return cin.trim();
+    }
+
+    private void ensureCinAvailable(String cin, String userId) {
+        if (cin != null && userRepository.existsByCinAndUserIdNot(cin, userId)) {
+            throw new CinAlreadyExistsException("CIN already exists");
+        }
     }
 
     private String resolveRoleAuthority(String role) {
@@ -231,6 +256,7 @@ public class UserServiceImpl implements UserService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .cin(user.getCin())
                 .address(user.getAddress())
                 .profileImageUrl(user.getProfileImageUrl())
                 .meetingLink(user.getMeetingLink())

@@ -4,42 +4,61 @@
     nzCollapsible
     [(nzCollapsed)]="isCollapsed"
     [nzTrigger]="null"
-    [nzWidth]="268"
+    [nzWidth]="280"
     nzTheme="dark"
   >
     <div class="sider-brand" [class.collapsed]="isCollapsed">
-      <img src="daam-logo.png" alt="DAAM" />
+      <div class="brand-logo-wrap">
+        <img src="daam-logo.png" alt="DAAM" />
+      </div>
       <div class="sider-brand-text" *ngIf="!isCollapsed">
-        DAAM RH
-        <small>Administration</small>
+        <span class="brand-title">DAAM RH</span>
+        <span class="brand-subtitle">Administration</span>
       </div>
     </div>
 
-    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-menu-item routerLink="/admin/users" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="team" nzTheme="outline"></span>
-        <span>Utilisateurs</span>
-      </li>
-      <li nz-menu-item routerLink="/admin/zones" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="environment" nzTheme="outline"></span>
-        <span>Zones</span>
-      </li>
-      <li nz-menu-item routerLink="/admin/rh-assignments" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="usergroup-add" nzTheme="outline"></span>
-        <span>Affectation RH</span>
-      </li>
-      <li nz-menu-item routerLink="/admin/companies" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="bank" nzTheme="outline"></span>
-        <span>Agences</span>
-      </li>
-      <li nz-menu-item routerLink="/admin/profile" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="idcard" nzTheme="outline"></span>
-        <span>Mon profil</span>
-      </li>
-    </ul>
+    <div class="sider-nav" [class.collapsed]="isCollapsed">
+      <p class="nav-section-label" *ngIf="!isCollapsed">Administration</p>
+      <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+        <li nz-menu-item routerLink="/admin/users" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="team" nzTheme="outline"></span>
+          <span>Utilisateurs</span>
+        </li>
+        <li nz-menu-item routerLink="/admin/zones" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="environment" nzTheme="outline"></span>
+          <span>Zones</span>
+        </li>
+        <li nz-menu-item routerLink="/admin/rh-assignments" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="usergroup-add" nzTheme="outline"></span>
+          <span>Affectation RH</span>
+        </li>
+        <li nz-menu-item routerLink="/admin/companies" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="bank" nzTheme="outline"></span>
+          <span>Agences</span>
+        </li>
+        <li nz-menu-item routerLink="/admin/profile" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="idcard" nzTheme="outline"></span>
+          <span>Mon profil</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sider-profile" *ngIf="!isCollapsed && currentUser">
+      <nz-avatar
+        [nzSize]="40"
+        [nzSrc]="authService.resolveImageUrl(currentUser.profileImageUrl) || undefined"
+        nzIcon="user"
+      ></nz-avatar>
+      <div class="sider-profile-info">
+        <strong>{{ currentUser.firstName }} {{ currentUser.lastName }}</strong>
+        <span>Administrateur</span>
+      </div>
+    </div>
 
     <div class="sider-footer" *ngIf="!isCollapsed">
-      <p>Gérez les zones, les RH et les agences du réseau DAAM.</p>
+      <div class="sider-footer-card">
+        <p>Gérez les zones, les RH et les agences du réseau DAAM.</p>
+      </div>
     </div>
   </nz-sider>
 

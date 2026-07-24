@@ -120,6 +120,20 @@
               </nz-form-item>
 
               <nz-form-item>
+                <nz-form-control nzErrorTip="CIN requis (8 chiffres)">
+                  <nz-input-group nzPrefixIcon="idcard">
+                    <input
+                      nz-input
+                      formControlName="cin"
+                      placeholder="CIN (8 chiffres)"
+                      maxlength="8"
+                      inputmode="numeric"
+                    />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
                 <nz-form-control>
                   <nz-input-group nzPrefixIcon="phone">
                     <input nz-input formControlName="phoneNumber" placeholder="Téléphone (optionnel)" />

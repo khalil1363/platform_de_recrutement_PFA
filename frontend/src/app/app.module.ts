@@ -33,7 +33,10 @@ import {
   SendOutline,
   EyeOutline,
   EyeInvisibleOutline,
-  DownloadOutline
+  DownloadOutline,
+  SearchOutline,
+  ClearOutline,
+  FileExcelOutline
 } from '@ant-design/icons-angular/icons';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -69,7 +72,10 @@ const icons: IconDefinition[] = [
   SendOutline,
   EyeOutline,
   EyeInvisibleOutline,
-  DownloadOutline
+  DownloadOutline,
+  SearchOutline,
+  ClearOutline,
+  FileExcelOutline
 ];
 
 @NgModule({

@@ -11,6 +11,7 @@ public class UserDto {
     private String username;
     private String email;
     private String phoneNumber;
+    private String cin;
     private String address;
     private String profileImageUrl;
     private String role;

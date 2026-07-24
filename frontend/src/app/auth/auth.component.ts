@@ -88,6 +88,9 @@ export class AuthComponent implements OnInit {
 
     this.registerLoading = true;
     const payload = { ...this.registerForm.value };
+    if (payload.cin) {
+      payload.cin = String(payload.cin).trim();
+    }
     if (!payload.phoneNumber) {
       delete payload.phoneNumber;
     }
@@ -163,6 +166,7 @@ export class AuthComponent implements OnInit {
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      cin: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
       phoneNumber: [''],
       address: [''],
       profileImageUrl: ['']

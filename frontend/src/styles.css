@@ -21,7 +21,7 @@
   --daam-radius-lg: 20px;
   --daam-gradient: linear-gradient(135deg, #2a4f3c 0%, #35654d 35%, #40a070 70%, #5cc492 100%);
   --daam-gradient-soft: linear-gradient(135deg, rgba(64, 160, 112, 0.08) 0%, rgba(92, 196, 146, 0.04) 100%);
-  --daam-sidebar-width: 268px;
+  --daam-sidebar-width: 280px;
 }
 
 * {
@@ -139,125 +139,267 @@ body {
 }
 
 .app-shell .shell-sider {
-  background: var(--daam-gradient) !important;
-  box-shadow: 4px 0 24px rgba(26, 46, 36, 0.15);
+  background: linear-gradient(180deg, #1a3328 0%, #234636 42%, #2d5644 100%) !important;
+  box-shadow: 8px 0 32px rgba(15, 30, 22, 0.22);
   position: relative;
   overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .app-shell .shell-sider ::ng-deep .ant-layout-sider-children {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .app-shell .shell-sider::before {
   content: '';
   position: absolute;
-  top: -80px;
-  right: -80px;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(92, 196, 146, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(64, 160, 112, 0.12) 0%, transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 55%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .app-shell .shell-sider::after {
   content: '';
   position: absolute;
-  bottom: 60px;
-  left: -40px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.14), transparent);
   pointer-events: none;
+  z-index: 1;
 }
 
 .app-shell .sider-brand {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 24px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 22px 18px 18px;
   position: relative;
   z-index: 1;
 }
 
 .app-shell .sider-brand.collapsed {
   justify-content: center;
-  padding: 24px 10px;
+  padding: 22px 10px 16px;
 }
 
-.app-shell .sider-brand img {
-  width: 46px;
-  height: 46px;
+.app-shell .brand-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+}
+
+.app-shell .sider-brand img,
+.app-shell .brand-logo-wrap img {
+  width: 34px;
+  height: 34px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
 }
 
 .app-shell .sider-brand-text {
   color: #fff;
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
+  min-width: 0;
 }
 
-.app-shell .sider-brand-text small {
+.app-shell .brand-title {
   display: block;
-  font-size: 0.7rem;
-  font-weight: 500;
-  opacity: 0.75;
-  letter-spacing: 1px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  line-height: 1.15;
+}
+
+.app-shell .brand-subtitle {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.app-shell .sider-nav {
+  flex: 1;
+  padding: 6px 0 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell .sider-nav.collapsed {
+  padding-top: 4px;
+}
+
+.app-shell .nav-section-label {
+  margin: 0 18px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
 }
 
 .app-shell .shell-sider .ant-menu-dark {
   background: transparent !important;
   border-inline-end: none !important;
-  position: relative;
-  z-index: 1;
 }
 
 .app-shell .shell-sider .ant-menu-dark .ant-menu-item {
-  margin: 4px 10px !important;
-  border-radius: var(--daam-radius-sm) !important;
-  height: 46px !important;
-  line-height: 46px !important;
+  position: relative;
+  margin: 6px 12px !important;
+  padding-left: 14px !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  line-height: 48px !important;
   font-weight: 600 !important;
-  transition: all 0.2s ease !important;
+  font-size: 0.92rem !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: visible;
+}
+
+.app-shell .shell-sider .ant-menu-dark .ant-menu-item .anticon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 10px !important;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 16px !important;
+  transition: all 0.25s ease;
+  vertical-align: middle;
 }
 
 .app-shell .shell-sider .ant-menu-dark .ant-menu-item-selected {
-  background: rgba(255, 255, 255, 0.18) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.app-shell .shell-sider .ant-menu-dark .ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 26px;
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(180deg, #b8f0d0 0%, #5cc492 100%);
+  box-shadow: 0 0 12px rgba(92, 196, 146, 0.55);
+}
+
+.app-shell .shell-sider .ant-menu-dark .ant-menu-item-selected .anticon {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .app-shell .shell-sider .ant-menu-dark .ant-menu-item:hover {
   background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  transform: translateX(2px);
 }
 
-.app-shell .sider-footer {
-  margin-top: auto;
-  padding: 16px 18px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.app-shell .shell-sider .ant-menu-dark .ant-menu-item:hover .anticon {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.app-shell .sider-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 14px 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
 }
 
+.app-shell .sider-profile ::ng-deep .ant-avatar {
+  background: linear-gradient(135deg, #5cc492, #40a070);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.app-shell .sider-profile-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-shell .sider-profile-info strong {
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-shell .sider-profile-info span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.app-shell .sider-footer {
+  margin-top: auto;
+  padding: 14px 18px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell .sider-footer-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .app-shell .sider-footer p {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .app-shell .shell-header {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   padding: 0 28px;
   height: 68px;
   display: flex;
@@ -267,6 +409,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 4px 20px rgba(26, 46, 36, 0.04);
 }
 
 .app-shell .header-left {
@@ -278,20 +421,26 @@ body {
 .app-shell .trigger-btn {
   font-size: 18px;
   color: var(--daam-primary-dark);
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--daam-border);
+  background: #fff;
+  transition: all 0.2s ease;
 }
 
 .app-shell .trigger-btn:hover {
   background: var(--daam-gradient-soft);
+  border-color: rgba(64, 160, 112, 0.25);
+  transform: translateY(-1px);
 }
 
 .app-shell .page-title {
   margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.12rem;
+  font-weight: 800;
   color: var(--daam-primary-dark);
+  letter-spacing: -0.2px;
 }
 
 .app-shell .header-right {
@@ -305,15 +454,33 @@ body {
   color: var(--daam-primary-dark);
   border: 1px solid var(--daam-border);
   font-weight: 700;
-  font-size: 0.8rem;
-  padding: 4px 14px;
-  border-radius: 20px;
+  font-size: 0.78rem;
+  padding: 5px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
 }
 
 .app-shell .user-name {
   font-weight: 600;
   color: var(--daam-text);
   font-size: 0.9rem;
+}
+
+.app-shell .user-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--daam-border);
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.app-shell .user-dropdown:hover {
+  background: var(--daam-gradient-soft);
+  border-color: rgba(64, 160, 112, 0.25);
 }
 
 .app-shell .shell-content {
@@ -328,6 +495,16 @@ body {
   box-shadow: var(--daam-shadow-md);
   border: 1px solid var(--daam-border);
   animation: fadeSlideUp 0.4s ease;
+}
+
+/* Collapsed sidebar tweaks */
+.app-shell .shell-sider.ant-layout-sider-collapsed .ant-menu-item .anticon {
+  margin-right: 0 !important;
+}
+
+.app-shell .shell-sider.ant-layout-sider-collapsed .ant-menu-item-selected::before {
+  left: 0;
+  height: 20px;
 }
 
 /* ---- Page sections ---- */

@@ -4,6 +4,28 @@
   gap: 10px;
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: #f5f8f6;
+  border: 1px solid rgba(53, 101, 77, 0.12);
+  border-radius: 12px;
+  align-items: center;
+}
+
+.filter-input {
+  flex: 1 1 160px;
+  min-width: 140px;
+  max-width: 240px;
+}
+
+.filter-cin {
+  max-width: 140px;
+}
+
 .muted {
   color: #888;
   font-size: 12px;

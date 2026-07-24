@@ -74,6 +74,11 @@ export class ProfileComponent implements OnInit {
     }
 
     const payload = { ...this.profileForm.value };
+    if (payload.cin) {
+      payload.cin = String(payload.cin).trim();
+    } else {
+      delete payload.cin;
+    }
     if (!payload.password) {
       delete payload.password;
     }
@@ -156,6 +161,7 @@ export class ProfileComponent implements OnInit {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      cin: ['', [Validators.pattern(/^(\d{8})?$/)]],
       phoneNumber: [''],
       address: [''],
       profileImageUrl: [''],
@@ -169,6 +175,7 @@ export class ProfileComponent implements OnInit {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      cin: user.cin || '',
       phoneNumber: user.phoneNumber || '',
       address: user.address || '',
       profileImageUrl: user.profileImageUrl || '',

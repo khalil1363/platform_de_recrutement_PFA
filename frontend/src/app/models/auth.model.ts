@@ -9,6 +9,7 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
+  cin: string;
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
@@ -28,6 +29,7 @@ export interface UserProfile {
   username: string;
   email: string;
   phoneNumber?: string;
+  cin?: string;
   address?: string;
   profileImageUrl?: string;
   meetingLink?: string;
@@ -43,6 +45,7 @@ export interface UpdateProfileRequest {
   firstName: string;
   lastName: string;
   email: string;
+  cin?: string;
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
@@ -55,6 +58,7 @@ export interface AdminUpdateUserRequest {
   lastName: string;
   email: string;
   role: string;
+  cin?: string;
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
@@ -69,6 +73,7 @@ export interface AdminCreateUserRequest {
   email: string;
   password: string;
   role: string;
+  cin?: string;
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;

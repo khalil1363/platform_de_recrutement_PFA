@@ -122,6 +122,12 @@ export class RecruitmentService {
     return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications`);
   }
 
+  getCandidateApplicationHistory(candidateUserId: string): Observable<ApiResponse<JobApplication[]>> {
+    return this.http.get<ApiResponse<JobApplication[]>>(
+      `${this.apiUrl}/applications/history/${candidateUserId}`
+    );
+  }
+
   updateApplicationTracking(
     applicationId: string,
     request: ApplicationTrackingUpdateRequest

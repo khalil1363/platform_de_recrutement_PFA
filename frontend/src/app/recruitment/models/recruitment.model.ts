@@ -103,6 +103,7 @@ export interface UserSummary {
   username: string;
   email: string;
   phoneNumber?: string;
+  cin?: string;
   profileImageUrl?: string;
 }
 

@@ -2,6 +2,7 @@ package com.example.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,10 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
+
+    @NotBlank(message = "CIN is required")
+    @Pattern(regexp = "^\\d{8}$", message = "CIN must be exactly 8 digits")
+    private String cin;
 
     @Size(max = 20, message = "Phone number must not exceed 20 characters")
     private String phoneNumber;

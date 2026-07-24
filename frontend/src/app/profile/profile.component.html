@@ -60,6 +60,7 @@
             {{ currentUser.lastLoginDate ? (currentUser.lastLoginDate | date: 'dd/MM/yyyy HH:mm') : '—' }}
           </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Email">{{ currentUser.email }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="CIN">{{ currentUser.cin || '—' }}</nz-descriptions-item>
         </nz-descriptions>
       </div>
 
@@ -86,6 +87,21 @@
             <nz-form-control nzErrorTip="Email invalide">
               <nz-input-group nzPrefixIcon="mail">
                 <input nz-input formControlName="email" [readonly]="!editMode" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>CIN</nz-form-label>
+            <nz-form-control nzErrorTip="CIN invalide (8 chiffres)">
+              <nz-input-group nzPrefixIcon="idcard">
+                <input
+                  nz-input
+                  formControlName="cin"
+                  [readonly]="!editMode"
+                  placeholder="8 chiffres"
+                  maxlength="8"
+                />
               </nz-input-group>
             </nz-form-control>
           </nz-form-item>

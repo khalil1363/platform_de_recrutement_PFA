@@ -4,38 +4,57 @@
     nzCollapsible
     [(nzCollapsed)]="isCollapsed"
     [nzTrigger]="null"
-    [nzWidth]="268"
+    [nzWidth]="280"
     nzTheme="dark"
   >
     <div class="sider-brand" [class.collapsed]="isCollapsed">
-      <img src="daam-logo.png" alt="DAAM" />
+      <div class="brand-logo-wrap">
+        <img src="daam-logo.png" alt="DAAM" />
+      </div>
       <div class="sider-brand-text" *ngIf="!isCollapsed">
-        DAAM RH
-        <small>Espace candidat</small>
+        <span class="brand-title">DAAM RH</span>
+        <span class="brand-subtitle">Espace candidat</span>
       </div>
     </div>
 
-    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-menu-item routerLink="/jobs" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{ exact: true }">
-        <span nz-icon nzType="solution" nzTheme="outline"></span>
-        <span>Offres d'emploi</span>
-      </li>
-      <li nz-menu-item routerLink="/jobs/applications" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="file-text" nzTheme="outline"></span>
-        <span>Mes candidatures</span>
-      </li>
-      <li nz-menu-item routerLink="/jobs/evaluations" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="form" nzTheme="outline"></span>
-        <span>Mes évaluations</span>
-      </li>
-      <li nz-menu-item routerLink="/jobs/profile" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="idcard" nzTheme="outline"></span>
-        <span>Mon profil</span>
-      </li>
-    </ul>
+    <div class="sider-nav" [class.collapsed]="isCollapsed">
+      <p class="nav-section-label" *ngIf="!isCollapsed">Navigation</p>
+      <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+        <li nz-menu-item routerLink="/jobs" routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{ exact: true }">
+          <span nz-icon nzType="solution" nzTheme="outline"></span>
+          <span>Offres d'emploi</span>
+        </li>
+        <li nz-menu-item routerLink="/jobs/applications" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="file-text" nzTheme="outline"></span>
+          <span>Mes candidatures</span>
+        </li>
+        <li nz-menu-item routerLink="/jobs/evaluations" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="form" nzTheme="outline"></span>
+          <span>Mes évaluations</span>
+        </li>
+        <li nz-menu-item routerLink="/jobs/profile" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="idcard" nzTheme="outline"></span>
+          <span>Mon profil</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sider-profile" *ngIf="!isCollapsed && currentUser">
+      <nz-avatar
+        [nzSize]="40"
+        [nzSrc]="authService.resolveImageUrl(currentUser.profileImageUrl) || undefined"
+        nzIcon="user"
+      ></nz-avatar>
+      <div class="sider-profile-info">
+        <strong>{{ currentUser.firstName }} {{ currentUser.lastName }}</strong>
+        <span>Candidat</span>
+      </div>
+    </div>
 
     <div class="sider-footer" *ngIf="!isCollapsed">
-      <p>Plateforme de recrutement DAAM — Trouvez votre place dans la microfinance tunisienne.</p>
+      <div class="sider-footer-card">
+        <p>Plateforme de recrutement DAAM — Trouvez votre place dans la microfinance tunisienne.</p>
+      </div>
     </div>
   </nz-sider>
 
