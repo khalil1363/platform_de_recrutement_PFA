@@ -4,6 +4,20 @@
   gap: 8px;
 }
 
+.page-header-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .empty-state {
   padding: 48px 16px;
   text-align: center;

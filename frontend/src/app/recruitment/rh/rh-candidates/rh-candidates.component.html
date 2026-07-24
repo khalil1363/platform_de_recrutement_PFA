@@ -3,10 +3,16 @@
     <h2>Candidatures par offre</h2>
     <p>Chaque recrutement a son classement CV (meilleur match en premier)</p>
   </div>
-  <button nz-button nzType="primary" [nzLoading]="exportLoading" (click)="exportMonthlyExcel()">
-    <span nz-icon nzType="file-excel" nzTheme="outline"></span>
-    Export Excel (par mois)
-  </button>
+  <div class="page-header-actions">
+    <button nz-button nzType="default" [nzLoading]="exportFullLoading" (click)="exportFullExcel()">
+      <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+      Export Excel (CRM complet)
+    </button>
+    <button nz-button nzType="primary" [nzLoading]="exportLoading" (click)="exportMonthlyExcel()">
+      <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+      Export Excel (par mois)
+    </button>
+  </div>
 </div>
 
 <nz-spin [nzSpinning]="loading">

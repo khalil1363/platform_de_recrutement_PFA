@@ -253,6 +253,19 @@ public class RecruitmentController {
                 .body(xlsx);
     }
 
+    @GetMapping("/applications/export-full.xlsx")
+    @PreAuthorize("hasAuthority('ROLE_RH')")
+    public ResponseEntity<byte[]> exportCandidatesFullExcel(
+            @AuthenticationPrincipal AuthUser user) {
+        byte[] xlsx = candidatesMonthlyExcelService.exportFullForRh(user);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"daam-candidats-complet.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(xlsx);
+    }
+
     @GetMapping("/applications/hired")
     @PreAuthorize("hasAuthority('ROLE_RH')")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getHiredApplications(

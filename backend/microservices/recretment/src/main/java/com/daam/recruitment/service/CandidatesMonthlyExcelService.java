@@ -55,11 +55,69 @@ public class CandidatesMonthlyExcelService {
 
     @Transactional(readOnly = true)
     public byte[] exportForRh(AuthUser authUser) {
-        List<ApplicationResponse> applications = recruitmentService.getApplicationsForRh(authUser).stream()
+        List<ApplicationResponse> applications = filterMonthlyApplications(
+                recruitmentService.getApplicationsForRh(authUser));
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ExcelStyles styles = createStyles(workbook);
+            Set<String> usedSheetNames = new HashSet<>();
+            writeMonthAndAgencySheets(workbook, applications, styles, usedSheetNames);
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalStateException("Impossible de générer l'export candidats: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportFullForRh(AuthUser authUser) {
+        List<ApplicationResponse> allApplications = recruitmentService.getApplicationsForRh(authUser).stream()
+                .sorted(Comparator.comparing(
+                        ApplicationResponse::getAppliedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ExcelStyles styles = createStyles(workbook);
+            Set<String> usedSheetNames = new HashSet<>();
+
+            writeCrmSheet(workbook, allApplications, styles, usedSheetNames);
+
+            Map<String, List<ApplicationResponse>> byRecruitmentAgency = allApplications.stream()
+                    .collect(Collectors.groupingBy(
+                            this::recruitmentAgencyKey,
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+            writeRecruitmentAgencyIndex(
+                    workbook,
+                    byRecruitmentAgency,
+                    styles.headerStyle(),
+                    styles.titleStyle(),
+                    styles.textStyle(),
+                    styles.altRowStyle(),
+                    usedSheetNames
+            );
+
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalStateException("Impossible de générer l'export complet: " + e.getMessage(), e);
+        }
+    }
+
+    private List<ApplicationResponse> filterMonthlyApplications(List<ApplicationResponse> applications) {
+        return applications.stream()
                 .filter(a -> a.getStatus() == ApplicationStatus.HIRED
                         || a.getStatus() == ApplicationStatus.REJECTED)
                 .toList();
+    }
 
+    private void writeMonthAndAgencySheets(
+            XSSFWorkbook workbook,
+            List<ApplicationResponse> applications,
+            ExcelStyles styles,
+            Set<String> usedSheetNames) {
         Map<YearMonth, List<ApplicationResponse>> byMonth = applications.stream()
                 .collect(Collectors.groupingBy(
                         this::monthKey,
@@ -74,78 +132,235 @@ public class CandidatesMonthlyExcelService {
                         Collectors.toList()
                 ));
 
-        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            XSSFCellStyle headerStyle = workbook.createCellStyle();
-            Font headerFont = workbook.createFont();
-            headerFont.setBold(true);
-            headerFont.setColor(IndexedColors.WHITE.getIndex());
-            headerStyle.setFont(headerFont);
-            headerStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 0, (byte) 51, (byte) 102}, null));
-            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            headerStyle.setAlignment(HorizontalAlignment.CENTER);
-            headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-            headerStyle.setWrapText(true);
-            setThinBorders(headerStyle);
+        if (byMonth.isEmpty()) {
+            Sheet empty = workbook.createSheet(uniqueSheetName("Vide", usedSheetNames));
+            empty.createRow(0).createCell(0).setCellValue("Aucune candidature Embauché ou Rejeté.");
+        } else {
+            for (Map.Entry<YearMonth, List<ApplicationResponse>> entry : byMonth.entrySet()) {
+                YearMonth ym = entry.getKey();
+                List<ApplicationResponse> monthRows = entry.getValue().stream()
+                        .sorted(Comparator
+                                .comparing(this::sortDate, Comparator.nullsLast(Comparator.naturalOrder()))
+                                .thenComparing(a -> a.getStatus() == ApplicationStatus.HIRED ? 0 : 1))
+                        .toList();
 
-            XSSFCellStyle titleStyle = workbook.createCellStyle();
-            Font titleFont = workbook.createFont();
-            titleFont.setBold(true);
-            titleFont.setFontHeightInPoints((short) 12);
-            titleStyle.setFont(titleFont);
-
-            CellStyle textStyle = workbook.createCellStyle();
-            setThinBorders(textStyle);
-            textStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-            textStyle.setWrapText(true);
-
-            XSSFCellStyle altRowStyle = workbook.createCellStyle();
-            altRowStyle.cloneStyleFrom(textStyle);
-            altRowStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 226, (byte) 239, (byte) 218}, null));
-            altRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-            Set<String> usedSheetNames = new HashSet<>();
-
-            if (byMonth.isEmpty()) {
-                Sheet empty = workbook.createSheet("Vide");
-                empty.createRow(0).createCell(0).setCellValue("Aucune candidature Embauché ou Rejeté.");
-            } else {
-                for (Map.Entry<YearMonth, List<ApplicationResponse>> entry : byMonth.entrySet()) {
-                    YearMonth ym = entry.getKey();
-                    List<ApplicationResponse> monthRows = entry.getValue().stream()
-                            .sorted(Comparator
-                                    .comparing(this::sortDate, Comparator.nullsLast(Comparator.naturalOrder()))
-                                    .thenComparing(a -> a.getStatus() == ApplicationStatus.HIRED ? 0 : 1))
-                            .toList();
-
-                    String monthLabel = sheetNameFor(ym);
-                    writeCandidatesSheet(
-                            workbook,
-                            uniqueSheetName(monthLabel, usedSheetNames),
-                            "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR) + " (Embauché + Rejeté)",
-                            monthRows,
-                            headerStyle,
-                            titleStyle,
-                            textStyle,
-                            altRowStyle
-                    );
-                }
+                String monthLabel = sheetNameFor(ym);
+                writeCandidatesSheet(
+                        workbook,
+                        uniqueSheetName(monthLabel, usedSheetNames),
+                        "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR) + " (Embauché + Rejeté)",
+                        monthRows,
+                        styles.headerStyle(),
+                        styles.titleStyle(),
+                        styles.textStyle(),
+                        styles.altRowStyle()
+                );
             }
-
-            writeRecruitmentAgencyIndex(
-                    workbook,
-                    byRecruitmentAgency,
-                    headerStyle,
-                    titleStyle,
-                    textStyle,
-                    altRowStyle,
-                    usedSheetNames
-            );
-
-            workbook.write(out);
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new IllegalStateException("Impossible de générer l'export candidats: " + e.getMessage(), e);
         }
+
+        writeRecruitmentAgencyIndex(
+                workbook,
+                byRecruitmentAgency,
+                styles.headerStyle(),
+                styles.titleStyle(),
+                styles.textStyle(),
+                styles.altRowStyle(),
+                usedSheetNames
+        );
+    }
+
+    private void writeCrmSheet(
+            XSSFWorkbook workbook,
+            List<ApplicationResponse> applications,
+            ExcelStyles styles,
+            Set<String> usedSheetNames) {
+        Sheet sheet = workbook.createSheet(uniqueSheetName("Suivi CRM", usedSheetNames));
+
+        Row title = sheet.createRow(0);
+        Cell titleCell = title.createCell(0);
+        titleCell.setCellValue("DAAM - SUIVI CANDIDATS (CRM)");
+        titleCell.setCellStyle(styles.titleStyle());
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, CRM_HEADERS.length - 1));
+
+        Row header = sheet.createRow(2);
+        header.setHeightInPoints(32);
+        for (int i = 0; i < CRM_HEADERS.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(CRM_HEADERS[i]);
+            cell.setCellStyle(styles.headerStyle());
+        }
+
+        int r = 3;
+        int id = 1;
+        for (ApplicationResponse app : applications) {
+            Row row = sheet.createRow(r);
+            CellStyle style = (r % 2 == 0) ? styles.altRowStyle() : styles.textStyle();
+            String[] values = toCrmRow(app, id++);
+            for (int c = 0; c < values.length; c++) {
+                Cell cell = row.createCell(c);
+                cell.setCellValue(values[c] != null ? values[c] : "");
+                cell.setCellStyle(style);
+            }
+            r++;
+        }
+
+        for (int i = 0; i < CRM_HEADERS.length; i++) {
+            sheet.setColumnWidth(i, crmColumnWidth(i));
+        }
+        sheet.createFreezePane(0, 3);
+        if (r > 3) {
+            sheet.setAutoFilter(new CellRangeAddress(2, r - 1, 0, CRM_HEADERS.length - 1));
+        }
+    }
+
+    private static final String[] CRM_HEADERS = {
+            "ID",
+            "Date Contact",
+            "Nom Candidat",
+            "Téléphone",
+            "Email",
+            "Source",
+            "Référence",
+            "Ancien Employeur",
+            "Diplôme",
+            "Poste CRM",
+            "Affectation / Agence",
+            "Type Contrat",
+            "Prétention SN",
+            "Disponibilité",
+            "Date Début",
+            "Staff Confi.",
+            "Indicateur",
+            "Date Entretien RH",
+            "Heure RH",
+            "Statut RH",
+            "Commentaire RH",
+            "Date Entretien Res",
+            "Heure Res",
+            "Statut Responsable",
+            "Commentaire Res",
+            "Référ Excel",
+            "Recrutement"
+    };
+
+    private String[] toCrmRow(ApplicationResponse app, int id) {
+        UserSummary c = app.getCandidate();
+        String fullName = "";
+        if (c != null) {
+            fullName = ((c.getFirstName() != null ? c.getFirstName() : "") + " "
+                    + (c.getLastName() != null ? c.getLastName() : "")).trim();
+        }
+
+        String source = firstNonBlank(
+                app.getProvenance(),
+                app.getKeejobReference() != null && !app.getKeejobReference().isBlank() ? "KEEJOB" : null,
+                "Plateforme DAAM"
+        );
+        String reference = firstNonBlank(app.getKeejobReference(), app.getInternalReference(), app.getCodeDossier());
+        String poste = firstNonBlank(app.getProfilMetier(), app.getRecruitmentTitle());
+        String affectation = firstNonBlank(app.getAffectation(), resolveAgenceName(app));
+        String contrat = firstNonBlank(app.getDureeContrat(), app.getHireContractType(), app.getFormatMission());
+        String pretention = firstNonBlank(app.getPretention(), app.getHireNetSalary(), app.getSalaireActuel(), app.getPrixMois());
+        String dateDebut = firstNonBlank(
+                app.getHireStartDate() != null ? app.getHireStartDate().format(DATE_FMT) : null,
+                app.getDateDebutMission() != null ? app.getDateDebutMission().format(DATE_FMT) : null
+        );
+        String interviewDate = app.getInterviewAt() != null ? app.getInterviewAt().format(DATE_FMT) : "";
+        String interviewTime = app.getInterviewAt() != null ? app.getInterviewAt().format(TIME_FMT) : "";
+        String referExcel = firstNonBlank(app.getCodeDossier(), app.getInternalReference());
+        String recrutement = app.getStatus() == ApplicationStatus.HIRED ? "Oui" : "Non";
+
+        return new String[]{
+                String.valueOf(id),
+                app.getAppliedAt() != null ? app.getAppliedAt().format(DATE_FMT) : "",
+                fullName,
+                c != null && c.getPhoneNumber() != null ? c.getPhoneNumber() : "",
+                c != null && c.getEmail() != null ? c.getEmail() : "",
+                source != null ? source : "",
+                reference != null ? reference : "",
+                firstNonBlank(app.getSituationPerso(), app.getImf(), app.getCommercialName()) != null
+                        ? firstNonBlank(app.getSituationPerso(), app.getImf(), app.getCommercialName()) : "",
+                app.getDiplomeEcole() != null ? app.getDiplomeEcole() : "",
+                poste != null ? poste : "",
+                affectation != null ? affectation : "",
+                contrat != null ? contrat : "",
+                pretention != null ? pretention : "",
+                app.getDisponibilite() != null ? app.getDisponibilite() : "",
+                dateDebut != null ? dateDebut : "",
+                app.getDesistement() != null ? app.getDesistement() : "",
+                firstNonBlank(app.getDeplacement(), app.getANegocier()) != null
+                        ? firstNonBlank(app.getDeplacement(), app.getANegocier()) : "",
+                interviewDate,
+                interviewTime,
+                rhStatusLabel(app.getStatus()),
+                app.getCommentairesRh() != null ? app.getCommentairesRh() : "",
+                "",
+                "",
+                responsableStatusLabel(app.getStatus()),
+                firstNonBlank(app.getRemarquesRh(), app.getObservation()) != null
+                        ? firstNonBlank(app.getRemarquesRh(), app.getObservation()) : "",
+                referExcel != null ? referExcel : "",
+                recrutement
+        };
+    }
+
+    private String rhStatusLabel(ApplicationStatus status) {
+        if (status == null) return "";
+        return switch (status) {
+            case SUBMITTED -> "EN ATTENTE";
+            case UNDER_REVIEW -> "REQUIS POUR RDV";
+            case ACCEPTED -> "VALIDE";
+            case REJECTED -> "NON RETENU";
+            case HIRED -> "EMBAUCHÉ";
+        };
+    }
+
+    private String responsableStatusLabel(ApplicationStatus status) {
+        if (status == null) return "";
+        return switch (status) {
+            case HIRED -> "Admis !";
+            case REJECTED -> "Non retenu";
+            default -> "";
+        };
+    }
+
+    private ExcelStyles createStyles(XSSFWorkbook workbook) {
+        XSSFCellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setColor(IndexedColors.WHITE.getIndex());
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 0, (byte) 51, (byte) 102}, null));
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerStyle.setWrapText(true);
+        setThinBorders(headerStyle);
+
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleFont.setFontHeightInPoints((short) 12);
+        titleStyle.setFont(titleFont);
+
+        CellStyle textStyle = workbook.createCellStyle();
+        setThinBorders(textStyle);
+        textStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        textStyle.setWrapText(true);
+
+        XSSFCellStyle altRowStyle = workbook.createCellStyle();
+        altRowStyle.cloneStyleFrom(textStyle);
+        altRowStyle.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 226, (byte) 239, (byte) 218}, null));
+        altRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        return new ExcelStyles(headerStyle, titleStyle, textStyle, altRowStyle);
+    }
+
+    private record ExcelStyles(
+            XSSFCellStyle headerStyle,
+            XSSFCellStyle titleStyle,
+            CellStyle textStyle,
+            XSSFCellStyle altRowStyle) {
     }
 
     private void writeCandidatesSheet(
@@ -385,6 +600,18 @@ public class CandidatesMonthlyExcelService {
             }
         }
         return null;
+    }
+
+    private int crmColumnWidth(int index) {
+        return switch (index) {
+            case 0 -> 6 * 256;
+            case 2 -> 24 * 256;
+            case 4 -> 26 * 256;
+            case 9 -> 22 * 256;
+            case 10 -> 22 * 256;
+            case 20, 24 -> 28 * 256;
+            default -> 14 * 256;
+        };
     }
 
     private int columnWidth(int index) {

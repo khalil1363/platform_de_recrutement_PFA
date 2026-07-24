@@ -40,6 +40,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   cvObjectUrl: string | null = null;
   analyzeLoading = false;
   exportLoading = false;
+  exportFullLoading = false;
   trackingSaving = false;
   trackingForm!: FormGroup;
 
@@ -142,6 +143,26 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       error: () => {
         this.exportLoading = false;
         this.message.error('Erreur lors de l\'export Excel');
+      }
+    });
+  }
+
+  exportFullExcel(): void {
+    this.exportFullLoading = true;
+    this.recruitmentService.exportCandidatesFullExcel().subscribe({
+      next: (blob) => {
+        this.exportFullLoading = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'daam-candidats-complet.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.message.success('Export Excel complet téléchargé (Suivi CRM + Recrutements Agences)');
+      },
+      error: () => {
+        this.exportFullLoading = false;
+        this.message.error('Erreur lors de l\'export Excel complet');
       }
     });
   }

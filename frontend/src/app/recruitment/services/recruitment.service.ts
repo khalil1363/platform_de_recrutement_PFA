@@ -138,6 +138,12 @@ export class RecruitmentService {
     });
   }
 
+  exportCandidatesFullExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/applications/export-full.xlsx`, {
+      responseType: 'blob'
+    });
+  }
+
   getHiredApplications(): Observable<ApiResponse<JobApplication[]>> {
     return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/applications/hired`);
   }
