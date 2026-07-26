@@ -3,7 +3,12 @@ package com.daam.recruitment.enumeration;
 public enum ApplicationStatus {
     SUBMITTED,
     UNDER_REVIEW,
+    /** Retenu (entretien / sélection) */
     ACCEPTED,
+    /** Retenu et embauché */
     HIRED,
-    REJECTED
+    /** Non retenu */
+    REJECTED,
+    /** Désisté */
+    DESISTED
 }

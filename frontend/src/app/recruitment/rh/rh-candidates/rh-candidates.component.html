@@ -110,11 +110,11 @@
               nz-button
               nzSize="small"
               nzType="primary"
-              *ngIf="app.status !== 'ACCEPTED' && app.status !== 'REJECTED' && app.status !== 'HIRED'"
+              *ngIf="app.status !== 'ACCEPTED' && !isFinalStatus(app.status)"
               [nzLoading]="actionLoading"
               (click)="updateStatus(app, 'ACCEPTED', 'ONLINE')"
             >
-              Accepter reunion en ligne
+              Retenu — réunion en ligne
             </button>
             <button
               nz-button
@@ -125,7 +125,7 @@
               [nzLoading]="actionLoading"
               (click)="updateStatus(app, 'ACCEPTED', 'PHYSICAL')"
             >
-              Planifier reunion physique
+              Planifier réunion physique
             </button>
             <button
               nz-button
@@ -141,11 +141,20 @@
               nz-button
               nzSize="small"
               nzDanger
-              [disabled]="app.status === 'REJECTED' || app.status === 'HIRED'"
+              [disabled]="isFinalStatus(app.status)"
               [nzLoading]="actionLoading"
               (click)="updateStatus(app, 'REJECTED')"
             >
-              Rejeter
+              Non retenu
+            </button>
+            <button
+              nz-button
+              nzSize="small"
+              [disabled]="isFinalStatus(app.status)"
+              [nzLoading]="actionLoading"
+              (click)="updateStatus(app, 'DESISTED')"
+            >
+              Désisté
             </button>
           </td>
         </tr>
@@ -199,9 +208,7 @@
           </button>
         </div>
         <p class="tracking-hint">
-          Colonnes Excel exactes : NOM DU CANDIDAT, N° DE TELEPHONE, EMAIL, PROVENANCE, IMF,
-          INTITULE DU POSTE, AFFECTATION, DATE DE L'ENTRETIEN, HEURE DE L'ENTRETIEN, STATUT,
-          DATE DE CONFIRMATION, DESISTEMENT, CONTRAT, COMPOSANTE, DATE D'INTEGRATION, PRETENTION, OBSERVATION.
+          Colonnes Excel (par mois) : NOM DU CANDIDAT … RESPONSABLE DE RECRUTEMENT, COWORKING.
         </p>
         <form nz-form [formGroup]="trackingForm" class="tracking-form">
           <div class="tracking-grid">
@@ -214,37 +221,45 @@
             <nz-form-item>
               <nz-form-label>IMF</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="diplomeEcole" placeholder="Diplôme / école" />
+                <input nz-input formControlName="imf" placeholder="IMF" />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-label>Intitulé du poste</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="profilMetier" placeholder="Ex: Chargé(e) de crédit" />
+                <nz-select
+                  formControlName="profilMetier"
+                  nzPlaceHolder="Sélectionner un poste"
+                  nzShowSearch
+                  nzAllowClear
+                >
+                  <nz-option *ngFor="let title of jobTitles" [nzValue]="title" [nzLabel]="title"></nz-option>
+                </nz-select>
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-label>Affectation</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="affectation" placeholder="Nom de l'agence" />
+                <nz-select
+                  formControlName="affectation"
+                  nzPlaceHolder="Sélectionner une agence"
+                  nzShowSearch
+                  nzAllowClear
+                >
+                  <nz-option *ngFor="let a of affectations" [nzValue]="a" [nzLabel]="a"></nz-option>
+                </nz-select>
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
-              <nz-form-label>Désistement</nz-form-label>
+              <nz-form-label>Hébergement</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="desistement" placeholder="Ex: Oui / Non / motif" />
+                <input nz-input formControlName="hebergement" placeholder="Ex: Oui / Non / détails" />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-label>Contrat</nz-form-label>
               <nz-form-control>
                 <input nz-input formControlName="dureeContrat" placeholder="Ex: CDI, CIVP, 6 mois" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Composante</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="composante" placeholder="Composante" />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
@@ -259,13 +274,22 @@
                 <input nz-input formControlName="pretention" placeholder="Ex: 1200 DT" />
               </nz-form-control>
             </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>Date de début potentielle</nz-form-label>
+              <nz-form-control>
+                <nz-date-picker formControlName="dateDebutPotentielle" nzFormat="yyyy-MM-dd" class="interview-picker"></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
           </div>
           <nz-form-item>
-            <nz-form-label>Observation</nz-form-label>
+            <nz-form-label>Commentaire</nz-form-label>
             <nz-form-control>
-              <textarea nz-input formControlName="observation" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+              <textarea nz-input formControlName="commentairesRh" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
             </nz-form-control>
           </nz-form-item>
+          <p class="tracking-hint" *ngIf="selectedApplication?.responsibleName">
+            Responsable de recrutement (offre) : <strong>{{ selectedApplication.responsibleName }}</strong>
+          </p>
         </form>
       </div>
 

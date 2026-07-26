@@ -20,7 +20,16 @@
         <div class="form-grid">
           <nz-form-item>
             <nz-form-label nzRequired>Titre</nz-form-label>
-            <nz-form-control><input nz-input formControlName="title" placeholder="Ex. Développeur Full Stack" /></nz-form-control>
+            <nz-form-control nzErrorTip="Sélectionnez un titre">
+              <nz-select
+                formControlName="title"
+                nzPlaceHolder="Sélectionner un poste"
+                nzShowSearch
+                nzAllowClear
+              >
+                <nz-option *ngFor="let title of jobTitles" [nzValue]="title" [nzLabel]="title"></nz-option>
+              </nz-select>
+            </nz-form-control>
           </nz-form-item>
           <nz-form-item>
             <nz-form-label nzRequired>Agence</nz-form-label>
@@ -40,6 +49,12 @@
               <nz-select formControlName="status">
                 <nz-option *ngFor="let s of statusOptions" [nzValue]="s.value" [nzLabel]="s.label"></nz-option>
               </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Responsable de recrutement</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="responsibleName" placeholder="Nom du responsable RH" />
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>

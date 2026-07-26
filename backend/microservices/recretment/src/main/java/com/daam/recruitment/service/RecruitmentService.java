@@ -4,7 +4,9 @@ import com.daam.recruitment.client.UserClient;
 import com.daam.recruitment.client.UserDto;
 import com.daam.recruitment.dto.RecruitmentDtos.*;
 import com.daam.recruitment.entity.*;
+import com.daam.recruitment.enumeration.AgencyAffectation;
 import com.daam.recruitment.enumeration.ApplicationStatus;
+import com.daam.recruitment.enumeration.JobTitle;
 import com.daam.recruitment.enumeration.RecruitmentStatus;
 import com.daam.recruitment.repository.*;
 import com.daam.recruitment.response.ApiResponse;
@@ -188,6 +190,16 @@ public class RecruitmentService {
         }
         return recruitmentRepository.findByStatus(RecruitmentStatus.PUBLISHED).stream()
                 .map(r -> toRecruitmentResponse(r, false)).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getJobTitles() {
+        return JobTitle.labels();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAffectations() {
+        return AgencyAffectation.labels();
     }
 
     @Transactional(readOnly = true)
@@ -473,6 +485,8 @@ public class RecruitmentService {
         if (request.getDesistement() != null) application.setDesistement(blankToNull(request.getDesistement()));
         if (request.getComposante() != null) application.setComposante(blankToNull(request.getComposante()));
         if (request.getObservation() != null) application.setObservation(blankToNull(request.getObservation()));
+        if (request.getHebergement() != null) application.setHebergement(blankToNull(request.getHebergement()));
+        if (request.getDateDebutPotentielle() != null) application.setDateDebutPotentielle(request.getDateDebutPotentielle());
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
 
@@ -511,7 +525,8 @@ public class RecruitmentService {
             AuthUser authUser) {
         ApplicationStatus status = request.getStatus();
         if (status != ApplicationStatus.ACCEPTED && status != ApplicationStatus.REJECTED
-                && status != ApplicationStatus.UNDER_REVIEW && status != ApplicationStatus.HIRED) {
+                && status != ApplicationStatus.UNDER_REVIEW && status != ApplicationStatus.HIRED
+                && status != ApplicationStatus.DESISTED) {
             throw new IllegalArgumentException("Invalid application status");
         }
         JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
@@ -612,7 +627,7 @@ public class RecruitmentService {
             return response;
         }
 
-        if (status == ApplicationStatus.REJECTED) {
+        if (status == ApplicationStatus.REJECTED || status == ApplicationStatus.DESISTED) {
             interviewService.cancelByApplication(application.getApplicationId());
             application.setInterviewAt(null);
             application.setInterviewEndAt(null);
@@ -799,7 +814,17 @@ public class RecruitmentService {
     }
 
     private void applyRequest(Recruitment r, RecruitmentRequest req, Company company) {
-        r.setTitle(req.getTitle());
+        String title = req.getTitle() != null ? req.getTitle().trim() : "";
+        Optional<JobTitle> matched = JobTitle.fromLabel(title);
+        if (matched.isPresent()) {
+            r.setTitle(matched.get().getLabel());
+        } else if (r.getTitle() != null && r.getTitle().equalsIgnoreCase(title)) {
+            // Keep legacy free-text titles already saved before the enum existed
+            r.setTitle(r.getTitle());
+        } else {
+            throw new IllegalArgumentException(
+                    "Titre de poste invalide. Veuillez sélectionner un titre dans la liste.");
+        }
         r.setDescription(req.getDescription());
         r.setResponsibilities(req.getResponsibilities());
         r.setTechnicalSkills(req.getTechnicalSkills());
@@ -991,6 +1016,11 @@ public class RecruitmentService {
                 .desistement(a.getDesistement())
                 .composante(a.getComposante())
                 .observation(a.getObservation())
+                .hebergement(a.getHebergement())
+                .dateDebutPotentielle(a.getDateDebutPotentielle())
+                .responsibleName(r.getResponsibleName())
+                .coworking(r.isCoworking())
+                .coworkingMonth(r.getCoworkingMonth())
                 .keejobReference(r.getKeejobReference())
                 .internalReference(r.getInternalReference())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)

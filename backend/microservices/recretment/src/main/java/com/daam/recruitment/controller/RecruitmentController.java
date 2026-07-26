@@ -137,6 +137,20 @@ public class RecruitmentController {
     }
 
     // ---- Recruitments ----
+    @GetMapping("/job-titles")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<String>>> getJobTitles() {
+        return ResponseEntity.ok(ApiResponse.success("Job titles",
+                recruitmentService.getJobTitles(), HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/affectations")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<String>>> getAffectations() {
+        return ResponseEntity.ok(ApiResponse.success("Affectations",
+                recruitmentService.getAffectations(), HttpStatus.OK.value()));
+    }
+
     @PostMapping("/recruitments")
     @PreAuthorize("hasAuthority('ROLE_RH')")
     public ResponseEntity<ApiResponse<RecruitmentResponse>> createRecruitment(

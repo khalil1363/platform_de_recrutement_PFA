@@ -109,6 +109,10 @@ public class JobApplication {
     private String composante;
     @Column(columnDefinition = "TEXT")
     private String observation;
+    @Column(length = 255)
+    private String hebergement;
+    /** Potential start date (DATE DE DEBUT POTENTIELLE). */
+    private java.time.LocalDate dateDebutPotentielle;
 
     @CreationTimestamp private LocalDateTime appliedAt;
 

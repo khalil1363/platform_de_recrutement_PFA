@@ -1,5 +1,5 @@
 export type RecruitmentStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
-export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'HIRED' | 'REJECTED';
+export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'HIRED' | 'REJECTED' | 'DESISTED';
 
 export interface Zone {
   zoneId: string;
@@ -179,6 +179,11 @@ export interface JobApplication {
   desistement?: string;
   composante?: string;
   observation?: string;
+  hebergement?: string;
+  dateDebutPotentielle?: string;
+  responsibleName?: string;
+  coworking?: boolean;
+  coworkingMonth?: string | null;
   keejobReference?: string;
   internalReference?: string;
   city?: string;
@@ -213,6 +218,8 @@ export interface ApplicationTrackingUpdateRequest {
   desistement?: string | null;
   composante?: string | null;
   observation?: string | null;
+  hebergement?: string | null;
+  dateDebutPotentielle?: string | null;
 }
 
 export interface ApplicationStatusUpdateRequest {

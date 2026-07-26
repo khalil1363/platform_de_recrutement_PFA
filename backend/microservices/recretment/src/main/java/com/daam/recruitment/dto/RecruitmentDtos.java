@@ -293,6 +293,8 @@ public final class RecruitmentDtos {
         private String desistement;
         private String composante;
         private String observation;
+        private String hebergement;
+        private java.time.LocalDate dateDebutPotentielle;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -358,6 +360,12 @@ public final class RecruitmentDtos {
         private String desistement;
         private String composante;
         private String observation;
+        private String hebergement;
+        private java.time.LocalDate dateDebutPotentielle;
+        /** From linked recruitment offer. */
+        private String responsibleName;
+        private boolean coworking;
+        private java.time.LocalDate coworkingMonth;
         private String keejobReference;
         private String internalReference;
         private LocalDateTime appliedAt;

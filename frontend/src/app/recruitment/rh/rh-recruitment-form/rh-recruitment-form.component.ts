@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { RecruitmentService } from '../../services/recruitment.service';
 import { Company, Qcm, RecruitmentRequest } from '../../models/recruitment.model';
+import { JOB_TITLES } from '../../constants/job-titles';
 
 @Component({
   selector: 'app-rh-recruitment-form',
@@ -14,6 +15,7 @@ export class RhRecruitmentFormComponent implements OnInit {
   form!: FormGroup;
   companies: Company[] = [];
   qcms: Qcm[] = [];
+  jobTitles: string[] = [...JOB_TITLES];
   loading = false;
   saving = false;
   isEdit = false;
@@ -37,6 +39,7 @@ export class RhRecruitmentFormComponent implements OnInit {
     this.buildForm();
     this.loadCompanies();
     this.loadQcms();
+    this.loadJobTitles();
     this.recruitmentId = this.route.snapshot.paramMap.get('id') || '';
     this.isEdit = !!this.recruitmentId && this.route.snapshot.url.some((s) => s.path === 'edit');
     if (this.isEdit) {
@@ -110,6 +113,16 @@ export class RhRecruitmentFormComponent implements OnInit {
     });
   }
 
+  loadJobTitles(): void {
+    this.recruitmentService.getJobTitles().subscribe({
+      next: (response) => {
+        if (response.success && response.data?.length) {
+          this.jobTitles = response.data;
+        }
+      }
+    });
+  }
+
   loadRecruitment(): void {
     this.loading = true;
     this.recruitmentService.getRecruitment(this.recruitmentId).subscribe({
@@ -117,6 +130,9 @@ export class RhRecruitmentFormComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           const data = response.data;
+          if (data.title && !this.jobTitles.includes(data.title)) {
+            this.jobTitles = [data.title, ...this.jobTitles];
+          }
           this.form.patchValue({
             title: data.title,
             companyId: data.companyId,

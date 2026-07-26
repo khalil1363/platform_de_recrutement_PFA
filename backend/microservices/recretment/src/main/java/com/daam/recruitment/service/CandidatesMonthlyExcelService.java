@@ -2,7 +2,9 @@ package com.daam.recruitment.service;
 
 import com.daam.recruitment.dto.RecruitmentDtos.ApplicationResponse;
 import com.daam.recruitment.dto.RecruitmentDtos.UserSummary;
+import com.daam.recruitment.enumeration.AgencyAffectation;
 import com.daam.recruitment.enumeration.ApplicationStatus;
+import com.daam.recruitment.enumeration.JobTitle;
 import com.daam.recruitment.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -38,13 +40,14 @@ public class CandidatesMonthlyExcelService {
             "DATE DE L'ENTRETIEN",
             "HEURE DE L'ENTRETIEN",
             "STATUT",
-            "DATE DE CONFIRMATION",
-            "DESISTEMENT",
+            "HEBERGEMENT",
             "CONTRAT",
-            "COMPOSANTE",
+            "COMMENTAIRE",
             "DATE D'INTEGRATION",
             "PRETENTION",
-            "OBSERVATION"
+            "DATE DE DEBUT POTENTIELLE",
+            "RESPONSABLE DE RECRUTEMENT",
+            "COWORKING"
     };
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -98,6 +101,7 @@ public class CandidatesMonthlyExcelService {
                     styles.altRowStyle(),
                     usedSheetNames
             );
+            writeListingSheet(workbook, styles, usedSheetNames);
 
             workbook.write(out);
             return out.toByteArray();
@@ -109,7 +113,9 @@ public class CandidatesMonthlyExcelService {
     private List<ApplicationResponse> filterMonthlyApplications(List<ApplicationResponse> applications) {
         return applications.stream()
                 .filter(a -> a.getStatus() == ApplicationStatus.HIRED
-                        || a.getStatus() == ApplicationStatus.REJECTED)
+                        || a.getStatus() == ApplicationStatus.REJECTED
+                        || a.getStatus() == ApplicationStatus.DESISTED
+                        || a.getStatus() == ApplicationStatus.ACCEPTED)
                 .toList();
     }
 
@@ -134,21 +140,23 @@ public class CandidatesMonthlyExcelService {
 
         if (byMonth.isEmpty()) {
             Sheet empty = workbook.createSheet(uniqueSheetName("Vide", usedSheetNames));
-            empty.createRow(0).createCell(0).setCellValue("Aucune candidature Embauché ou Rejeté.");
+            empty.createRow(0).createCell(0).setCellValue(
+                    "Aucune candidature (Retenu / Non retenu / Désisté) pour l'export mensuel.");
         } else {
             for (Map.Entry<YearMonth, List<ApplicationResponse>> entry : byMonth.entrySet()) {
                 YearMonth ym = entry.getKey();
                 List<ApplicationResponse> monthRows = entry.getValue().stream()
                         .sorted(Comparator
                                 .comparing(this::sortDate, Comparator.nullsLast(Comparator.naturalOrder()))
-                                .thenComparing(a -> a.getStatus() == ApplicationStatus.HIRED ? 0 : 1))
+                                .thenComparing(a -> a.getStatus() == ApplicationStatus.HIRED
+                                        || a.getStatus() == ApplicationStatus.ACCEPTED ? 0 : 1))
                         .toList();
 
                 String monthLabel = sheetNameFor(ym);
                 writeCandidatesSheet(
                         workbook,
                         uniqueSheetName(monthLabel, usedSheetNames),
-                        "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR) + " (Embauché + Rejeté)",
+                        "DAAM - CANDIDATS " + monthLabel.toUpperCase(FR),
                         monthRows,
                         styles.headerStyle(),
                         styles.titleStyle(),
@@ -167,6 +175,50 @@ public class CandidatesMonthlyExcelService {
                 styles.altRowStyle(),
                 usedSheetNames
         );
+        writeListingSheet(workbook, styles, usedSheetNames);
+    }
+
+    private void writeListingSheet(XSSFWorkbook workbook, ExcelStyles styles, Set<String> usedSheetNames) {
+        Sheet sheet = workbook.createSheet(uniqueSheetName("listing", usedSheetNames));
+
+        Row title = sheet.createRow(0);
+        Cell titleCell = title.createCell(0);
+        titleCell.setCellValue("DAAM - RÉFÉRENTIELS — AGENCES & POSTES");
+        titleCell.setCellStyle(styles.titleStyle());
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+
+        Row header = sheet.createRow(2);
+        header.setHeightInPoints(28);
+        Cell affectationHeader = header.createCell(0);
+        affectationHeader.setCellValue("AFFECTATION");
+        affectationHeader.setCellStyle(styles.headerStyle());
+        Cell posteHeader = header.createCell(1);
+        posteHeader.setCellValue("POSTE");
+        posteHeader.setCellStyle(styles.headerStyle());
+
+        List<String> affectations = AgencyAffectation.labels();
+        List<String> postes = JobTitle.labels();
+        int rowCount = Math.max(affectations.size(), postes.size());
+
+        for (int i = 0; i < rowCount; i++) {
+            Row row = sheet.createRow(i + 3);
+            CellStyle style = ((i + 3) % 2 == 0) ? styles.altRowStyle() : styles.textStyle();
+
+            Cell affectationCell = row.createCell(0);
+            affectationCell.setCellValue(i < affectations.size() ? affectations.get(i) : "");
+            affectationCell.setCellStyle(style);
+
+            Cell posteCell = row.createCell(1);
+            posteCell.setCellValue(i < postes.size() ? postes.get(i) : "");
+            posteCell.setCellStyle(style);
+        }
+
+        sheet.setColumnWidth(0, 28 * 256);
+        sheet.setColumnWidth(1, 48 * 256);
+        sheet.createFreezePane(0, 3);
+        if (rowCount > 0) {
+            sheet.setAutoFilter(new CellRangeAddress(2, 2 + rowCount, 0, 1));
+        }
     }
 
     private void writeCrmSheet(
@@ -215,32 +267,31 @@ public class CandidatesMonthlyExcelService {
 
     private static final String[] CRM_HEADERS = {
             "ID",
-            "Date Contact",
-            "Nom Candidat",
+            "Nom Complet",
             "Téléphone",
             "Email",
             "Source",
             "Référence",
             "Ancien Employeur",
-            "Diplôme",
-            "Poste CRM",
+            "Exp (ans)",
+            "Poste Ciblé",
             "Affectation / Agence",
             "Type Contrat",
-            "Prétention SN",
-            "Disponibilité",
+            "Prétention (DT)",
+            "Date Formation",
             "Date Début",
-            "Staff Confi.",
-            "Indicateur",
+            "Email Confirmé",
+            "Hébergement",
             "Date Entretien RH",
             "Heure RH",
             "Statut RH",
             "Commentaire RH",
-            "Date Entretien Res",
-            "Heure Res",
+            "Date Entretien Resp.",
+            "Heure Resp.",
             "Statut Responsable",
-            "Commentaire Res",
-            "Référ Excel",
-            "Recrutement"
+            "Commentaire Resp.",
+            "Délai (jours)",
+            "Sélectionné"
     };
 
     private String[] toCrmRow(ApplicationResponse app, int id) {
@@ -257,50 +308,67 @@ public class CandidatesMonthlyExcelService {
                 "Plateforme DAAM"
         );
         String reference = firstNonBlank(app.getKeejobReference(), app.getInternalReference(), app.getCodeDossier());
+        String ancienEmployeur = firstNonBlank(app.getSituationPerso(), app.getCommercialName(), app.getImf());
         String poste = firstNonBlank(app.getProfilMetier(), app.getRecruitmentTitle());
         String affectation = firstNonBlank(app.getAffectation(), resolveAgenceName(app));
         String contrat = firstNonBlank(app.getDureeContrat(), app.getHireContractType(), app.getFormatMission());
         String pretention = firstNonBlank(app.getPretention(), app.getHireNetSalary(), app.getSalaireActuel(), app.getPrixMois());
+        String dateFormation = "";
         String dateDebut = firstNonBlank(
                 app.getHireStartDate() != null ? app.getHireStartDate().format(DATE_FMT) : null,
                 app.getDateDebutMission() != null ? app.getDateDebutMission().format(DATE_FMT) : null
         );
+        boolean emailConfirmed = app.getStatus() == ApplicationStatus.ACCEPTED
+                || app.getStatus() == ApplicationStatus.HIRED;
+        String hebergement = firstNonBlank(app.getHebergement());
         String interviewDate = app.getInterviewAt() != null ? app.getInterviewAt().format(DATE_FMT) : "";
         String interviewTime = app.getInterviewAt() != null ? app.getInterviewAt().format(TIME_FMT) : "";
-        String referExcel = firstNonBlank(app.getCodeDossier(), app.getInternalReference());
-        String recrutement = app.getStatus() == ApplicationStatus.HIRED ? "Oui" : "Non";
+        String commentaireRh = firstNonBlank(app.getCommentairesRh());
+        String commentaireResp = firstNonBlank(app.getRemarquesRh(), app.getObservation());
+        String delaiJours = "";
+        if (app.getAppliedAt() != null && app.getInterviewAt() != null) {
+            long days = java.time.Duration.between(
+                    app.getAppliedAt().toLocalDate().atStartOfDay(),
+                    app.getInterviewAt().toLocalDate().atStartOfDay()
+            ).toDays();
+            delaiJours = String.valueOf(days);
+        } else if (app.getAppliedAt() != null && app.getHiredAt() != null) {
+            long days = java.time.Duration.between(
+                    app.getAppliedAt().toLocalDate().atStartOfDay(),
+                    app.getHiredAt().toLocalDate().atStartOfDay()
+            ).toDays();
+            delaiJours = String.valueOf(days);
+        }
+        String selectionne = (app.getStatus() == ApplicationStatus.ACCEPTED
+                || app.getStatus() == ApplicationStatus.HIRED) ? "Oui" : "Non";
 
         return new String[]{
                 String.valueOf(id),
-                app.getAppliedAt() != null ? app.getAppliedAt().format(DATE_FMT) : "",
                 fullName,
                 c != null && c.getPhoneNumber() != null ? c.getPhoneNumber() : "",
                 c != null && c.getEmail() != null ? c.getEmail() : "",
                 source != null ? source : "",
                 reference != null ? reference : "",
-                firstNonBlank(app.getSituationPerso(), app.getImf(), app.getCommercialName()) != null
-                        ? firstNonBlank(app.getSituationPerso(), app.getImf(), app.getCommercialName()) : "",
-                app.getDiplomeEcole() != null ? app.getDiplomeEcole() : "",
+                ancienEmployeur != null ? ancienEmployeur : "",
+                app.getExperienceYears() != null ? app.getExperienceYears() : "",
                 poste != null ? poste : "",
                 affectation != null ? affectation : "",
                 contrat != null ? contrat : "",
                 pretention != null ? pretention : "",
-                app.getDisponibilite() != null ? app.getDisponibilite() : "",
+                dateFormation,
                 dateDebut != null ? dateDebut : "",
-                app.getDesistement() != null ? app.getDesistement() : "",
-                firstNonBlank(app.getDeplacement(), app.getANegocier()) != null
-                        ? firstNonBlank(app.getDeplacement(), app.getANegocier()) : "",
+                emailConfirmed ? "Oui" : "Non",
+                hebergement != null ? hebergement : "",
                 interviewDate,
                 interviewTime,
                 rhStatusLabel(app.getStatus()),
-                app.getCommentairesRh() != null ? app.getCommentairesRh() : "",
+                commentaireRh != null ? commentaireRh : "",
                 "",
                 "",
                 responsableStatusLabel(app.getStatus()),
-                firstNonBlank(app.getRemarquesRh(), app.getObservation()) != null
-                        ? firstNonBlank(app.getRemarquesRh(), app.getObservation()) : "",
-                referExcel != null ? referExcel : "",
-                recrutement
+                commentaireResp != null ? commentaireResp : "",
+                delaiJours,
+                selectionne
         };
     }
 
@@ -308,18 +376,19 @@ public class CandidatesMonthlyExcelService {
         if (status == null) return "";
         return switch (status) {
             case SUBMITTED -> "EN ATTENTE";
-            case UNDER_REVIEW -> "REQUIS POUR RDV";
-            case ACCEPTED -> "VALIDE";
+            case UNDER_REVIEW -> "EN ATTENTE";
+            case ACCEPTED, HIRED -> "RETENU";
             case REJECTED -> "NON RETENU";
-            case HIRED -> "EMBAUCHÉ";
+            case DESISTED -> "DÉSISTÉ";
         };
     }
 
     private String responsableStatusLabel(ApplicationStatus status) {
         if (status == null) return "";
         return switch (status) {
-            case HIRED -> "Admis !";
+            case HIRED, ACCEPTED -> "Retenu";
             case REJECTED -> "Non retenu";
+            case DESISTED -> "Désisté";
             default -> "";
         };
     }
@@ -478,43 +547,54 @@ public class CandidatesMonthlyExcelService {
                 app.getKeejobReference() != null && !app.getKeejobReference().isBlank() ? "KEEJOB" : null,
                 "Plateforme DAAM"
         );
-        String IMF = firstNonBlank(app.getDiplomeEcole());
-        String poste = firstNonBlank(app.getProfilMetier(), app.getRecruitmentTitle());
+        String imf = firstNonBlank(app.getImf(), app.getDiplomeEcole());
+        String poste = firstNonBlank(app.getRecruitmentTitle(), app.getProfilMetier());
         String affectation = firstNonBlank(app.getAffectation(), resolveAgenceName(app));
         String interviewDate = app.getInterviewAt() != null ? app.getInterviewAt().format(DATE_FMT) : "";
         String interviewTime = app.getInterviewAt() != null ? app.getInterviewAt().format(TIME_FMT) : "";
-        String confirmationDate = firstNonBlank(
-                app.getHiredAt() != null ? app.getHiredAt().format(DATE_FMT) : null,
-                app.getStatus() == ApplicationStatus.ACCEPTED && app.getInterviewAt() != null
-                        ? app.getInterviewAt().format(DATE_FMT) : null
-        );
+        String hebergement = firstNonBlank(app.getHebergement());
         String contrat = firstNonBlank(app.getDureeContrat(), app.getHireContractType(), app.getFormatMission());
-        String composante = firstNonBlank(app.getComposante(), app.getImf());
-        String integration = firstNonBlank(
+        String commentaire = firstNonBlank(app.getCommentairesRh(), app.getRemarquesRh(), app.getObservation());
+        String dateIntegration = firstNonBlank(
                 app.getHireStartDate() != null ? app.getHireStartDate().format(DATE_FMT) : null,
                 app.getDateDebutMission() != null ? app.getDateDebutMission().format(DATE_FMT) : null
         );
-        String pretention = firstNonBlank(app.getPretention(), app.getDisponibilite(), app.getSalaireActuel(), app.getPrixMois());
-        String observation = firstNonBlank(app.getObservation(), app.getCommentairesRh(), app.getRemarquesRh());
+        String pretention = firstNonBlank(app.getPretention(), app.getHireNetSalary(), app.getSalaireActuel(), app.getPrixMois());
+        String dateDebutPotentielle = app.getDateDebutPotentielle() != null
+                ? app.getDateDebutPotentielle().format(DATE_FMT)
+                : "";
+        String responsable = firstNonBlank(app.getResponsibleName(), app.getContactName());
+        String coworking = "Non";
+        if (app.isCoworking()) {
+            if (app.getCoworkingMonth() != null) {
+                YearMonth ym = YearMonth.from(app.getCoworkingMonth());
+                String month = ym.getMonth().getDisplayName(java.time.format.TextStyle.FULL, FR);
+                month = month.substring(0, 1).toUpperCase(FR) + month.substring(1);
+                coworking = "Oui (" + month + " " + ym.getYear() + ")";
+            } else {
+                coworking = "Oui";
+            }
+        }
 
         return new String[]{
                 fullName,
                 c != null && c.getPhoneNumber() != null ? c.getPhoneNumber() : "",
                 c != null && c.getEmail() != null ? c.getEmail() : "",
                 provenance != null ? provenance : "",
-                IMF != null ? IMF : "",
+                imf != null ? imf : "",
                 poste != null ? poste.toUpperCase(FR) : "",
                 affectation != null ? affectation : "",
                 interviewDate,
                 interviewTime,
                 statusLabel(app.getStatus()),
-                confirmationDate != null ? confirmationDate : "",
-                app.getDesistement() != null ? app.getDesistement() : "",
+                hebergement != null ? hebergement : "",
                 contrat != null ? contrat : "",
-                composante != null ? composante : "",
-                integration != null ? integration : "",
+                commentaire != null ? commentaire : "",
+                dateIntegration != null ? dateIntegration : "",
                 pretention != null ? pretention : "",
-                observation != null ? observation : ""
+                dateDebutPotentielle,
+                responsable != null ? responsable : "",
+                coworking
         };
     }
 
@@ -531,11 +611,10 @@ public class CandidatesMonthlyExcelService {
     private String statusLabel(ApplicationStatus status) {
         if (status == null) return "";
         return switch (status) {
-            case SUBMITTED -> "SOUMISE";
-            case UNDER_REVIEW -> "EN COURS";
-            case ACCEPTED -> "OK";
-            case REJECTED -> "REJETÉ";
-            case HIRED -> "EMBAUCHÉ";
+            case SUBMITTED, UNDER_REVIEW -> "En attente";
+            case ACCEPTED, HIRED -> "Retenu";
+            case REJECTED -> "Non retenu";
+            case DESISTED -> "Désisté";
         };
     }
 
@@ -605,11 +684,12 @@ public class CandidatesMonthlyExcelService {
     private int crmColumnWidth(int index) {
         return switch (index) {
             case 0 -> 6 * 256;
-            case 2 -> 24 * 256;
-            case 4 -> 26 * 256;
-            case 9 -> 22 * 256;
-            case 10 -> 22 * 256;
-            case 20, 24 -> 28 * 256;
+            case 1 -> 24 * 256;
+            case 3 -> 26 * 256;
+            case 8 -> 26 * 256;
+            case 9 -> 24 * 256;
+            case 19, 23 -> 28 * 256;
+            case 25 -> 12 * 256;
             default -> 14 * 256;
         };
     }
@@ -619,9 +699,12 @@ public class CandidatesMonthlyExcelService {
             case 0 -> 28 * 256;
             case 1 -> 16 * 256;
             case 2 -> 26 * 256;
-            case 5 -> 26 * 256;
+            case 5 -> 28 * 256;
             case 6 -> 24 * 256;
-            case 16 -> 28 * 256;
+            case 10 -> 18 * 256;
+            case 12 -> 30 * 256;
+            case 16 -> 26 * 256;
+            case 17 -> 18 * 256;
             default -> 16 * 256;
         };
     }

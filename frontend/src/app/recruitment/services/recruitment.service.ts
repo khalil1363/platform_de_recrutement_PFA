@@ -79,6 +79,14 @@ export class RecruitmentService {
     return this.http.get<ApiResponse<Recruitment[]>>(`${this.apiUrl}/recruitments`);
   }
 
+  getJobTitles(): Observable<ApiResponse<string[]>> {
+    return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/job-titles`);
+  }
+
+  getAffectations(): Observable<ApiResponse<string[]>> {
+    return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/affectations`);
+  }
+
   getCoworkingDashboard(year?: number | null, month?: number | null): Observable<ApiResponse<CoworkingDashboard>> {
     const params: Record<string, string> = {};
     if (year != null && month != null) {

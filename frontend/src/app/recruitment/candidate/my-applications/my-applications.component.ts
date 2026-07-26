@@ -45,17 +45,20 @@ export class MyApplicationsComponent implements OnInit {
 
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
-      SUBMITTED: 'Soumise',
-      UNDER_REVIEW: 'En cours',
-      ACCEPTED: 'Acceptée',
-      REJECTED: 'Rejetée'
+      SUBMITTED: 'En attente',
+      UNDER_REVIEW: 'En attente',
+      ACCEPTED: 'Retenu',
+      HIRED: 'Retenu',
+      REJECTED: 'Non retenu',
+      DESISTED: 'Désisté'
     };
     return labels[status] || status;
   }
 
   statusColor(status: string): string {
-    if (status === 'ACCEPTED') return 'green';
+    if (status === 'ACCEPTED' || status === 'HIRED') return 'green';
     if (status === 'REJECTED') return 'red';
+    if (status === 'DESISTED') return 'orange';
     if (status === 'UNDER_REVIEW') return 'blue';
     return 'default';
   }

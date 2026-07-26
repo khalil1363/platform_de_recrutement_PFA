@@ -7,6 +7,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../../core/services/auth.service';
 import { RecruitmentService } from '../../services/recruitment.service';
 import { ApplicationStatus, ApplicationTrackingUpdateRequest, JobApplication } from '../../models/recruitment.model';
+import { AFFECTATIONS } from '../../constants/affectations';
+import { JOB_TITLES } from '../../constants/job-titles';
 
 interface RecruitmentApplicationsGroup {
   recruitmentId: string;
@@ -43,6 +45,8 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   exportFullLoading = false;
   trackingSaving = false;
   trackingForm!: FormGroup;
+  affectations: string[] = [...AFFECTATIONS];
+  jobTitles: string[] = [...JOB_TITLES];
 
   filterFirstName = '';
   filterLastName = '';
@@ -90,17 +94,35 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
     });
     this.trackingForm = this.fb.group({
       provenance: [''],
-      diplomeEcole: [''],
+      imf: [''],
       profilMetier: [''],
       affectation: [''],
-      desistement: [''],
+      hebergement: [''],
       dureeContrat: [''],
-      composante: [''],
+      commentairesRh: [''],
       dateDebutMission: [null],
       pretention: [''],
-      observation: ['']
+      dateDebutPotentielle: [null]
     });
+    this.loadReferentials();
     this.loadApplications();
+  }
+
+  loadReferentials(): void {
+    this.recruitmentService.getAffectations().subscribe({
+      next: (response) => {
+        if (response.success && response.data?.length) {
+          this.affectations = response.data;
+        }
+      }
+    });
+    this.recruitmentService.getJobTitles().subscribe({
+      next: (response) => {
+        if (response.success && response.data?.length) {
+          this.jobTitles = response.data;
+        }
+      }
+    });
   }
 
   get interviewModalTitle(): string {
@@ -243,15 +265,15 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
     const value = this.trackingForm.value;
     const request: ApplicationTrackingUpdateRequest = {
       provenance: value.provenance,
-      diplomeEcole: value.diplomeEcole,
+      imf: value.imf,
       profilMetier: value.profilMetier,
       affectation: value.affectation,
-      desistement: value.desistement,
+      hebergement: value.hebergement,
       dureeContrat: value.dureeContrat,
-      composante: value.composante,
+      commentairesRh: value.commentairesRh,
       dateDebutMission: this.formatLocalDateOrNull(value.dateDebutMission),
       pretention: value.pretention,
-      observation: value.observation
+      dateDebutPotentielle: this.formatLocalDateOrNull(value.dateDebutPotentielle)
     };
     this.trackingSaving = true;
     this.recruitmentService.updateApplicationTracking(this.selectedApplication.applicationId, request).subscribe({
@@ -274,21 +296,29 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
   }
 
   private patchTrackingForm(app: JobApplication): void {
+    const affectation = app.affectation || app.companyName || app.zoneName || '';
+    if (affectation && !this.affectations.includes(affectation)) {
+      this.affectations = [affectation, ...this.affectations];
+    }
+    const poste = app.profilMetier || app.recruitmentTitle || '';
+    if (poste && !this.jobTitles.includes(poste)) {
+      this.jobTitles = [poste, ...this.jobTitles];
+    }
     this.trackingForm.reset({
       provenance: app.provenance || (app.keejobReference ? 'KEEJOB' : 'Plateforme DAAM'),
-      diplomeEcole: app.diplomeEcole || '',
-      profilMetier: app.profilMetier || app.recruitmentTitle || '',
-      affectation: app.affectation || app.companyName || app.zoneName || '',
-      desistement: app.desistement || '',
+      imf: app.imf || app.diplomeEcole || '',
+      profilMetier: poste,
+      affectation,
+      hebergement: app.hebergement || '',
       dureeContrat: app.dureeContrat || app.hireContractType || app.formatMission || '',
-      composante: app.composante || app.imf || app.companyName || '',
+      commentairesRh: app.commentairesRh || app.remarquesRh || app.observation || '',
       dateDebutMission: app.dateDebutMission
         ? new Date(app.dateDebutMission)
         : app.hireStartDate
           ? new Date(app.hireStartDate)
           : null,
-      pretention: app.pretention || app.disponibilite || app.salaireActuel || app.prixMois || '',
-      observation: app.observation || app.commentairesRh || app.remarquesRh || ''
+      pretention: app.pretention || app.salaireActuel || app.prixMois || '',
+      dateDebutPotentielle: app.dateDebutPotentielle ? new Date(app.dateDebutPotentielle) : null
     });
   }
 
@@ -374,7 +404,13 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       next: (response) => {
         this.actionLoading = false;
         if (response.success) {
-          this.message.success(status === 'REJECTED' ? 'Candidature rejetee' : 'Statut mis a jour');
+          const msg =
+            status === 'REJECTED'
+              ? 'Candidature non retenue'
+              : status === 'DESISTED'
+                ? 'Candidature marquée comme désistée'
+                : 'Statut mis a jour';
+          this.message.success(msg);
           this.detailVisible = false;
           this.loadApplications();
         }
@@ -432,7 +468,7 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
                 `Entretien planifie le ${this.formatDisplayDate(interviewAt)}. Lien de reunion envoye au candidat.`
               );
             } else {
-              this.message.success('Candidature acceptee et entretien planifie');
+              this.message.success('Candidature retenue et entretien planifié');
             }
           }
 
@@ -505,22 +541,27 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
   }
 
   statusColor(status: string): string {
-    if (status === 'HIRED') return 'purple';
-    if (status === 'ACCEPTED') return 'green';
+    if (status === 'HIRED' || status === 'ACCEPTED') return 'green';
     if (status === 'REJECTED') return 'red';
+    if (status === 'DESISTED') return 'orange';
     if (status === 'UNDER_REVIEW') return 'blue';
     return 'default';
   }
 
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
-      SUBMITTED: 'Soumise',
-      UNDER_REVIEW: 'En cours',
-      ACCEPTED: 'Acceptée',
-      HIRED: 'Embauché',
-      REJECTED: 'Rejetée'
+      SUBMITTED: 'En attente',
+      UNDER_REVIEW: 'En attente',
+      ACCEPTED: 'Retenu',
+      HIRED: 'Retenu',
+      REJECTED: 'Non retenu',
+      DESISTED: 'Désisté'
     };
     return labels[status] || status;
+  }
+
+  isFinalStatus(status: string): boolean {
+    return status === 'REJECTED' || status === 'DESISTED' || status === 'HIRED';
   }
 
   hideCvPreview(): void {
