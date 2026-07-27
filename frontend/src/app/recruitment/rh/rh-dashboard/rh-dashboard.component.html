@@ -1,124 +1,318 @@
-<div class="page-header-bar">
-  <div>
-    <h2>Tableau de bord coworking</h2>
-    <p>Suivi des campagnes coworking, par agence et par poste</p>
-  </div>
-  <div class="header-filters">
-    <nz-date-picker
-      nzMode="month"
-      nzPlaceHolder="Filtrer par mois"
-      nzFormat="MMMM yyyy"
-      [ngModel]="filterMonth"
-      (ngModelChange)="onMonthChange($event)"
-      style="width: 200px"
-    ></nz-date-picker>
-    <button nz-button nzType="default" type="button" *ngIf="filterMonth" (click)="clearMonthFilter()">
-      Tous les mois
-    </button>
-  </div>
+<div class="selection-dashboard">
+  <div class="dash-bg-shape dash-bg-shape-1"></div>
+  <div class="dash-bg-shape dash-bg-shape-2"></div>
+
+  <header class="dash-hero">
+    <div class="dash-hero-top">
+      <div class="dash-hero-copy">
+        <div class="dash-hero-badges">
+          <span class="hero-badge">DAAM RH</span>
+          <span class="hero-badge hero-badge-light">Campagne {{ periodLabel }}</span>
+        </div>
+        <h1>
+          <span class="hero-title-main">Dashboard Recrutement</span>
+          <span class="hero-title-sub">Suivi de la sélection des candidats</span>
+        </h1>
+        <p class="dash-subtitle">{{ subtitle }}</p>
+      </div>
+      <div class="dash-filters">
+        <label class="filter-label">Période</label>
+        <nz-date-picker
+          nzMode="month"
+          nzPlaceHolder="Filtrer par mois"
+          nzFormat="MMMM yyyy"
+          [ngModel]="filterMonth"
+          (ngModelChange)="onMonthChange($event)"
+        ></nz-date-picker>
+        <button nz-button nzType="default" type="button" class="filter-reset" *ngIf="filterMonth" (click)="clearMonthFilter()">
+          Tous les mois
+        </button>
+      </div>
+    </div>
+    <div class="dash-accent-line">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </header>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-alert
+      *ngIf="loadError"
+      nzType="warning"
+      [nzShowIcon]="false"
+      nzMessage="Données indisponibles"
+      nzDescription="Le tableau de bord s'affiche vide. Redémarrez le microservice recrutement pour activer l'API /dashboard/selection."
+      class="dash-error-alert"
+    ></nz-alert>
+
+    <section class="kpi-row">
+      <article class="kpi-tile kpi-blue" style="--delay: 0ms">
+        <div class="kpi-icon">👥</div>
+        <span class="kpi-title">Total candidats</span>
+        <strong>{{ dashboard.totalCandidates }}</strong>
+        <span class="kpi-foot">Volume global</span>
+      </article>
+      <article class="kpi-tile kpi-green" style="--delay: 40ms">
+        <div class="kpi-icon">✓</div>
+        <span class="kpi-title">Retenus</span>
+        <strong>{{ dashboard.retenus }}</strong>
+        <span class="kpi-foot">Sélection positive</span>
+      </article>
+      <article class="kpi-tile kpi-red" style="--delay: 80ms">
+        <div class="kpi-icon">✕</div>
+        <span class="kpi-title">Non retenus</span>
+        <strong>{{ dashboard.nonRetenus }}</strong>
+        <span class="kpi-foot">Refus après étude</span>
+      </article>
+      <article class="kpi-tile kpi-orange" style="--delay: 120ms">
+        <div class="kpi-icon">?</div>
+        <span class="kpi-title">Non présentés</span>
+        <strong>{{ dashboard.nonPresentes }}</strong>
+        <span class="kpi-foot">Absents entretien</span>
+      </article>
+      <article class="kpi-tile kpi-purple" style="--delay: 160ms">
+        <div class="kpi-icon">!</div>
+        <span class="kpi-title">Désistés</span>
+        <strong>{{ dashboard.desistes }}</strong>
+        <span class="kpi-foot">Retrait candidat</span>
+      </article>
+      <article class="kpi-tile kpi-featured" style="--delay: 200ms">
+        <div class="rate-ring" [style.--pct]="dashboard.selectionRate">
+          <div class="rate-ring-inner">
+            <strong>{{ formatRate(dashboard.selectionRate) }}</strong>
+            <small>Taux</small>
+          </div>
+        </div>
+        <span class="kpi-title">Taux de sélection</span>
+      </article>
+      <article class="kpi-tile kpi-green-soft" style="--delay: 240ms">
+        <div class="kpi-icon">🎯</div>
+        <span class="kpi-title">{{ integresLabel }}</span>
+        <strong>{{ dashboard.integresMonth }}</strong>
+        <span class="kpi-foot">Embauches du mois</span>
+      </article>
+      <article class="kpi-tile kpi-blue-soft" style="--delay: 280ms">
+        <div class="kpi-icon">🏠</div>
+        <span class="kpi-title">Hébergés</span>
+        <strong>{{ dashboard.heberges }}</strong>
+        <span class="kpi-foot">Avec hébergement</span>
+      </article>
+    </section>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <span class="section-icon">⏵</span>
+        <div>
+          <h2>Pipeline de recrutement</h2>
+          <p>Parcours des candidatures de la réception au désistement</p>
+        </div>
+      </div>
+      <div class="pipeline-shell">
+        <div class="pipeline-track"></div>
+        <div class="pipeline-row">
+          <ng-container *ngFor="let step of pipelineSteps; let last = last; trackBy: trackPipelineStep">
+            <article class="pipeline-card" [ngClass]="'tone-' + step.tone">
+              <div class="pipeline-icon" [attr.data-step]="step.key"></div>
+              <span class="pipeline-label">{{ step.label }}</span>
+              <strong class="pipeline-count">{{ step.count }}</strong>
+              <div class="pipeline-bar">
+                <span [style.width.%]="step.percent"></span>
+              </div>
+              <span class="pipeline-percent">{{ step.percent }}% du total</span>
+            </article>
+            <span class="pipeline-arrow" *ngIf="!last">→</span>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+
+    <section class="dash-section">
+      <div class="section-head section-head-alt">
+        <span class="section-icon">⏵</span>
+        <div>
+          <h2>Analyse par source &amp; par statut</h2>
+          <p>Performance par canal, répartition et suivi responsable</p>
+        </div>
+      </div>
+      <div class="analysis-grid">
+        <div class="panel-card">
+          <div class="panel-title"><span class="dot dot-blue"></span> Par source</div>
+          <div class="analysis-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Total</th>
+                  <th class="col-green">Retenus</th>
+                  <th class="col-red">Non retenus</th>
+                  <th class="col-orange">Non présenté</th>
+                  <th>Taux</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dashboard.bySource">
+                  <td><strong>{{ row.source }}</strong></td>
+                  <td><span class="num-chip">{{ row.total }}</span></td>
+                  <td class="col-green">{{ row.retenus }}</td>
+                  <td class="col-red">{{ row.nonRetenus }}</td>
+                  <td class="col-orange">{{ row.nonPresentes }}</td>
+                  <td><span class="rate-pill" [ngClass]="rateTone(row.selectionRate)">{{ formatRate(row.selectionRate) }}</span></td>
+                </tr>
+                <tr *ngIf="!dashboard.bySource.length">
+                  <td colspan="6" class="empty-cell">Aucune donnée source</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-title"><span class="dot dot-purple"></span> Par statut</div>
+          <div class="analysis-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Statut</th>
+                  <th>Effectif</th>
+                  <th>%</th>
+                  <th>Barre</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dashboard.statusStats">
+                  <td><strong>{{ row.label }}</strong></td>
+                  <td>{{ row.count }}</td>
+                  <td>{{ formatRate(row.percent) }}</td>
+                  <td>
+                    <div class="status-bar-track">
+                      <div
+                        class="status-bar-fill"
+                        [style.width.%]="row.percent"
+                        [style.background]="statusBarColor(row)"
+                      ></div>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!dashboard.statusStats.length">
+                  <td colspan="4" class="empty-cell">Aucun statut</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-card panel-card-green">
+          <div class="panel-title"><span class="dot dot-green"></span> Par responsable</div>
+          <div class="analysis-table-wrap">
+            <table class="dash-table table-green-head">
+              <thead>
+                <tr>
+                  <th>Responsable</th>
+                  <th>Total</th>
+                  <th>Retenus</th>
+                  <th>Taux</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dashboard.byResponsible">
+                  <td><strong>{{ row.name }}</strong></td>
+                  <td>{{ row.total }}</td>
+                  <td class="col-green">{{ row.retenus }}</td>
+                  <td><span class="rate-pill" [ngClass]="rateTone(row.selectionRate)">{{ formatRate(row.selectionRate) }}</span></td>
+                </tr>
+                <tr *ngIf="!dashboard.byResponsible.length">
+                  <td colspan="4" class="empty-cell">Aucun responsable</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dash-section">
+      <div class="section-head">
+        <span class="section-icon">⏵</span>
+        <div>
+          <h2>Top agences &amp; postes les plus demandés</h2>
+          <p>Classement par volume et taux de conversion</p>
+        </div>
+      </div>
+      <div class="top-grid">
+        <div class="panel-card panel-card-wide">
+          <div class="panel-title"><span class="dot dot-orange"></span> Agences</div>
+          <div class="analysis-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Agence</th>
+                  <th>Candidats</th>
+                  <th class="col-green">Retenus</th>
+                  <th class="col-red">Non retenus</th>
+                  <th>Taux</th>
+                  <th>Indicateur</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dashboard.topAgencies; let i = index">
+                  <td><span class="rank-badge" [ngClass]="rankClass(i)">{{ i + 1 }}</span></td>
+                  <td><strong [style.color]="agencyColor(i)">{{ row.agencyName }}</strong></td>
+                  <td><span class="num-chip">{{ row.candidates }}</span></td>
+                  <td class="col-green">{{ row.retenus }}</td>
+                  <td class="col-red">{{ row.nonRetenus }}</td>
+                  <td><span class="rate-pill" [ngClass]="rateTone(row.selectionRate)">{{ formatRate(row.selectionRate) }}</span></td>
+                  <td>
+                    <div class="indicator-blocks">
+                      <span
+                        *ngFor="let slot of indicatorSlots"
+                        [class.filled]="isIndicatorFilled(row.indicatorLevel, slot)"
+                      ></span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!dashboard.topAgencies.length">
+                  <td colspan="7" class="empty-cell">Aucune agence</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-card panel-card-wide">
+          <div class="panel-title"><span class="dot dot-teal"></span> Postes</div>
+          <div class="analysis-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Poste</th>
+                  <th>Total</th>
+                  <th class="col-green">Retenus</th>
+                  <th class="col-red">Non retenus</th>
+                  <th>Taux</th>
+                  <th>CIVP</th>
+                  <th>CDI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of dashboard.topPosts; let i = index">
+                  <td><span class="rank-badge" [ngClass]="rankClass(i)">{{ i + 1 }}</span></td>
+                  <td><strong [style.color]="postColor(i)">{{ row.title }}</strong></td>
+                  <td><span class="num-chip">{{ row.total }}</span></td>
+                  <td class="col-green">{{ row.retenus }}</td>
+                  <td class="col-red">{{ row.nonRetenus }}</td>
+                  <td>{{ formatRate(row.selectionRate) }}</td>
+                  <td><span class="contract-pill">{{ row.civpCount }}</span></td>
+                  <td><span class="contract-pill contract-pill-cdi">{{ row.cdiCount }}</span></td>
+                </tr>
+                <tr *ngIf="!dashboard.topPosts.length">
+                  <td colspan="8" class="empty-cell">Aucun poste</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </nz-spin>
 </div>
-
-<nz-spin [nzSpinning]="loading">
-  <div class="kpi-grid" *ngIf="dashboard">
-    <div class="kpi-card kpi-main">
-      <span class="kpi-label">Coworkings</span>
-      <strong class="kpi-value">{{ dashboard.totalCoworking }}</strong>
-      <span class="kpi-sub">recrutements coworking</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Agences</span>
-      <strong class="kpi-value">{{ dashboard.byAgency.length }}</strong>
-      <span class="kpi-sub">avec au moins 1 coworking</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Postes</span>
-      <strong class="kpi-value">{{ dashboard.byPost.length }}</strong>
-      <span class="kpi-sub">titres distincts</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Embauches</span>
-      <strong class="kpi-value success">{{ totalHired }}</strong>
-      <span class="kpi-sub">candidats embauchés</span>
-    </div>
-    <div class="kpi-card">
-      <span class="kpi-label">Rejets</span>
-      <strong class="kpi-value danger">{{ totalRejected }}</strong>
-      <span class="kpi-sub">candidats rejetés</span>
-    </div>
-  </div>
-
-  <div class="dash-grid" *ngIf="dashboard">
-    <section class="dash-card">
-      <div class="dash-card-head">
-        <h3>Coworking par agence</h3>
-      </div>
-      <nz-empty *ngIf="!dashboard.byAgency.length" nzNotFoundContent="Aucun coworking"></nz-empty>
-      <div class="bar-list" *ngIf="dashboard.byAgency.length">
-        <div class="bar-row" *ngFor="let item of dashboard.byAgency">
-          <div class="bar-meta">
-            <strong>{{ item.companyName }}</strong>
-            <span>{{ item.coworkingCount }}</span>
-          </div>
-          <div class="bar-track">
-            <div
-              class="bar-fill agency"
-              [style.width]="barWidth(item.coworkingCount, maxAgencyCount())"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="dash-card">
-      <div class="dash-card-head">
-        <h3>Coworking par poste</h3>
-      </div>
-      <nz-empty *ngIf="!dashboard.byPost.length" nzNotFoundContent="Aucun poste"></nz-empty>
-      <div class="bar-list" *ngIf="dashboard.byPost.length">
-        <div class="bar-row" *ngFor="let item of dashboard.byPost">
-          <div class="bar-meta">
-            <strong>{{ item.title }}</strong>
-            <span>{{ item.coworkingCount }}</span>
-          </div>
-          <div class="bar-track">
-            <div
-              class="bar-fill post"
-              [style.width]="barWidth(item.coworkingCount, maxPostCount())"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <section class="dash-card outcomes" *ngIf="dashboard">
-    <div class="dash-card-head">
-      <h3>Résultats par agence</h3>
-      <p>Candidats embauchés et rejetés sur les recrutements coworking</p>
-    </div>
-    <nz-empty *ngIf="!dashboard.agencyOutcomes.length" nzNotFoundContent="Aucune donnée"></nz-empty>
-    <nz-table
-      *ngIf="dashboard.agencyOutcomes.length"
-      [nzData]="dashboard.agencyOutcomes"
-      [nzFrontPagination]="false"
-      nzSize="middle"
-    >
-      <thead>
-        <tr>
-          <th>Agence</th>
-          <th>Coworkings</th>
-          <th>Embauchés</th>
-          <th>Rejetés</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of dashboard.agencyOutcomes">
-          <td><strong>{{ row.companyName }}</strong></td>
-          <td>{{ row.coworkingCount }}</td>
-          <td><nz-tag nzColor="success">{{ row.hiredCount }}</nz-tag></td>
-          <td><nz-tag nzColor="error">{{ row.rejectedCount }}</nz-tag></td>
-        </tr>
-      </tbody>
-    </nz-table>
-  </section>
-</nz-spin>

@@ -15,6 +15,4 @@ public interface QcmQuestionRepository extends JpaRepository<QcmQuestion, Long> 
     @Modifying
     @Query("DELETE FROM QcmQuestion q WHERE q.qcmId = :qcmId")
     void deleteByQcmId(String qcmId);
-
-    long countByQcmId(String qcmId);
 }

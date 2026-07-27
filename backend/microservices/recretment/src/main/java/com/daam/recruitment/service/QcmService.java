@@ -87,10 +87,6 @@ public class QcmService {
                 .orElseThrow(() -> new IllegalArgumentException("QCM not found"));
     }
 
-    public List<QcmQuestion> getQuestionsForQcm(String qcmId) {
-        return qcmQuestionRepository.findByQcmIdOrderByOrderIndexAsc(qcmId);
-    }
-
     private void ensureCanEdit(Qcm qcm, AuthUser authUser) {
         if (authUser.isAdmin()) {
             return;

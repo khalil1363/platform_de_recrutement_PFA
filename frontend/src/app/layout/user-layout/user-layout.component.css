@@ -1,9 +1,0 @@
-:host {
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .user-name {
-    display: none;
-  }
-}

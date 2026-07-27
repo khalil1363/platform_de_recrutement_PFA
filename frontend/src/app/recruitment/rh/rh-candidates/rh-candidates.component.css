@@ -740,58 +740,6 @@
   line-height: 1.45;
 }
 
-.export-prep-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.export-prep-card {
-  border: 1px solid rgba(53, 101, 77, 0.14);
-  border-radius: 12px;
-  background: #fff;
-  overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.export-prep-card.expanded {
-  border-color: rgba(53, 101, 77, 0.32);
-  box-shadow: 0 4px 14px rgba(26, 46, 36, 0.06);
-}
-
-.export-prep-card.saved {
-  border-color: rgba(47, 125, 87, 0.35);
-}
-
-.export-prep-card-header {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 0;
-  background: #f8fbf9;
-  text-align: left;
-  cursor: pointer;
-}
-
-.export-prep-card-title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.export-prep-card-meta {
-  color: #6b7c72;
-  font-size: 12px;
-}
-
-.export-prep-card-body {
-  padding: 14px;
-  border-top: 1px solid #eef2ef;
-}
-
 .export-prep-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -822,12 +770,4 @@
 .export-prep-select,
 .export-prep-date {
   width: 100%;
-}
-
-.export-prep-card-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(53, 101, 77, 0.14);
 }

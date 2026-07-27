@@ -24,7 +24,6 @@ import {
   DeleteOutline,
   SaveOutline,
   IdcardOutline,
-  SettingOutline,
   SolutionOutline,
   BankOutline,
   FileTextOutline,
@@ -36,7 +35,15 @@ import {
   DownloadOutline,
   SearchOutline,
   ClearOutline,
-  FileExcelOutline
+  FileExcelOutline,
+  CaretRightFill,
+  InboxOutline,
+  CheckCircleOutline,
+  CloseCircleOutline,
+  UserDeleteOutline,
+  StopOutline,
+  DashboardOutline,
+  CalendarOutline
 } from '@ant-design/icons-angular/icons';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -63,7 +70,6 @@ const icons: IconDefinition[] = [
   DeleteOutline,
   SaveOutline,
   IdcardOutline,
-  SettingOutline,
   SolutionOutline,
   BankOutline,
   FileTextOutline,
@@ -75,7 +81,15 @@ const icons: IconDefinition[] = [
   DownloadOutline,
   SearchOutline,
   ClearOutline,
-  FileExcelOutline
+  FileExcelOutline,
+  CaretRightFill,
+  InboxOutline,
+  CheckCircleOutline,
+  CloseCircleOutline,
+  UserDeleteOutline,
+  StopOutline,
+  DashboardOutline,
+  CalendarOutline
 ];
 
 @NgModule({

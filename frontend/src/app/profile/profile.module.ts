@@ -9,7 +9,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [ProfileComponent],
-  exports: [ProfileComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class ProfileModule {}

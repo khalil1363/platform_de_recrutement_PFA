@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -47,16 +46,6 @@ public class CvAnalysisService {
 
     @Value("${app.cv-analysis.enabled:true}")
     private boolean enabled;
-
-    @Async
-    @Transactional
-    public void analyzeApplicationAsync(String applicationId) {
-        try {
-            doAnalyze(applicationId);
-        } catch (Exception e) {
-            log.error("CV analysis failed for application {}: {}", applicationId, e.getMessage());
-        }
-    }
 
     @Transactional
     public JobApplication analyzeApplication(String applicationId) {

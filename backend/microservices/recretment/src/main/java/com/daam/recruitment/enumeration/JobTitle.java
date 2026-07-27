@@ -99,8 +99,4 @@ public enum JobTitle {
                 .filter(t -> t.label.equalsIgnoreCase(normalized))
                 .findFirst();
     }
-
-    public static boolean isValidLabel(String label) {
-        return fromLabel(label).isPresent();
-    }
 }

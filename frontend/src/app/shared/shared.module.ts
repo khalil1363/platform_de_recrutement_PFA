@@ -24,7 +24,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
-import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzCalendarModule } from 'ng-zorro-antd/calendar';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
@@ -53,7 +52,6 @@ const NG_ZORRO_MODULES = [
   NzDescriptionsModule,
   NzRadioModule,
   NzStepsModule,
-  NzCollapseModule,
   NzCalendarModule,
   NzDatePickerModule,
   NzAlertModule

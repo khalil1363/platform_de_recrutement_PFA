@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByCompanyId(String companyId);
-    List<Company> findByZoneIdAndActiveTrue(String zoneId);
     List<Company> findByZoneIdInAndActiveTrue(List<String> zoneIds);
     List<Company> findByActiveTrue();
 }

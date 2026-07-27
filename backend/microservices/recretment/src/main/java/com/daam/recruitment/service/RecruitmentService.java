@@ -893,7 +893,6 @@ public class RecruitmentService {
         r.setAnonymousMode(req.getAnonymousMode());
         r.setPublicationDate(req.getPublicationDate());
         r.setResponsibleName(req.getResponsibleName());
-        r.setEmailNotificationPerApplication(req.getEmailNotificationPerApplication());
         r.setInternalReference(req.getInternalReference());
         r.setKeejobReference(req.getKeejobReference());
         if (req.getStatus() != null) r.setStatus(req.getStatus());

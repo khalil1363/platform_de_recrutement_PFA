@@ -23,7 +23,6 @@ interface ExportPrepFormEntry {
   gaps: ExportFieldGap[];
   values: Record<string, string | Date | null>;
   saving: boolean;
-  saved: boolean;
 }
 
 interface RecruitmentApplicationsGroup {
@@ -300,8 +299,7 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       recruitmentTitle: this.selectedApplication.recruitmentTitle || '—',
       gaps,
       values: this.emptyValuesForGaps(gaps),
-      saving: false,
-      saved: false
+      saving: false
     };
     this.exportPrepVisible = true;
   }
@@ -346,7 +344,6 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       next: (response) => {
         entry.saving = false;
         if (response.success && response.data) {
-          entry.saved = true;
           this.applications = this.applications.map((a) =>
             a.applicationId === response.data!.applicationId ? response.data! : a
           );

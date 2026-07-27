@@ -32,19 +32,6 @@ public class InterviewService {
             String candidateName,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
-            String rhMeetingLink) {
-        return scheduleInterview(application, recruitment, recruiterUserId, candidateName,
-                startDateTime, endDateTime, rhMeetingLink, false);
-    }
-
-    @Transactional
-    public InterviewScheduleResult scheduleInterview(
-            JobApplication application,
-            Recruitment recruitment,
-            String recruiterUserId,
-            String candidateName,
-            LocalDateTime startDateTime,
-            LocalDateTime endDateTime,
             String rhMeetingLink,
             boolean physical) {
 

@@ -9,6 +9,4 @@ public interface HiredQcmDimensionScoreRepository extends JpaRepository<HiredQcm
     List<HiredQcmDimensionScore> findByAssignmentIdOrderBySortOrderAsc(String assignmentId);
 
     void deleteByAssignmentId(String assignmentId);
-
-    List<HiredQcmDimensionScore> findByAssignmentIdInOrderByAssignmentIdAscSortOrderAsc(List<String> assignmentIds);
 }

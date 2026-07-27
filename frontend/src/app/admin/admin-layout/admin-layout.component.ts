@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../models/auth.model';
 
@@ -12,10 +11,7 @@ export class AdminLayoutComponent implements OnInit {
   isCollapsed = false;
   currentUser: UserProfile | null = null;
 
-  constructor(
-    readonly authService: AuthService,
-    private readonly router: Router
-  ) {}
+  constructor(readonly authService: AuthService) {}
 
   ngOnInit(): void {
     this.authService.loadCurrentUser().subscribe({
@@ -29,9 +25,5 @@ export class AdminLayoutComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-  }
-
-  navigateTo(path: string): void {
-    this.router.navigate([path]);
   }
 }

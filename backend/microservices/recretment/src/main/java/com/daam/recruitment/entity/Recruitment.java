@@ -49,7 +49,6 @@ public class Recruitment {
     private Boolean anonymousMode;
     private LocalDate publicationDate;
     private String responsibleName;
-    private Boolean emailNotificationPerApplication;
     private String internalReference;
     private String keejobReference;
     @Enumerated(EnumType.STRING)

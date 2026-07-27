@@ -295,13 +295,75 @@ export interface RecruitmentRequest {
   anonymousMode?: boolean;
   publicationDate?: string;
   responsibleName?: string;
-  emailNotificationPerApplication?: boolean;
   internalReference?: string;
   keejobReference?: string;
   status?: RecruitmentStatus;
   qcmId?: string | null;
   coworking?: boolean;
   coworkingMonth?: string | null;
+}
+
+export interface SelectionDashboard {
+  totalCampaigns: number;
+  filterYear?: number | null;
+  filterMonth?: number | null;
+  filterMonthLabel?: string;
+  responsibleNames: string[];
+  totalCandidates: number;
+  retenus: number;
+  nonRetenus: number;
+  nonPresentes: number;
+  desistes: number;
+  selectionRate: number;
+  integresMonth: number;
+  heberges: number;
+  statusStats: DashboardStatusStat[];
+  bySource: DashboardSourceStat[];
+  byResponsible: DashboardResponsibleStat[];
+  topAgencies: DashboardAgencyStat[];
+  topPosts: DashboardPostStat[];
+}
+
+export interface DashboardStatusStat {
+  key: string;
+  label: string;
+  count: number;
+  percent: number;
+}
+
+export interface DashboardSourceStat {
+  source: string;
+  total: number;
+  retenus: number;
+  nonRetenus: number;
+  nonPresentes: number;
+  selectionRate: number;
+}
+
+export interface DashboardResponsibleStat {
+  name: string;
+  total: number;
+  retenus: number;
+  selectionRate: number;
+}
+
+export interface DashboardAgencyStat {
+  agencyName: string;
+  candidates: number;
+  retenus: number;
+  nonRetenus: number;
+  selectionRate: number;
+  indicatorLevel: number;
+}
+
+export interface DashboardPostStat {
+  title: string;
+  total: number;
+  retenus: number;
+  nonRetenus: number;
+  selectionRate: number;
+  civpCount: number;
+  cdiCount: number;
 }
 
 export interface CoworkingAgencyStat {

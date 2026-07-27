@@ -9,6 +9,7 @@ import com.daam.recruitment.service.HiredEvaluationsExcelService;
 import com.daam.recruitment.service.HiredQcmService;
 import com.daam.recruitment.service.QcmService;
 import com.daam.recruitment.service.RecruitmentService;
+import com.daam.recruitment.service.SelectionDashboardService;
 import com.daam.recruitment.service.TalentReportPdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class RecruitmentController {
     private final HiredEvaluationsExcelService hiredEvaluationsExcelService;
     private final CandidatesMonthlyExcelService candidatesMonthlyExcelService;
     private final CvStorageService cvStorageService;
+    private final SelectionDashboardService selectionDashboardService;
 
     // ---- Public ----
     @GetMapping("/public/recruitments")
@@ -183,14 +185,23 @@ public class RecruitmentController {
                 recruitmentService.getRecruitments(user), HttpStatus.OK.value()));
     }
 
-    @GetMapping("/dashboard/coworking")
+    @GetMapping("/dashboard/selection")
     @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<CoworkingDashboardResponse>> getCoworkingDashboard(
+    public ResponseEntity<ApiResponse<SelectionDashboardResponse>> getSelectionDashboard(
             @AuthenticationPrincipal AuthUser user,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month) {
-        return ResponseEntity.ok(ApiResponse.success("Coworking dashboard",
-                recruitmentService.getCoworkingDashboard(user, year, month), HttpStatus.OK.value()));
+        return ResponseEntity.ok(ApiResponse.success("Selection dashboard",
+                selectionDashboardService.getDashboard(user, year, month), HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/dashboard/coworking")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<SelectionDashboardResponse>> getCoworkingDashboard(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return getSelectionDashboard(user, year, month);
     }
 
     @GetMapping("/recruitments/{id}")

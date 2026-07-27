@@ -40,8 +40,6 @@ public class Interview {
     @Builder.Default
     private MeetingProviderType meetingProvider = MeetingProviderType.NONE;
 
-    private String meetingId;
-
     @Column(length = 1024)
     private String meetingLink;
 

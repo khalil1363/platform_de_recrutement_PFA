@@ -83,5 +83,3 @@ export interface AdminCreateUserRequest {
 export interface FileUploadResponse {
   profileImageUrl: string;
 }
-
-export type UserRole = 'ROLE_USER' | 'ROLE_ADMIN' | 'ROLE_RH' | 'ROLE_DEVELOPER';

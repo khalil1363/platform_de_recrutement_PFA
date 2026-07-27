@@ -93,7 +93,6 @@ public final class RecruitmentDtos {
         private Boolean anonymousMode;
         private LocalDate publicationDate;
         private String responsibleName;
-        private Boolean emailNotificationPerApplication;
         private String internalReference;
         private String keejobReference;
         private RecruitmentStatus status;
@@ -144,6 +143,75 @@ public final class RecruitmentDtos {
         private boolean coworking;
         private LocalDate coworkingMonth;
         private List<QcmQuestionResponse> questions;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class SelectionDashboardResponse {
+        private long totalCampaigns;
+        private Long filterYear;
+        private Integer filterMonth;
+        private String filterMonthLabel;
+        private List<String> responsibleNames;
+        private long totalCandidates;
+        private long retenus;
+        private long nonRetenus;
+        private long nonPresentes;
+        private long desistes;
+        private double selectionRate;
+        private long integresMonth;
+        private long heberges;
+        private List<DashboardStatusStat> statusStats;
+        private List<DashboardSourceStat> bySource;
+        private List<DashboardResponsibleStat> byResponsible;
+        private List<DashboardAgencyStat> topAgencies;
+        private List<DashboardPostStat> topPosts;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DashboardStatusStat {
+        private String key;
+        private String label;
+        private long count;
+        private double percent;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DashboardSourceStat {
+        private String source;
+        private long total;
+        private long retenus;
+        private long nonRetenus;
+        private long nonPresentes;
+        private double selectionRate;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DashboardResponsibleStat {
+        private String name;
+        private long total;
+        private long retenus;
+        private double selectionRate;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DashboardAgencyStat {
+        private String agencyName;
+        private long candidates;
+        private long retenus;
+        private long nonRetenus;
+        private double selectionRate;
+        private int indicatorLevel;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class DashboardPostStat {
+        private String title;
+        private long total;
+        private long retenus;
+        private long nonRetenus;
+        private double selectionRate;
+        private long civpCount;
+        private long cdiCount;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

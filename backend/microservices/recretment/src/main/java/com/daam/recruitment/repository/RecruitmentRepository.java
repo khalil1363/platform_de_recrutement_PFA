@@ -10,7 +10,6 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
     Optional<Recruitment> findByRecruitmentId(String recruitmentId);
     List<Recruitment> findByZoneId(String zoneId);
     List<Recruitment> findByZoneIdIn(List<String> zoneIds);
-    List<Recruitment> findByZoneIdAndStatus(String zoneId, RecruitmentStatus status);
     List<Recruitment> findByStatus(RecruitmentStatus status);
     List<Recruitment> findByCompanyId(String companyId);
     List<Recruitment> findByQcmId(String qcmId);

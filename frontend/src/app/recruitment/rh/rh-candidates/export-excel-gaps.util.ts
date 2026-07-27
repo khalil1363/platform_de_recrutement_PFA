@@ -2,7 +2,7 @@ import { ApplicationTrackingUpdateRequest, JobApplication } from '../../models/r
 
 export type ExportExcelType = 'monthly' | 'crm';
 
-export type ExportGapFieldKey = keyof ApplicationTrackingUpdateRequest;
+type ExportGapFieldKey = keyof ApplicationTrackingUpdateRequest;
 
 export interface ExportFieldGap {
   header: string;
@@ -10,13 +10,6 @@ export interface ExportFieldGap {
   fieldKey: ExportGapFieldKey;
   inputType: 'text' | 'select-poste' | 'select-affectation' | 'date' | 'datetime' | 'textarea';
   placeholder?: string;
-}
-
-export interface ExportCandidateGap {
-  applicationId: string;
-  candidateName: string;
-  recruitmentTitle: string;
-  gaps: ExportFieldGap[];
 }
 
 function firstNonBlank(...values: (string | null | undefined)[]): string {

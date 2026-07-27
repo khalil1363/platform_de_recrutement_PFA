@@ -2,7 +2,6 @@ package com.daam.recruitment.enumeration;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Fixed DAAM agency affectation list (référentiel AFFECTATION).
@@ -53,15 +52,5 @@ public enum AgencyAffectation {
 
     public static List<String> labels() {
         return Arrays.stream(values()).map(AgencyAffectation::getLabel).toList();
-    }
-
-    public static Optional<AgencyAffectation> fromLabel(String label) {
-        if (label == null || label.isBlank()) {
-            return Optional.empty();
-        }
-        String normalized = label.trim();
-        return Arrays.stream(values())
-                .filter(a -> a.label.equalsIgnoreCase(normalized))
-                .findFirst();
     }
 }

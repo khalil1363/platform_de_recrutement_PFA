@@ -16,12 +16,11 @@ import {
   RecruitmentRequest,
   RhZoneAssignment,
   RhZoneAssignmentRequest,
-  ApplicationStatus,
   Qcm,
   QcmRequest,
   Zone,
   ZoneRequest,
-  CoworkingDashboard
+  SelectionDashboard
 } from '../models/recruitment.model';
 
 @Injectable({ providedIn: 'root' })
@@ -87,15 +86,19 @@ export class RecruitmentService {
     return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/affectations`);
   }
 
-  getCoworkingDashboard(year?: number | null, month?: number | null): Observable<ApiResponse<CoworkingDashboard>> {
+  getSelectionDashboard(year?: number | null, month?: number | null): Observable<ApiResponse<SelectionDashboard>> {
     const params: Record<string, string> = {};
     if (year != null && month != null) {
       params['year'] = String(year);
       params['month'] = String(month);
     }
-    return this.http.get<ApiResponse<CoworkingDashboard>>(`${this.apiUrl}/dashboard/coworking`, {
+    return this.http.get<ApiResponse<SelectionDashboard>>(`${this.apiUrl}/dashboard/selection`, {
       params
     });
+  }
+
+  getCoworkingDashboard(year?: number | null, month?: number | null): Observable<ApiResponse<SelectionDashboard>> {
+    return this.getSelectionDashboard(year, month);
   }
 
   getRecruitment(id: string): Observable<ApiResponse<Recruitment>> {
@@ -132,10 +135,6 @@ export class RecruitmentService {
 
   deleteQcm(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/qcm/${id}`);
-  }
-
-  getApplications(recruitmentId: string): Observable<ApiResponse<JobApplication[]>> {
-    return this.http.get<ApiResponse<JobApplication[]>>(`${this.apiUrl}/recruitments/${recruitmentId}/applications`);
   }
 
   getRhApplications(): Observable<ApiResponse<JobApplication[]>> {

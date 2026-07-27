@@ -27,7 +27,6 @@ export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/api/auth`;
 
   private readonly currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
-  readonly currentUser$ = this.currentUserSubject.asObservable();
 
   login(request: LoginRequest): Observable<ApiResponse<AuthenticationResponse>> {
     return this.http
@@ -80,10 +79,6 @@ export class AuthService {
 
   deleteUser(userId: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/users/${userId}`);
-  }
-
-  getCurrentUserValue(): UserProfile | null {
-    return this.currentUserSubject.value;
   }
 
   uploadProfileImage(file: File): Observable<ApiResponse<FileUploadResponse>> {
@@ -151,16 +146,6 @@ export class AuthService {
       return;
     }
     this.router.navigate(['/jobs']);
-  }
-
-  getProfileRoute(): string {
-    if (this.isAdmin()) {
-      return '/admin/profile';
-    }
-    if (this.isRh()) {
-      return '/rh/profile';
-    }
-    return '/jobs/profile';
   }
 
   private handleAuthSuccess(response: ApiResponse<AuthenticationResponse>): void {
