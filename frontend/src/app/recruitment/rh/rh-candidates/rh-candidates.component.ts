@@ -9,6 +9,22 @@ import { RecruitmentService } from '../../services/recruitment.service';
 import { ApplicationStatus, ApplicationTrackingUpdateRequest, JobApplication } from '../../models/recruitment.model';
 import { AFFECTATIONS } from '../../constants/affectations';
 import { JOB_TITLES } from '../../constants/job-titles';
+import {
+  detectExportGaps,
+  ExportExcelType,
+  ExportFieldGap,
+  exportPrepTitle
+} from './export-excel-gaps.util';
+
+interface ExportPrepFormEntry {
+  applicationId: string;
+  candidateName: string;
+  recruitmentTitle: string;
+  gaps: ExportFieldGap[];
+  values: Record<string, string | Date | null>;
+  saving: boolean;
+  saved: boolean;
+}
 
 interface RecruitmentApplicationsGroup {
   recruitmentId: string;
@@ -43,8 +59,6 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   analyzeLoading = false;
   exportLoading = false;
   exportFullLoading = false;
-  trackingSaving = false;
-  trackingForm!: FormGroup;
   affectations: string[] = [...AFFECTATIONS];
   jobTitles: string[] = [...JOB_TITLES];
 
@@ -57,6 +71,11 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   historyApplications: JobApplication[] = [];
   historyCandidate: JobApplication | null = null;
   historyExpandedId: string | null = null;
+
+  exportPrepVisible = false;
+  exportPrepType: ExportExcelType = 'monthly';
+  exportPrepEntry: ExportPrepFormEntry | null = null;
+  qcmDetailsExpanded = false;
 
   constructor(
     readonly authService: AuthService,
@@ -91,18 +110,6 @@ Prime de portefeuille mensuelle calculée selon l’évolution du portefeuille, 
 Tickets restaurant d’une valeur mensuelle de 170 DT ;
 Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
       ]
-    });
-    this.trackingForm = this.fb.group({
-      provenance: [''],
-      imf: [''],
-      profilMetier: [''],
-      affectation: [''],
-      hebergement: [''],
-      dureeContrat: [''],
-      commentairesRh: [''],
-      dateDebutMission: [null],
-      pretention: [''],
-      dateDebutPotentielle: [null]
     });
     this.loadReferentials();
     this.loadApplications();
@@ -161,8 +168,43 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
   openDetails(app: JobApplication): void {
     this.selectedApplication = app;
     this.hideCvPreview();
-    this.patchTrackingForm(app);
+    this.qcmDetailsExpanded = false;
+    this.ensureReferentialOptions(app);
     this.detailVisible = true;
+  }
+
+  toggleQcmDetails(): void {
+    this.qcmDetailsExpanded = !this.qcmDetailsExpanded;
+  }
+
+  qcmScoreLabel(app: JobApplication): string {
+    const score = app.qcmScore ?? 0;
+    const total = app.qcmTotalQuestions ?? 0;
+    if (!total) {
+      return 'Aucune réponse';
+    }
+    const pct = Math.round((score / total) * 100);
+    return `${score}/${total} (${pct}%)`;
+  }
+
+  qcmScoreColor(app: JobApplication): string {
+    const score = app.qcmScore ?? 0;
+    const total = app.qcmTotalQuestions ?? 1;
+    const pct = (score / total) * 100;
+    if (pct >= 70) return 'success';
+    if (pct >= 50) return 'processing';
+    return 'error';
+  }
+
+  private ensureReferentialOptions(app: JobApplication): void {
+    const affectation = app.affectation || app.companyName || app.zoneName || '';
+    if (affectation && !this.affectations.includes(affectation)) {
+      this.affectations = [affectation, ...this.affectations];
+    }
+    const poste = app.profilMetier || app.recruitmentTitle || '';
+    if (poste && !this.jobTitles.includes(poste)) {
+      this.jobTitles = [poste, ...this.jobTitles];
+    }
   }
 
   openHistory(app: JobApplication): void {
@@ -219,36 +261,131 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
   }
 
   exportMonthlyExcel(): void {
-    this.exportLoading = true;
-    this.recruitmentService.exportCandidatesMonthlyExcel().subscribe({
-      next: (blob) => {
-        this.exportLoading = false;
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'daam-candidats-par-mois.xlsx';
-        a.click();
-        window.URL.revokeObjectURL(url);
-        this.message.success('Export Excel téléchargé (une feuille par mois)');
+    this.runExportDownload('monthly');
+  }
+
+  exportFullExcel(): void {
+    this.runExportDownload('crm');
+  }
+
+  detailGapCount(type: ExportExcelType): number {
+    if (!this.selectedApplication) {
+      return 0;
+    }
+    return detectExportGaps(this.selectedApplication, type).length;
+  }
+
+  get exportPrepModalTitle(): string {
+    return exportPrepTitle(this.exportPrepType);
+  }
+
+  openDetailExportPrep(type: ExportExcelType): void {
+    if (!this.selectedApplication) {
+      return;
+    }
+    const gaps = detectExportGaps(this.selectedApplication, type);
+    if (gaps.length === 0) {
+      this.message.success('Toutes les colonnes Excel sont déjà remplies pour cet export.');
+      return;
+    }
+    const c = this.selectedApplication.candidate;
+    const candidateName = c
+      ? `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Candidat'
+      : 'Candidat';
+
+    this.exportPrepType = type;
+    this.exportPrepEntry = {
+      applicationId: this.selectedApplication.applicationId,
+      candidateName,
+      recruitmentTitle: this.selectedApplication.recruitmentTitle || '—',
+      gaps,
+      values: this.emptyValuesForGaps(gaps),
+      saving: false,
+      saved: false
+    };
+    this.exportPrepVisible = true;
+  }
+
+  closeExportPrep(): void {
+    this.exportPrepVisible = false;
+    this.exportPrepEntry = null;
+  }
+
+  exportPrepFilledCount(): number {
+    if (!this.exportPrepEntry) {
+      return 0;
+    }
+    return this.exportPrepEntry.gaps.filter((g) =>
+      this.hasExportPrepValue(this.exportPrepEntry!, g.fieldKey)
+    ).length;
+  }
+
+  hasExportPrepValue(entry: ExportPrepFormEntry, fieldKey: string): boolean {
+    const v = entry.values[fieldKey];
+    if (v == null) {
+      return false;
+    }
+    if (v instanceof Date) {
+      return !Number.isNaN(v.getTime());
+    }
+    return String(v).trim().length > 0;
+  }
+
+  saveDetailExportFiche(): void {
+    if (!this.exportPrepEntry) {
+      return;
+    }
+    const entry = this.exportPrepEntry;
+    const request = this.buildTrackingRequestFromPrep(entry);
+    if (Object.keys(request).length === 0) {
+      this.message.warning('Renseignez au moins un champ avant d’enregistrer');
+      return;
+    }
+    entry.saving = true;
+    this.recruitmentService.updateApplicationTracking(entry.applicationId, request).subscribe({
+      next: (response) => {
+        entry.saving = false;
+        if (response.success && response.data) {
+          entry.saved = true;
+          this.applications = this.applications.map((a) =>
+            a.applicationId === response.data!.applicationId ? response.data! : a
+          );
+          this.rebuildGroups();
+          if (this.selectedApplication?.applicationId === response.data.applicationId) {
+            this.selectedApplication = response.data;
+          }
+          this.message.success('Fiche enregistrée — incluse dans l’export Excel');
+          this.closeExportPrep();
+        }
       },
-      error: () => {
-        this.exportLoading = false;
-        this.message.error('Erreur lors de l\'export Excel');
+      error: (err) => {
+        entry.saving = false;
+        this.message.error(err.error?.message || 'Erreur lors de l’enregistrement');
       }
     });
   }
 
-  exportFullExcel(): void {
+  private runExportDownload(type: ExportExcelType): void {
+    if (type === 'monthly') {
+      this.exportLoading = true;
+      this.recruitmentService.exportCandidatesMonthlyExcel().subscribe({
+        next: (blob) => {
+          this.exportLoading = false;
+          this.downloadBlob(blob, 'daam-candidats-par-mois.xlsx');
+          this.message.success('Export Excel téléchargé (une feuille par mois)');
+        },
+        error: () => {
+          this.exportLoading = false;
+          this.message.error('Erreur lors de l\'export Excel');
+        }
+      });
+      return;
+    }
     this.exportFullLoading = true;
     this.recruitmentService.exportCandidatesFullExcel().subscribe({
       next: (blob) => {
         this.exportFullLoading = false;
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'daam-candidats-complet.xlsx';
-        a.click();
-        window.URL.revokeObjectURL(url);
+        this.downloadBlob(blob, 'daam-candidats-complet.xlsx');
         this.message.success('Export Excel complet téléchargé (Suivi CRM + Recrutements Agences)');
       },
       error: () => {
@@ -258,75 +395,46 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
     });
   }
 
-  saveTracking(): void {
-    if (!this.selectedApplication) {
-      return;
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private emptyValuesForGaps(gaps: ExportFieldGap[]): Record<string, string | Date | null> {
+    const values: Record<string, string | Date | null> = {};
+    for (const gap of gaps) {
+      values[gap.fieldKey] =
+        gap.inputType === 'date' || gap.inputType === 'datetime' ? null : '';
     }
-    const value = this.trackingForm.value;
-    const request: ApplicationTrackingUpdateRequest = {
-      provenance: value.provenance,
-      imf: value.imf,
-      profilMetier: value.profilMetier,
-      affectation: value.affectation,
-      hebergement: value.hebergement,
-      dureeContrat: value.dureeContrat,
-      commentairesRh: value.commentairesRh,
-      dateDebutMission: this.formatLocalDateOrNull(value.dateDebutMission),
-      pretention: value.pretention,
-      dateDebutPotentielle: this.formatLocalDateOrNull(value.dateDebutPotentielle)
-    };
-    this.trackingSaving = true;
-    this.recruitmentService.updateApplicationTracking(this.selectedApplication.applicationId, request).subscribe({
-      next: (response) => {
-        this.trackingSaving = false;
-        if (response.success && response.data) {
-          this.selectedApplication = response.data;
-          this.applications = this.applications.map((a) =>
-            a.applicationId === response.data!.applicationId ? response.data! : a
-          );
-          this.rebuildGroups();
-          this.message.success('Fiche suivi enregistrée — sera incluse dans l\'export Excel');
-        }
-      },
-      error: (err) => {
-        this.trackingSaving = false;
-        this.message.error(err.error?.message || 'Erreur lors de l\'enregistrement');
+    return values;
+  }
+
+  private buildTrackingRequestFromPrep(entry: ExportPrepFormEntry): ApplicationTrackingUpdateRequest {
+    const request: ApplicationTrackingUpdateRequest = {};
+    for (const gap of entry.gaps) {
+      const raw = entry.values[gap.fieldKey];
+      if (raw == null || (typeof raw === 'string' && !raw.trim())) {
+        continue;
       }
-    });
-  }
-
-  private patchTrackingForm(app: JobApplication): void {
-    const affectation = app.affectation || app.companyName || app.zoneName || '';
-    if (affectation && !this.affectations.includes(affectation)) {
-      this.affectations = [affectation, ...this.affectations];
+      if (gap.inputType === 'date') {
+        const date = raw instanceof Date ? raw : new Date(String(raw));
+        if (!Number.isNaN(date.getTime())) {
+          (request as Record<string, string | null>)[gap.fieldKey] = this.formatLocalDate(date);
+        }
+      } else if (gap.inputType === 'datetime') {
+        const date = raw instanceof Date ? raw : new Date(String(raw));
+        if (!Number.isNaN(date.getTime())) {
+          request.entretienRespAt = this.formatLocalDateTime(date);
+        }
+      } else {
+        (request as Record<string, string | null>)[gap.fieldKey] = String(raw).trim();
+      }
     }
-    const poste = app.profilMetier || app.recruitmentTitle || '';
-    if (poste && !this.jobTitles.includes(poste)) {
-      this.jobTitles = [poste, ...this.jobTitles];
-    }
-    this.trackingForm.reset({
-      provenance: app.provenance || (app.keejobReference ? 'KEEJOB' : 'Plateforme DAAM'),
-      imf: app.imf || app.diplomeEcole || '',
-      profilMetier: poste,
-      affectation,
-      hebergement: app.hebergement || '',
-      dureeContrat: app.dureeContrat || app.hireContractType || app.formatMission || '',
-      commentairesRh: app.commentairesRh || app.remarquesRh || app.observation || '',
-      dateDebutMission: app.dateDebutMission
-        ? new Date(app.dateDebutMission)
-        : app.hireStartDate
-          ? new Date(app.hireStartDate)
-          : null,
-      pretention: app.pretention || app.salaireActuel || app.prixMois || '',
-      dateDebutPotentielle: app.dateDebutPotentielle ? new Date(app.dateDebutPotentielle) : null
-    });
-  }
-
-  private formatLocalDateOrNull(date: Date | null): string | null {
-    if (!date) {
-      return null;
-    }
-    return this.formatLocalDate(date);
+    return request;
   }
 
   toggleCvPreview(): void {

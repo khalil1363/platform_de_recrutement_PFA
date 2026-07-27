@@ -313,7 +313,10 @@ public class CandidatesMonthlyExcelService {
         String affectation = firstNonBlank(app.getAffectation(), resolveAgenceName(app));
         String contrat = firstNonBlank(app.getDureeContrat(), app.getHireContractType(), app.getFormatMission());
         String pretention = firstNonBlank(app.getPretention(), app.getHireNetSalary(), app.getSalaireActuel(), app.getPrixMois());
-        String dateFormation = "";
+        String dateFormation = firstNonBlank(
+                app.getDateDebutMission() != null ? app.getDateDebutMission().format(DATE_FMT) : null,
+                app.getHireStartDate() != null ? app.getHireStartDate().format(DATE_FMT) : null
+        );
         String dateDebut = firstNonBlank(
                 app.getHireStartDate() != null ? app.getHireStartDate().format(DATE_FMT) : null,
                 app.getDateDebutMission() != null ? app.getDateDebutMission().format(DATE_FMT) : null
@@ -325,6 +328,15 @@ public class CandidatesMonthlyExcelService {
         String interviewTime = app.getInterviewAt() != null ? app.getInterviewAt().format(TIME_FMT) : "";
         String commentaireRh = firstNonBlank(app.getCommentairesRh());
         String commentaireResp = firstNonBlank(app.getRemarquesRh(), app.getObservation());
+        String entretienRespDate = "";
+        String entretienRespHeure = "";
+        if (app.getEntretienRespAt() != null) {
+            entretienRespDate = app.getEntretienRespAt().format(DATE_FMT);
+            entretienRespHeure = app.getEntretienRespAt().format(TIME_FMT);
+        } else if (app.getHiredAt() != null) {
+            entretienRespDate = app.getHiredAt().format(DATE_FMT);
+            entretienRespHeure = app.getHiredAt().format(TIME_FMT);
+        }
         String delaiJours = "";
         if (app.getAppliedAt() != null && app.getInterviewAt() != null) {
             long days = java.time.Duration.between(
@@ -355,7 +367,7 @@ public class CandidatesMonthlyExcelService {
                 affectation != null ? affectation : "",
                 contrat != null ? contrat : "",
                 pretention != null ? pretention : "",
-                dateFormation,
+                dateFormation != null ? dateFormation : "",
                 dateDebut != null ? dateDebut : "",
                 emailConfirmed ? "Oui" : "Non",
                 hebergement != null ? hebergement : "",
@@ -363,8 +375,8 @@ public class CandidatesMonthlyExcelService {
                 interviewTime,
                 rhStatusLabel(app.getStatus()),
                 commentaireRh != null ? commentaireRh : "",
-                "",
-                "",
+                entretienRespDate,
+                entretienRespHeure,
                 responsableStatusLabel(app.getStatus()),
                 commentaireResp != null ? commentaireResp : "",
                 delaiJours,

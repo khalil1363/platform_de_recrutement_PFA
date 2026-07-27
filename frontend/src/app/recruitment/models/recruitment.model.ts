@@ -181,6 +181,7 @@ export interface JobApplication {
   observation?: string;
   hebergement?: string;
   dateDebutPotentielle?: string;
+  entretienRespAt?: string;
   responsibleName?: string;
   coworking?: boolean;
   coworkingMonth?: string | null;
@@ -220,6 +221,7 @@ export interface ApplicationTrackingUpdateRequest {
   observation?: string | null;
   hebergement?: string | null;
   dateDebutPotentielle?: string | null;
+  entretienRespAt?: string | null;
 }
 
 export interface ApplicationStatusUpdateRequest {

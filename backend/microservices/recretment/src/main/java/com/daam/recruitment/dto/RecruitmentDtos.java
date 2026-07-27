@@ -295,6 +295,7 @@ public final class RecruitmentDtos {
         private String observation;
         private String hebergement;
         private java.time.LocalDate dateDebutPotentielle;
+        private java.time.LocalDateTime entretienRespAt;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -362,6 +363,7 @@ public final class RecruitmentDtos {
         private String observation;
         private String hebergement;
         private java.time.LocalDate dateDebutPotentielle;
+        private java.time.LocalDateTime entretienRespAt;
         /** From linked recruitment offer. */
         private String responsibleName;
         private boolean coworking;

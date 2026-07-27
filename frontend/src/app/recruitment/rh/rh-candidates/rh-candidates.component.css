@@ -218,6 +218,29 @@
   font-size: 0.85rem;
 }
 
+.detail-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detail-export-btn {
+  flex: 1 1 240px;
+  justify-content: flex-start;
+}
+
+.detail-export-btn nz-tag {
+  margin-left: auto;
+}
+
+.export-prep-filled-hint {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #35654d;
+  font-weight: 600;
+}
+
 .tracking-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -496,6 +519,49 @@
   margin-bottom: 12px;
 }
 
+.qcm-panel {
+  margin-top: 16px;
+  border: 1px solid rgba(53, 101, 77, 0.14);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.qcm-panel-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 0;
+  background: #f8fbf9;
+  cursor: pointer;
+  text-align: left;
+}
+
+.qcm-panel-header:hover {
+  background: #eef6f0;
+}
+
+.qcm-panel-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #35654d;
+}
+
+.qcm-panel-chevron {
+  color: #6b7c72;
+  font-size: 14px;
+}
+
+.qcm-panel-body {
+  padding: 12px 14px 4px;
+  border-top: 1px solid #eef2ef;
+}
+
 .answer-block p {
   margin: 4px 0;
 }
@@ -652,4 +718,116 @@
   .act-btn span:not([nz-icon]) {
     font-size: 11px;
   }
+
+  .export-prep-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Export prep modal — empty Excel columns only */
+.export-prep-modal {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.export-prep-intro {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #eef6f0;
+  color: #35654d;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.export-prep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.export-prep-card {
+  border: 1px solid rgba(53, 101, 77, 0.14);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.export-prep-card.expanded {
+  border-color: rgba(53, 101, 77, 0.32);
+  box-shadow: 0 4px 14px rgba(26, 46, 36, 0.06);
+}
+
+.export-prep-card.saved {
+  border-color: rgba(47, 125, 87, 0.35);
+}
+
+.export-prep-card-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 0;
+  background: #f8fbf9;
+  text-align: left;
+  cursor: pointer;
+}
+
+.export-prep-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-prep-card-meta {
+  color: #6b7c72;
+  font-size: 12px;
+}
+
+.export-prep-card-body {
+  padding: 14px;
+  border-top: 1px solid #eef2ef;
+}
+
+.export-prep-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.export-prep-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.export-prep-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2f4f3f;
+}
+
+.export-prep-label small {
+  font-weight: 500;
+  font-size: 11px;
+  color: #8a9a90;
+}
+
+.export-prep-select,
+.export-prep-date {
+  width: 100%;
+}
+
+.export-prep-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(53, 101, 77, 0.14);
 }

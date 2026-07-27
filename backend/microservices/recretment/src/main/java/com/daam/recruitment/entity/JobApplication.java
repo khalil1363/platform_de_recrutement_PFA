@@ -113,6 +113,8 @@ public class JobApplication {
     private String hebergement;
     /** Potential start date (DATE DE DEBUT POTENTIELLE). */
     private java.time.LocalDate dateDebutPotentielle;
+    /** CRM: Date / heure entretien responsable. */
+    private LocalDateTime entretienRespAt;
 
     @CreationTimestamp private LocalDateTime appliedAt;
 

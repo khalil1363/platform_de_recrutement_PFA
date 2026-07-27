@@ -239,101 +239,51 @@
       <div class="tracking-block">
         <div class="tracking-header">
           <h4>Fiche suivi Excel (champs RH)</h4>
-          <button
-            nz-button
-            nzType="primary"
-            nzSize="small"
-            type="button"
-            [nzLoading]="trackingSaving"
-            (click)="saveTracking()"
-          >
-            Enregistrer la fiche
-          </button>
         </div>
         <p class="tracking-hint">
-          Colonnes Excel (par mois) : NOM DU CANDIDAT … RESPONSABLE DE RECRUTEMENT, COWORKING.
+          Complétez les colonnes vides pour chaque type d’export. Seuls les champs manquants s’affichent dans le formulaire.
         </p>
-        <form nz-form [formGroup]="trackingForm" class="tracking-form">
-          <div class="tracking-grid">
-            <nz-form-item>
-              <nz-form-label>Provenance</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="provenance" placeholder="Ex: KEEJOB, Plateforme DAAM" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>IMF</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="imf" placeholder="IMF" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Intitulé du poste</nz-form-label>
-              <nz-form-control>
-                <nz-select
-                  formControlName="profilMetier"
-                  nzPlaceHolder="Sélectionner un poste"
-                  nzShowSearch
-                  nzAllowClear
-                >
-                  <nz-option *ngFor="let title of jobTitles" [nzValue]="title" [nzLabel]="title"></nz-option>
-                </nz-select>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Affectation</nz-form-label>
-              <nz-form-control>
-                <nz-select
-                  formControlName="affectation"
-                  nzPlaceHolder="Sélectionner une agence"
-                  nzShowSearch
-                  nzAllowClear
-                >
-                  <nz-option *ngFor="let a of affectations" [nzValue]="a" [nzLabel]="a"></nz-option>
-                </nz-select>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Hébergement</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="hebergement" placeholder="Ex: Oui / Non / détails" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Contrat</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="dureeContrat" placeholder="Ex: CDI, CIVP, 6 mois" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Date d'intégration</nz-form-label>
-              <nz-form-control>
-                <nz-date-picker formControlName="dateDebutMission" nzFormat="yyyy-MM-dd" class="interview-picker"></nz-date-picker>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Prétention</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="pretention" placeholder="Ex: 1200 DT" />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label>Date de début potentielle</nz-form-label>
-              <nz-form-control>
-                <nz-date-picker formControlName="dateDebutPotentielle" nzFormat="yyyy-MM-dd" class="interview-picker"></nz-date-picker>
-              </nz-form-control>
-            </nz-form-item>
-          </div>
-          <nz-form-item>
-            <nz-form-label>Commentaire</nz-form-label>
-            <nz-form-control>
-              <textarea nz-input formControlName="commentairesRh" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
-            </nz-form-control>
-          </nz-form-item>
-          <p class="tracking-hint" *ngIf="selectedApplication?.responsibleName">
-            Responsable de recrutement (offre) : <strong>{{ selectedApplication.responsibleName }}</strong>
-          </p>
-        </form>
+        <div class="detail-export-actions">
+          <button
+            type="button"
+            class="export-btn export-month detail-export-btn"
+            (click)="openDetailExportPrep('monthly')"
+          >
+            <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+            <span class="export-btn-text">
+              <strong>Export par mois</strong>
+              <small>Colonnes mensuelles</small>
+            </span>
+            <nz-tag *ngIf="detailGapCount('monthly') > 0" nzColor="orange">
+              {{ detailGapCount('monthly') }} vide(s)
+            </nz-tag>
+            <nz-tag *ngIf="detailGapCount('monthly') === 0" nzColor="success">Complet</nz-tag>
+          </button>
+          <button
+            type="button"
+            class="export-btn export-crm detail-export-btn"
+            (click)="openDetailExportPrep('crm')"
+          >
+            <span nz-icon nzType="file-excel" nzTheme="outline"></span>
+            <span class="export-btn-text">
+              <strong>Export CRM complet</strong>
+              <small>Suivi candidats</small>
+            </span>
+            <nz-tag *ngIf="detailGapCount('crm') > 0" nzColor="orange">
+              {{ detailGapCount('crm') }} vide(s)
+            </nz-tag>
+            <nz-tag *ngIf="detailGapCount('crm') === 0" nzColor="success">Complet</nz-tag>
+          </button>
+        </div>
+        <p class="tracking-hint" *ngIf="selectedApplication?.responsibleName">
+          Responsable de recrutement (offre) : <strong>{{ selectedApplication.responsibleName }}</strong>
+        </p>
+        <p class="tracking-hint" *ngIf="selectedApplication?.coworking">
+          Coworking : <strong>Oui</strong>
+          <ng-container *ngIf="selectedApplication?.coworkingMonth">
+            ({{ selectedApplication.coworkingMonth | date:'MMMM yyyy' }})
+          </ng-container>
+        </p>
       </div>
 
       <div class="cv-analysis" *ngIf="selectedApplication.cvAnalysisSummary || selectedApplication.cvMatchScore != null">
@@ -431,13 +381,37 @@
         </nz-spin>
       </div>
 
-      <h4>Réponses QCM</h4>
-      <div class="answer-block" *ngFor="let answer of selectedApplication.answers">
-        <p><strong>{{ answer.questionText }}</strong></p>
-        <p>
-          Réponse : {{ answer.selectedOption }}
-          <nz-tag [nzColor]="answer.correct ? 'green' : 'red'">{{ answer.correct ? 'Correct' : 'Incorrect' }}</nz-tag>
-        </p>
+      <div
+        class="qcm-panel"
+        *ngIf="selectedApplication.answers?.length"
+      >
+        <button type="button" class="qcm-panel-header" (click)="toggleQcmDetails()">
+          <div class="qcm-panel-title">
+            <span nz-icon nzType="form" nzTheme="outline"></span>
+            <strong>Résultat QCM</strong>
+            <nz-tag [nzColor]="qcmScoreColor(selectedApplication)">
+              {{ qcmScoreLabel(selectedApplication) }}
+            </nz-tag>
+          </div>
+          <span
+            class="qcm-panel-chevron"
+            nz-icon
+            [nzType]="qcmDetailsExpanded ? 'up' : 'down'"
+            nzTheme="outline"
+          ></span>
+        </button>
+
+        <div class="qcm-panel-body" *ngIf="qcmDetailsExpanded">
+          <div class="answer-block" *ngFor="let answer of selectedApplication.answers">
+            <p><strong>{{ answer.questionText }}</strong></p>
+            <p>
+              Réponse : {{ answer.selectedOption || '—' }}
+              <nz-tag [nzColor]="answer.correct ? 'green' : 'red'">
+                {{ answer.correct ? 'Correct' : 'Incorrect' }}
+              </nz-tag>
+            </p>
+          </div>
+        </div>
       </div>
     </ng-container>
   </div>
@@ -756,4 +730,99 @@
       </div>
     </nz-spin>
   </div>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="exportPrepVisible"
+  [nzTitle]="exportPrepModalTitle"
+  [nzWidth]="720"
+  [nzFooter]="exportPrepFooter"
+  (nzOnCancel)="closeExportPrep()"
+>
+  <ng-template #exportPrepFooter>
+    <button nz-button type="button" (click)="closeExportPrep()">Annuler</button>
+    <button
+      nz-button
+      nzType="primary"
+      type="button"
+      [nzLoading]="exportPrepEntry?.saving"
+      (click)="saveDetailExportFiche()"
+    >
+      Enregistrer la fiche
+    </button>
+  </ng-template>
+
+  <ng-container *nzModalContent>
+    <div class="export-prep-modal" *ngIf="exportPrepEntry as entry">
+      <p class="export-prep-intro">
+        <strong>{{ entry.candidateName }}</strong> — {{ entry.recruitmentTitle }}<br />
+        {{ entry.gaps.length }} colonne(s) vide(s) pour cet export. Seuls les champs manquants sont affichés.
+      </p>
+
+      <div class="export-prep-grid">
+        <div class="export-prep-field" *ngFor="let gap of entry.gaps">
+          <label class="export-prep-label">
+            {{ gap.label }}
+            <small>{{ gap.header }}</small>
+          </label>
+
+          <input
+            *ngIf="gap.inputType === 'text'"
+            nz-input
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            [placeholder]="gap.placeholder || gap.label"
+          />
+
+          <nz-select
+            *ngIf="gap.inputType === 'select-poste'"
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            nzPlaceHolder="Sélectionner un poste"
+            nzShowSearch
+            nzAllowClear
+            class="export-prep-select"
+          >
+            <nz-option *ngFor="let title of jobTitles" [nzValue]="title" [nzLabel]="title"></nz-option>
+          </nz-select>
+
+          <nz-select
+            *ngIf="gap.inputType === 'select-affectation'"
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            nzPlaceHolder="Sélectionner une agence"
+            nzShowSearch
+            nzAllowClear
+            class="export-prep-select"
+          >
+            <nz-option *ngFor="let a of affectations" [nzValue]="a" [nzLabel]="a"></nz-option>
+          </nz-select>
+
+          <nz-date-picker
+            *ngIf="gap.inputType === 'date'"
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            nzFormat="yyyy-MM-dd"
+            class="export-prep-date"
+          ></nz-date-picker>
+
+          <nz-date-picker
+            *ngIf="gap.inputType === 'datetime'"
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            nzShowTime
+            nzFormat="yyyy-MM-dd HH:mm"
+            class="export-prep-date"
+          ></nz-date-picker>
+
+          <textarea
+            *ngIf="gap.inputType === 'textarea'"
+            nz-input
+            [(ngModel)]="entry.values[gap.fieldKey]"
+            [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+            [placeholder]="gap.placeholder || gap.label"
+          ></textarea>
+        </div>
+      </div>
+
+      <p class="export-prep-filled-hint" *ngIf="exportPrepFilledCount()">
+        {{ exportPrepFilledCount() }} champ(s) saisi(s) sur {{ entry.gaps.length }}
+      </p>
+    </div>
+  </ng-container>
 </nz-modal>

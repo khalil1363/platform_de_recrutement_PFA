@@ -487,6 +487,7 @@ public class RecruitmentService {
         if (request.getObservation() != null) application.setObservation(blankToNull(request.getObservation()));
         if (request.getHebergement() != null) application.setHebergement(blankToNull(request.getHebergement()));
         if (request.getDateDebutPotentielle() != null) application.setDateDebutPotentielle(request.getDateDebutPotentielle());
+        if (request.getEntretienRespAt() != null) application.setEntretienRespAt(request.getEntretienRespAt());
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
 
@@ -1018,6 +1019,7 @@ public class RecruitmentService {
                 .observation(a.getObservation())
                 .hebergement(a.getHebergement())
                 .dateDebutPotentielle(a.getDateDebutPotentielle())
+                .entretienRespAt(a.getEntretienRespAt())
                 .responsibleName(r.getResponsibleName())
                 .coworking(r.isCoworking())
                 .coworkingMonth(r.getCoworkingMonth())
