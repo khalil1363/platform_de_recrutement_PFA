@@ -11,7 +11,9 @@ import com.daam.recruitment.enumeration.RecruitmentStatus;
 import com.daam.recruitment.repository.*;
 import com.daam.recruitment.response.ApiResponse;
 import com.daam.recruitment.security.AuthUser;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecruitmentService {
 
     private final ZoneRepository zoneRepository;
@@ -735,17 +738,56 @@ public class RecruitmentService {
     private CandidateContact resolveCandidate(String candidateUserId) {
         String email = null;
         String name = "Candidat";
-        ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, candidateUserId);
-        if (userResp.isSuccess() && userResp.getData() != null) {
-            UserDto candidate = userResp.getData();
-            email = candidate.getEmail();
-            name = ((candidate.getFirstName() != null ? candidate.getFirstName() : "")
-                    + " " + (candidate.getLastName() != null ? candidate.getLastName() : "")).trim();
-            if (name.isBlank()) {
-                name = candidate.getUsername() != null ? candidate.getUsername() : "Candidat";
+        try {
+            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, candidateUserId);
+            if (userResp.isSuccess() && userResp.getData() != null) {
+                UserDto candidate = userResp.getData();
+                email = candidate.getEmail();
+                name = ((candidate.getFirstName() != null ? candidate.getFirstName() : "")
+                        + " " + (candidate.getLastName() != null ? candidate.getLastName() : "")).trim();
+                if (name.isBlank()) {
+                    name = candidate.getUsername() != null ? candidate.getUsername() : "Candidat";
+                }
             }
+        } catch (FeignException e) {
+            if (e.status() != 404) {
+                throw e;
+            }
+            log.warn("Candidate user not found for contact resolution: {}", candidateUserId);
+            name = "Candidat (compte supprimé)";
         }
         return new CandidateContact(email, name);
+    }
+
+    private UserSummary resolveCandidateSummary(String candidateUserId) {
+        try {
+            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, candidateUserId);
+            if (userResp.isSuccess() && userResp.getData() != null) {
+                UserDto u = userResp.getData();
+                return UserSummary.builder()
+                        .userId(u.getUserId())
+                        .firstName(u.getFirstName())
+                        .lastName(u.getLastName())
+                        .username(u.getUsername())
+                        .email(u.getEmail())
+                        .phoneNumber(u.getPhoneNumber())
+                        .cin(u.getCin())
+                        .profileImageUrl(u.getProfileImageUrl())
+                        .build();
+            }
+        } catch (FeignException e) {
+            if (e.status() != 404) {
+                throw e;
+            }
+            log.warn("Candidate user not found for application summary: {}", candidateUserId);
+        }
+        return UserSummary.builder()
+                .userId(candidateUserId)
+                .firstName("Candidat")
+                .lastName("(compte supprimé)")
+                .username("—")
+                .email("—")
+                .build();
     }
 
     private RhContact resolveRh(AuthUser authUser) {
@@ -936,16 +978,7 @@ public class RecruitmentService {
     private ApplicationResponse toApplicationResponse(JobApplication a, Recruitment r, boolean includeDetails) {
         UserSummary candidate = null;
         if (includeDetails) {
-            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, a.getCandidateUserId());
-            if (userResp.isSuccess() && userResp.getData() != null) {
-                UserDto u = userResp.getData();
-                candidate = UserSummary.builder().userId(u.getUserId())
-                        .firstName(u.getFirstName()).lastName(u.getLastName())
-                        .username(u.getUsername()).email(u.getEmail())
-                        .phoneNumber(u.getPhoneNumber())
-                        .cin(u.getCin())
-                        .profileImageUrl(u.getProfileImageUrl()).build();
-            }
+            candidate = resolveCandidateSummary(a.getCandidateUserId());
         }
 
         List<ApplicationAnswerResponse> answers = applicationAnswerRepository.findByApplicationId(a.getApplicationId())
