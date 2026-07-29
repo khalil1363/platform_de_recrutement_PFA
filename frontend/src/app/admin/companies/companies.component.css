@@ -121,7 +121,7 @@
 
 .map-search-results {
   margin-top: 8px;
-  max-height: 220px;
+  max-height: 320px;
   overflow: auto;
   border: 1px solid var(--daam-border, #e8e8e8);
   border-radius: 10px;

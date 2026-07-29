@@ -117,7 +117,7 @@
         [(ngModel)]="searchQuery"
         (ngModelChange)="onSearchInput()"
         (keydown.enter)="$event.preventDefault(); searchNow()"
-        placeholder="Rechercher une adresse, ville, rue…"
+        placeholder="Rechercher une adresse, ville, rue, quartier…"
       />
       <button nz-button nzType="primary" type="button" [nzLoading]="searching" (click)="searchNow()">
         <span nz-icon nzType="search" nzTheme="outline"></span>

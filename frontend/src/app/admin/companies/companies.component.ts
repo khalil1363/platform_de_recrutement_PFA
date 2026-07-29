@@ -151,11 +151,11 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   onSearchInput(): void {
     this.clearSearchDebounce();
     const q = this.searchQuery.trim();
-    if (q.length < 3) {
+    if (q.length < 2) {
       this.searchResults = [];
       return;
     }
-    this.searchDebounce = setTimeout(() => void this.searchPlaces(q), 400);
+    this.searchDebounce = setTimeout(() => void this.searchPlaces(q), 300);
   }
 
   searchNow(): void {
@@ -436,28 +436,20 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Photon (autocomplete) + Nominatim (OSM) merged — finds more streets,
+   * cities and POIs than Nominatim alone (limit was previously only 6).
+   */
   private async searchPlaces(query: string): Promise<void> {
     this.searching = true;
     try {
-      const url =
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}`
-        + `&limit=6&addressdetails=1&countrycodes=tn`;
-      const res = await fetch(url, {
-        headers: {
-          Accept: 'application/json'
-        }
-      });
-      if (!res.ok) {
-        throw new Error('search failed');
-      }
-      const data = (await res.json()) as Array<{ display_name: string; lat: string; lon: string }>;
-      this.searchResults = (data || []).map((item) => ({
-        displayName: item.display_name,
-        lat: Number(item.lat),
-        lng: Number(item.lon)
-      }));
+      const [photon, nominatim] = await Promise.all([
+        this.searchPhoton(query),
+        this.searchNominatim(query)
+      ]);
+      this.searchResults = this.mergeSearchResults([...photon, ...nominatim], 20);
       if (this.searchResults.length === 0) {
-        this.message.info('Aucun résultat trouvé');
+        this.message.info('Aucun résultat trouvé — essayez un autre nom ou cliquez sur la carte');
       }
     } catch {
       this.searchResults = [];
@@ -467,10 +459,135 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async searchPhoton(query: string): Promise<SearchResult[]> {
+    // Tunisia bias around Tunis; bbox = minLon,minLat,maxLon,maxLat
+    const url =
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}`
+      + `&limit=15&lang=fr&lat=36.8065&lon=10.1815`
+      + `&bbox=7.5,30.2,11.6,37.5`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!res.ok) {
+      return [];
+    }
+    const data = await res.json();
+    const features = (data?.features || []) as Array<{
+      geometry?: { coordinates?: [number, number] };
+      properties?: Record<string, string | number | undefined>;
+    }>;
+    return features
+      .map((f) => {
+        const coords = f.geometry?.coordinates;
+        const p = f.properties || {};
+        if (!coords || coords.length < 2) {
+          return null;
+        }
+        const country = String(p['countrycode'] || p['country'] || '').toUpperCase();
+        if (country && country !== 'TN' && !country.includes('TUNIS')) {
+          return null;
+        }
+        return {
+          displayName: this.formatPhotonLabel(p),
+          lng: Number(coords[0]),
+          lat: Number(coords[1])
+        } as SearchResult;
+      })
+      .filter((r): r is SearchResult => !!r && !!r.displayName && !Number.isNaN(r.lat));
+  }
+
+  private async searchNominatim(query: string): Promise<SearchResult[]> {
+    const base =
+      `https://nominatim.openstreetmap.org/search?format=jsonv2`
+      + `&addressdetails=1&dedupe=0&limit=15&accept-language=fr`
+      + `&countrycodes=tn&viewbox=7.5,37.5,11.6,30.2&bounded=0`
+      + `&q=`;
+    const queries = [
+      query,
+      query.toLowerCase().includes('tunisie') || query.toLowerCase().includes('tunisia')
+        ? query
+        : `${query}, Tunisie`
+    ];
+    const uniqueQueries = [...new Set(queries)];
+    const batches = await Promise.all(
+      uniqueQueries.map(async (q) => {
+        try {
+          const res = await fetch(base + encodeURIComponent(q), {
+            headers: { Accept: 'application/json' }
+          });
+          if (!res.ok) {
+            return [] as SearchResult[];
+          }
+          const data = (await res.json()) as Array<{
+            display_name: string;
+            lat: string;
+            lon: string;
+          }>;
+          return (data || []).map((item) => ({
+            displayName: item.display_name,
+            lat: Number(item.lat),
+            lng: Number(item.lon)
+          }));
+        } catch {
+          return [] as SearchResult[];
+        }
+      })
+    );
+    return batches.flat();
+  }
+
+  private formatPhotonLabel(p: Record<string, string | number | undefined>): string {
+    const parts = [
+      p['name'],
+      p['housenumber'] ? `${p['street'] || ''} ${p['housenumber']}`.trim() : p['street'],
+      p['district'] || p['suburb'] || p['neighbourhood'],
+      p['city'] || p['town'] || p['village'] || p['county'],
+      p['state'],
+      p['country']
+    ]
+      .map((part) => (part != null ? String(part).trim() : ''))
+      .filter((part, index, arr) => !!part && arr.indexOf(part) === index);
+    return parts.join(', ') || String(p['name'] || '');
+  }
+
+  private mergeSearchResults(results: SearchResult[], max: number): SearchResult[] {
+    const seen = new Set<string>();
+    const merged: SearchResult[] = [];
+    for (const r of results) {
+      if (!r.displayName || Number.isNaN(r.lat) || Number.isNaN(r.lng)) {
+        continue;
+      }
+      const key = `${r.lat.toFixed(4)},${r.lng.toFixed(4)}|${r.displayName.toLowerCase().slice(0, 40)}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      merged.push(r);
+      if (merged.length >= max) {
+        break;
+      }
+    }
+    return merged;
+  }
+
   private async reverseGeocodeLabel(lat: number, lng: number): Promise<void> {
     try {
+      // Prefer Photon reverse (more reliable CORS), fall back to Nominatim.
+      const photonRes = await fetch(
+        `https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=fr&limit=1`,
+        { headers: { Accept: 'application/json' } }
+      );
+      if (photonRes.ok) {
+        const data = await photonRes.json();
+        const props = data?.features?.[0]?.properties as Record<string, string | number | undefined> | undefined;
+        if (props) {
+          const label = this.formatPhotonLabel(props);
+          if (label) {
+            this.selectedPlaceLabel = label;
+            return;
+          }
+        }
+      }
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=fr`,
         { headers: { Accept: 'application/json' } }
       );
       if (!res.ok) {
