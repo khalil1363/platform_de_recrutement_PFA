@@ -20,7 +20,11 @@
         </div>
       </section>
 
-      <nz-descriptions nzBordered [nzColumn]="2" class="meta-block">
+      <nz-descriptions
+        nzBordered
+        [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }"
+        class="meta-block"
+      >
         <nz-descriptions-item nzTitle="Référence">{{ recruitment.internalReference || recruitment.keejobReference || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Disponibilité">{{ recruitment.availability || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Salaire">

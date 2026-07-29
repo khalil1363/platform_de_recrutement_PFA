@@ -8,6 +8,51 @@
   overflow: hidden;
 }
 
+.meta-block ::ng-deep .ant-descriptions-view {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.meta-block ::ng-deep .ant-descriptions-view > table {
+  width: 100% !important;
+  table-layout: auto;
+}
+
+.meta-block ::ng-deep .ant-descriptions-item-label,
+.meta-block ::ng-deep .ant-descriptions-item-content {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  vertical-align: top;
+}
+
+.meta-block ::ng-deep .ant-descriptions-item-label {
+  width: 38%;
+  min-width: 110px;
+  white-space: nowrap;
+}
+
+.meta-block ::ng-deep .ant-descriptions-item-content {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .meta-block ::ng-deep .ant-descriptions-item-label {
+    width: 34%;
+    min-width: 96px;
+    white-space: normal;
+    font-size: 0.85rem;
+  }
+
+  .meta-block ::ng-deep .ant-descriptions-item-content {
+    font-size: 0.9rem;
+  }
+
+  .hero-actions-row .ant-btn {
+    width: 100%;
+  }
+}
+
 .detail-hero-inner {
   position: relative;
   z-index: 1;

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
+import { ShellBase } from '../../core/layout/shell-base';
 import { UserProfile } from '../../models/auth.model';
 
 @Component({
@@ -7,13 +8,15 @@ import { UserProfile } from '../../models/auth.model';
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css'
 })
-export class AdminLayoutComponent implements OnInit {
-  isCollapsed = false;
+export class AdminLayoutComponent extends ShellBase implements OnInit, OnDestroy {
   currentUser: UserProfile | null = null;
 
-  constructor(readonly authService: AuthService) {}
+  constructor(readonly authService: AuthService) {
+    super();
+  }
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.authService.loadCurrentUser().subscribe({
       next: (response) => {
         if (response.success && response.data) {

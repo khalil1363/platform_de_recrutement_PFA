@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
+import { ShellBase } from '../../../core/layout/shell-base';
 import { UserProfile } from '../../../models/auth.model';
 
 @Component({
@@ -7,11 +8,15 @@ import { UserProfile } from '../../../models/auth.model';
   templateUrl: './rh-layout.component.html',
   styleUrl: './rh-layout.component.css'
 })
-export class RhLayoutComponent {
-  isCollapsed = false;
+export class RhLayoutComponent extends ShellBase implements OnInit, OnDestroy {
   currentUser: UserProfile | null = null;
 
   constructor(readonly authService: AuthService) {
+    super();
+  }
+
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.authService.loadCurrentUser().subscribe({
       next: (response) => {
         if (response.success && response.data) {

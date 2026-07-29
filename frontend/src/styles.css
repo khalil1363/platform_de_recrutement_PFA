@@ -807,14 +807,150 @@ body {
   50% { transform: translateY(-8px); }
 }
 
+/* ---- Mobile drawer backdrop ---- */
+.shell-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 30, 22, 0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ---- Responsive ---- */
-@media (max-width: 768px) {
+@media (max-width: 991px) {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .app-shell .shell-sider {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1050;
+    width: 280px !important;
+    max-width: 82vw !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+    transform: translateX(-100%);
+    transition: transform 0.26s ease;
+    overflow-y: auto;
+  }
+
+  /* Expanded = drawer slides in. Collapsed = fully hidden off-canvas. */
+  .app-shell .shell-sider:not(.ant-layout-sider-collapsed) {
+    transform: translateX(0);
+  }
+
+  .app-shell .shell-sider.ant-layout-sider-collapsed {
+    transform: translateX(-100%);
+  }
+
+  /* Sider is overlaid, so main content always uses the full width. */
+  .app-shell .shell-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw;
+    min-width: 0;
+  }
+
+  .app-shell.ant-layout,
+  .app-shell > nz-layout {
+    min-width: 0;
+  }
+
+  .shell-backdrop.is-visible {
+    display: block;
+  }
+
+  .app-shell .shell-header {
+    padding: 0 14px;
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    gap: 8px;
+    row-gap: 10px;
+  }
+
+  .app-shell .header-left {
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .app-shell .page-title {
+    font-size: 0.98rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(52vw, 220px);
+  }
+
+  .app-shell .header-right {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .app-shell .header-right .ant-btn {
+    flex-shrink: 0;
+  }
+
+  .app-shell .user-name,
+  .app-shell .role-pill {
+    display: none;
+  }
+
   .app-shell .shell-content {
-    margin: 16px;
+    margin: 12px;
+    min-width: 0;
   }
 
   .app-shell .content-panel {
-    padding: 18px;
+    padding: 16px;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /* Tables scroll horizontally instead of crushing the layout */
+  .ant-table-wrapper,
+  .table-scroll,
+  .dash-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .ant-modal {
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+  }
+
+  .ant-modal-body {
+    padding: 16px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell .shell-content {
+    margin: 10px;
+  }
+
+  .app-shell .content-panel {
+    padding: 14px;
   }
 
   .page-hero {
@@ -823,6 +959,197 @@ body {
 
   .jobs-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Page headers / toolbars: never let two blocks fight for one row. */
+  .page-header-bar,
+  .page-hero-stats,
+  .toolbar,
+  .actions,
+  .header-filters,
+  .filters-bar,
+  .filter-row,
+  .users-header,
+  .modal-footer,
+  .step-actions,
+  .form-actions,
+  .page-header-actions,
+  .group-header,
+  .dash-hero-top,
+  .dash-filters,
+  .recruitment-group,
+  .job-card-footer,
+  .job-card-top {
+    flex-wrap: wrap !important;
+  }
+
+  .page-header-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .page-header-bar > div:first-child {
+    min-width: 0;
+  }
+
+  .page-header-bar h2 {
+    font-size: 1.25rem !important;
+    word-break: break-word;
+  }
+
+  .page-header-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .page-header-actions .export-btn,
+  .page-header-actions > button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .filter-input,
+  .filter-cin {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .filter-reset-btn,
+  .filter-reset {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .group-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .recruitment-group {
+    padding: 14px 12px 8px !important;
+    overflow-x: hidden;
+  }
+
+  .page-hero-stats {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  .stat-pill {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 120px;
+  }
+
+  .job-card-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .job-card-footer .ant-btn {
+    width: 100%;
+  }
+
+  .detail-hero {
+    padding: 22px 18px !important;
+  }
+
+  .detail-hero h1 {
+    font-size: 1.35rem !important;
+    word-break: break-word;
+  }
+
+  .selection-dashboard {
+    overflow-x: hidden;
+  }
+
+  .kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .pipeline-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .pipeline-arrow {
+    transform: rotate(90deg);
+    align-self: center !important;
+  }
+
+  .dash-table {
+    min-width: 560px;
+  }
+
+  .ant-pagination {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .ant-pagination-options {
+    margin-left: 0 !important;
+  }
+
+  .nz-form-item,
+  .ant-form-item {
+    flex-wrap: wrap;
+  }
+
+  .ant-form-item-label,
+  .ant-form-item-control {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Descriptions: avoid letter-by-letter wrapping on narrow screens */
+  .ant-descriptions-bordered .ant-descriptions-item-label,
+  .ant-descriptions-bordered .ant-descriptions-item-content {
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 520px) {
+  /* Toolbar buttons go full width so labels are never clipped. */
+  .page-header-bar > button,
+  .page-header-bar > .ant-btn,
+  .toolbar > button,
+  .users-header > button,
+  .form-actions > button,
+  .step-actions > button,
+  .actions > button {
+    width: 100%;
+  }
+
+  .stat-pill {
+    flex: 1 1 100%;
+  }
+
+  .kpi-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-hero h1 {
+    font-size: 1.45rem !important;
+  }
+
+  .app-shell .page-title {
+    max-width: 42vw;
+    font-size: 0.9rem;
   }
 }
 
