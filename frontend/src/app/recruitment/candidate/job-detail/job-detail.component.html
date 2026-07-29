@@ -21,6 +21,7 @@
       </section>
 
       <nz-descriptions nzBordered [nzColumn]="2" class="meta-block">
+        <nz-descriptions-item nzTitle="Référence">{{ recruitment.internalReference || recruitment.keejobReference || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Disponibilité">{{ recruitment.availability || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Salaire">
           <span *ngIf="recruitment.salaryMin && recruitment.salaryMax">
@@ -33,7 +34,7 @@
         <nz-descriptions-item nzTitle="Région">{{ recruitment.region || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Ville">{{ recruitment.city || '—' }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="Langues">{{ recruitment.languages?.join(', ') || '—' }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Référence">{{ recruitment.internalReference || recruitment.keejobReference || '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Agence">{{ recruitment.companyName || '—' }}</nz-descriptions-item>
       </nz-descriptions>
 
       <section class="detail-section" *ngIf="recruitment.description">

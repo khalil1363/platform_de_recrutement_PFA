@@ -60,6 +60,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
   exportFullLoading = false;
   affectations: string[] = [...AFFECTATIONS];
   jobTitles: string[] = [...JOB_TITLES];
+  hireContractTypes: string[] = ['CVP', 'CDI'];
 
   filterFirstName = '';
   filterLastName = '';
@@ -96,9 +97,7 @@ export class RhCandidatesComponent implements OnInit, OnDestroy {
     this.hireForm = this.fb.group({
       hireStartDate: [null, Validators.required],
       hireNetSalary: ['', Validators.required],
-      hireContractType: [
-        "Contrat à durée indéterminée (CDI), assorti d'une période d'essai de six (6) mois, renouvelable une seule fois, sous réserve d'éligibilité au contrat CIVP"
-      ],
+      hireContractType: [null, Validators.required],
       hireWorkingHours: [
         '08 heures par jour, du lundi au vendredi de 8h à 17h30, avec permanence le samedi de fin de mois de 08h00 à 12h00'
       ],
@@ -597,7 +596,8 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
     this.pendingApplication = app;
     this.hireForm.patchValue({
       hireStartDate: null,
-      hireNetSalary: ''
+      hireNetSalary: '',
+      hireContractType: null
     });
     this.hireModalVisible = true;
   }

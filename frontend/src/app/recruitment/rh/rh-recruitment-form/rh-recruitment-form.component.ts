@@ -27,6 +27,35 @@ export class RhRecruitmentFormComponent implements OnInit {
     { label: 'Fermé', value: 'CLOSED' }
   ];
 
+  readonly availabilityOptions = [
+    'Plein temps',
+    'Temps partiel'
+  ];
+
+  readonly educationLevelOptions = [
+    'Bac',
+    'Bac+2',
+    'Bac+3',
+    'Bac+4',
+    'Bac+5',
+    'Doctorat',
+    'Non précisé'
+  ];
+
+  readonly experienceLevelOptions = [
+    'Débutant / Junior',
+    '1-2 ans',
+    '3-5 ans',
+    '5-10 ans',
+    'Plus de 10 ans',
+    'Confirmé / Senior',
+    'Non précisé'
+  ];
+
+  readonly languageOptions = ['Arabe', 'Français', 'Anglais', 'Allemand', 'Italien', 'Espagnol'];
+
+  readonly salaryPeriodOptions = ['Mois', 'An', 'Jour', 'Heure'];
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,

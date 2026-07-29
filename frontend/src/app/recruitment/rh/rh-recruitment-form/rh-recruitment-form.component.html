@@ -58,6 +58,26 @@
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
+            <nz-form-label>Référence interne</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="internalReference" placeholder="Ex: REF-2026-001" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Référence Keejob</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="keejobReference" placeholder="Référence Keejob (optionnel)" />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Disponibilité</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="availability" nzPlaceHolder="Type de contrat / disponibilité" nzAllowClear>
+                <nz-option *ngFor="let a of availabilityOptions" [nzValue]="a" [nzLabel]="a"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
             <nz-form-label>Région</nz-form-label>
             <nz-form-control><input nz-input formControlName="region" placeholder="Ex. Grand Tunis" /></nz-form-control>
           </nz-form-item>
@@ -66,12 +86,49 @@
             <nz-form-control><input nz-input formControlName="city" placeholder="Ex. Tunis" /></nz-form-control>
           </nz-form-item>
           <nz-form-item>
+            <nz-form-label>Niveau d'étude</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="educationLevel" nzPlaceHolder="Niveau d'étude" nzAllowClear>
+                <nz-option *ngFor="let e of educationLevelOptions" [nzValue]="e" [nzLabel]="e"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Niveau d'expérience</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="experienceLevel" nzPlaceHolder="Niveau d'expérience" nzAllowClear>
+                <nz-option *ngFor="let e of experienceLevelOptions" [nzValue]="e" [nzLabel]="e"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Langues</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="languages"
+                nzMode="tags"
+                nzPlaceHolder="Ex: Français, Arabe, Anglais"
+                nzAllowClear
+              >
+                <nz-option *ngFor="let l of languageOptions" [nzValue]="l" [nzLabel]="l"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
             <nz-form-label>Salaire min</nz-form-label>
             <nz-form-control><input nz-input type="number" formControlName="salaryMin" /></nz-form-control>
           </nz-form-item>
           <nz-form-item>
             <nz-form-label>Salaire max</nz-form-label>
             <nz-form-control><input nz-input type="number" formControlName="salaryMax" /></nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Période salaire</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="salaryPeriod" nzPlaceHolder="Période">
+                <nz-option *ngFor="let p of salaryPeriodOptions" [nzValue]="p" [nzLabel]="p"></nz-option>
+              </nz-select>
+            </nz-form-control>
           </nz-form-item>
         </div>
 
@@ -119,6 +176,18 @@
           <nz-form-item>
             <nz-form-label>Compétences personnelles</nz-form-label>
             <nz-form-control><textarea nz-input rows="3" formControlName="personalSkills"></textarea></nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Formation requise</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input rows="3" formControlName="educationRequirements" placeholder="Diplômes / formation attendus..."></textarea>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>Expérience requise</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input rows="3" formControlName="experienceRequirements" placeholder="Années / type d'expérience..."></textarea>
+            </nz-form-control>
           </nz-form-item>
         </div>
       </section>

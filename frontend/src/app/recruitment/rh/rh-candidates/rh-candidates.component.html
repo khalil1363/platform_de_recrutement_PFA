@@ -516,9 +516,15 @@
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
-      <nz-form-label>Nature du contrat</nz-form-label>
-      <nz-form-control>
-        <textarea nz-input formControlName="hireContractType" [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+      <nz-form-label nzRequired>Nature du contrat</nz-form-label>
+      <nz-form-control nzErrorTip="Nature du contrat obligatoire">
+        <nz-select
+          formControlName="hireContractType"
+          nzPlaceHolder="Sélectionner le type de contrat"
+          class="interview-picker"
+        >
+          <nz-option *ngFor="let type of hireContractTypes" [nzValue]="type" [nzLabel]="type"></nz-option>
+        </nz-select>
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
