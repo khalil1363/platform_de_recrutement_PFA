@@ -246,7 +246,7 @@ public class RecruitmentController {
     }
 
     @GetMapping("/applications")
-    @PreAuthorize("hasAuthority('ROLE_RH')")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH', 'ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getRhApplications(
             @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("Applications",
@@ -285,6 +285,29 @@ public class RecruitmentController {
                 HttpStatus.OK.value()));
     }
 
+    @PostMapping("/applications/{applicationId}/allow-qcm-retake")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH','ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> allowQcmRetake(
+            @PathVariable String applicationId,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Nouveau passage QCM autorisé pour le candidat",
+                recruitmentService.allowQcmRetake(applicationId, user),
+                HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/applications/{applicationId}/retake-qcm")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> retakeQcm(
+            @PathVariable String applicationId,
+            @Valid @RequestBody RetakeQcmRequest request,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "QCM mis à jour",
+                recruitmentService.retakeQcm(applicationId, request, user),
+                HttpStatus.OK.value()));
+    }
+
     @GetMapping("/applications/export.xlsx")
     @PreAuthorize("hasAuthority('ROLE_RH')")
     public ResponseEntity<byte[]> exportCandidatesMonthlyExcel(
@@ -312,7 +335,7 @@ public class RecruitmentController {
     }
 
     @GetMapping("/applications/hired")
-    @PreAuthorize("hasAuthority('ROLE_RH')")
+    @PreAuthorize("hasAnyAuthority('ROLE_RH', 'ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getHiredApplications(
             @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(ApiResponse.success("Hired applications",

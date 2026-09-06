@@ -6,6 +6,10 @@ import { UsersComponent } from './users/users.component';
 import { ZonesComponent } from './zones/zones.component';
 import { RhAssignmentsComponent } from './rh-assignments/rh-assignments.component';
 import { CompaniesComponent } from './companies/companies.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { AdminRecruitmentsComponent } from './admin-recruitments/admin-recruitments.component';
+import { AdminApplicationsComponent } from './admin-applications/admin-applications.component';
+import { AdminHiredComponent } from './admin-hired/admin-hired.component';
 import { adminGuard } from '../core/guards/admin.guard';
 
 const routes: Routes = [
@@ -14,7 +18,11 @@ const routes: Routes = [
     component: AdminLayoutComponent,
     canActivate: [adminGuard],
     children: [
-      { path: '', redirectTo: 'users', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AdminDashboardComponent },
+      { path: 'recruitments', component: AdminRecruitmentsComponent },
+      { path: 'applications', component: AdminApplicationsComponent },
+      { path: 'hired', component: AdminHiredComponent },
       { path: 'users', component: UsersComponent },
       { path: 'zones', component: ZonesComponent },
       { path: 'rh-assignments', component: RhAssignmentsComponent },
@@ -27,6 +35,10 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     AdminLayoutComponent,
+    AdminDashboardComponent,
+    AdminRecruitmentsComponent,
+    AdminApplicationsComponent,
+    AdminHiredComponent,
     UsersComponent,
     ZonesComponent,
     RhAssignmentsComponent,

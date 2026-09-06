@@ -68,7 +68,7 @@ export class RhDashboardComponent implements OnInit {
   get subtitle(): string {
     const names = this.dashboard.responsibleNames ?? [];
     const responsables = names.length ? names.join(' · ') : '—';
-    return `${this.dashboard.totalCandidates} candidats sur ${this.dashboard.totalCampaigns} campagnes coworking · Responsables : ${responsables}`;
+    return `${this.dashboard.totalCandidates} candidats sur ${this.dashboard.totalCampaigns} campagnes cohort · Responsables : ${responsables}`;
   }
 
   get integresLabel(): string {

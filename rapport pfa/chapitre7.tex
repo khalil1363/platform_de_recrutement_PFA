@@ -1,0 +1,425 @@
+% ============================================================
+% CHAPITRE 7 — Sprint 4 : Entretiens, Décisions et Pilotage RH
+% (fusion des anciens sprints 4 et 5 du plan initial)
+% ============================================================
+\chapter{Sprint 4 --- Entretiens, Décisions et Pilotage du Recrutement}
+
+\section{Introduction}
+
+Après le dépôt des candidatures et la présélection (Sprint~3), le
+Sprint~4 couvre la \textbf{phase décisionnelle} du parcours~: le RH
+retient un candidat, planifie les entretiens (en ligne puis physique),
+confirme l'embauche et pilote l'activité via des tableaux de bord et
+des exports.
+
+Ce chapitre regroupe dans le rapport les contenus initialement prévus
+pour les sprints~4 (\emph{Entretiens \& décisions}) et~5
+(\emph{Embauche \& pilotage}). La plateforme automatise les convocations
+par e-mail, centralise le calendrier RH et trace l'historique des
+candidatures d'un même postulant.
+
+
+\section{Objectifs du Sprint}
+
+\begin{itemize}
+  \item permettre au RH de marquer un candidat \textbf{Retenu}
+        (\texttt{ACCEPTED}) et de planifier un entretien en ligne~;
+  \item enregistrer l'entretien (\texttt{Interview}), horaires et lien de
+        réunion issu du profil RH (Teams, Meet, etc.)~;
+  \item envoyer les notifications e-mail au candidat et au RH~;
+  \item planifier ensuite un \textbf{entretien physique} (convocation
+        formelle avec lieu et date)~;
+  \item confirmer l'\textbf{embauche} (\texttt{HIRED}) avec contrat,
+        rémunération et date de prise de fonction~;
+  \item afficher le \textbf{calendrier des entretiens} (\texttt{/rh/calendar})~;
+  \item consulter l'\textbf{historique} des candidatures d'un candidat~;
+  \item proposer un \textbf{tableau de bord} de sélection (taux de
+        rétention, intégrations, répartition par agence / poste)~;
+  \item exporter les candidatures (Excel mensuel et CRM complet)~;
+  \item assigner un \textbf{QCM d'évaluation} aux candidats embauchés et
+        générer le rapport talent (PDF).
+\end{itemize}
+
+
+\section{Spécification et Analyse des Besoins}
+
+\subsection{Sprint Backlog}
+
+\begin{table}[htbp]
+  \centering
+  \scriptsize
+  \caption{Sprint Backlog du Sprint 4 (entretiens, embauche et pilotage)}
+  \label{tab:sprint4-backlog}
+  \begin{tabular}{|p{2.0cm}|c|p{4.0cm}|c|p{3.1cm}|c|}
+    \hline
+    \textbf{Fonctionnalité} & \textbf{ID} & \textbf{Scénario utilisateur} &
+    \textbf{ID Tâche} & \textbf{Tâches} & \textbf{Est.} \\
+    \hline
+    Retenu en ligne
+    & US-14
+    & En tant que RH, je retiens un candidat et planifie un entretien en ligne.
+    & T1
+    & \texttt{PATCH .../status} + \texttt{InterviewService}
+    & 2 j \\
+    \cline{4-6}
+    & & & T2 & Modal entretien + e-mails & 1,5 j \\
+    \hline
+    Entretien physique
+    & US-15
+    & En tant que RH, je planifie la réunion physique après l'entretien en ligne.
+    & T3
+    & Convocation physique + lieu agence
+    & 1,5 j \\
+    \hline
+    Calendrier RH
+    & US-16
+    & En tant que RH, je consulte mes entretiens planifiés par date.
+    & T4
+    & Page \texttt{/rh/calendar}
+    & 1 j \\
+    \hline
+    Historique candidat
+    & US-17
+    & En tant que RH, je consulte les candidatures passées d'un candidat.
+    & T5
+    & \texttt{GET /applications/history/\{id\}}
+    & 1 j \\
+    \hline
+    Confirmation embauche
+    & US-18
+    & En tant que RH, je confirme l'embauche après l'entretien physique.
+    & T6
+    & Statut \texttt{HIRED} + e-mail confirmation
+    & 2 j \\
+    \hline
+    Tableau de bord
+    & US-19
+    & En tant que RH, je visualise les indicateurs de sélection.
+    & T7
+    & \texttt{GET /dashboard/selection}
+    & 2 j \\
+    \hline
+    Exports Excel
+    & US-20
+    & En tant que RH, j'exporte les candidatures (mensuel / CRM).
+    & T8
+    & \texttt{export.xlsx}, \texttt{export-full.xlsx}
+    & 1,5 j \\
+    \hline
+    QCM embauché
+    & US-21
+    & En tant que RH, j'assigne un QCM post-embauche et génère le rapport.
+    & T9
+    & \texttt{/hired-qcm} + PDF talent
+    & 2 j \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Diagramme de cas d'utilisation}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/uc-sprint4.jpg}
+  \caption{Diagramme de cas d'utilisation du Sprint 4}
+  \label{fig:uc-sprint4}
+\end{figure}
+
+
+\section{Description textuelle des cas d'utilisation}
+
+\subsection{Cas d'utilisation <<~Planifier un entretien en ligne~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Planifier un entretien en ligne}
+  \label{tab:uc-online-interview}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Planifier un entretien en ligne \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & Candidature \texttt{SUBMITTED} ou \texttt{UNDER\_REVIEW}
+          dans la zone du RH~; lien de réunion renseigné dans le profil RH (recommandé). \\
+    \hline
+    \textbf{Postcondition} & Statut \texttt{ACCEPTED}~; entretien \texttt{SCHEDULED}~;
+          e-mails envoyés. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH ouvre \texttt{/rh/candidates} et clique sur \textbf{Retenu en ligne}.
+      \item Il saisit la date et les horaires de début / fin.
+      \item \texttt{PATCH /api/recruitment/applications/\{id\}/status} avec
+            \texttt{status=ACCEPTED}, \texttt{interviewType=ONLINE}.
+      \item Le service crée l'entité \texttt{Interview}, copie le lien de
+            réunion du profil RH et envoie les convocations par e-mail.
+      \item Le candidat voit la date et le lien dans \texttt{/jobs/applications}.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Lien de réunion absent~: entretien enregistré avec avertissement au RH. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Planifier un entretien physique~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Planifier un entretien physique}
+  \label{tab:uc-physical-interview}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Planifier un entretien physique \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & Candidature déjà \texttt{ACCEPTED} avec entretien en ligne planifié. \\
+    \hline
+    \textbf{Postcondition} & Nouvel entretien physique planifié~; convocation formelle envoyée. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH clique sur \textbf{Réunion physique} depuis la fiche candidat.
+      \item Il choisit date, horaires et éventuellement le lieu (sinon adresse agence).
+      \item Le backend annule l'entretien précédent et crée un entretien
+            \texttt{PHYSICAL}.
+      \item Un e-mail de convocation (modèle DAAM) est envoyé au candidat et au RH.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Tentative sans entretien en ligne préalable~: refus métier. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Confirmer une embauche~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Confirmer une embauche}
+  \label{tab:uc-hire}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Confirmer une embauche \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & Candidature \texttt{ACCEPTED} avec entretien physique planifié. \\
+    \hline
+    \textbf{Postcondition} & Statut \texttt{HIRED}~; données contrat enregistrées~;
+          e-mail de confirmation envoyé. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH clique sur \textbf{Embauche} depuis \texttt{/rh/candidates}.
+      \item Il renseigne date de prise de fonction, salaire net, type de contrat,
+            horaires et avantages.
+      \item \texttt{PATCH .../status} avec \texttt{status=HIRED} et champs d'embauche.
+      \item Le candidat apparaît dans la liste des embauchés et le tableau de bord
+            est mis à jour.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Consulter le tableau de bord~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Consulter le tableau de bord}
+  \label{tab:uc-dashboard}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Consulter le tableau de bord de sélection \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & RH authentifié avec zones affectées. \\
+    \hline
+    \textbf{Postcondition} & Indicateurs affichés (candidats, retenus, intégrés, taux). \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH ouvre \texttt{/rh/dashboard}.
+      \item Il filtre éventuellement par mois / année.
+      \item \texttt{GET /api/recruitment/dashboard/selection} retourne les statistiques
+            agrégées par zone, agence, poste et responsable.
+      \item Les graphiques et cartes KPI sont affichés.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Autres cas d'utilisation}
+
+\begin{itemize}
+  \item \textbf{Consulter le calendrier des entretiens}~: vue mensuelle avec
+        liste des entretiens du jour (\texttt{/rh/calendar}).
+  \item \textbf{Consulter l'historique candidat}~: toutes les candidatures
+        passées d'un même utilisateur.
+  \item \textbf{Suivre sa convocation} (candidat)~: date, horaire et lien de
+        réunion dans \texttt{/jobs/applications}.
+  \item \textbf{Exporter les candidatures}~: Excel mensuel par feuille de mois
+        ou export CRM complet.
+  \item \textbf{Assigner un QCM embauché}~: évaluation post-recrutement et
+        génération du rapport talent PDF.
+  \item \textbf{Annuler un entretien}~: lors d'un refus (\texttt{REJECTED}) ou
+        d'un désistement (\texttt{DESISTED}), l'entretien planifié est annulé.
+\end{itemize}
+
+
+\section{Conception}
+
+\subsection{Diagramme de classes}
+
+Le domaine du Sprint~4 enrichit \textbf{JobApplication} avec les champs
+d'entretien et d'embauche, et introduit l'entité \textbf{Interview} ainsi
+que le module \textbf{HiredQcmAssignment} pour l'évaluation post-embauche.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/class-sprint4.jpg}
+  \caption{Diagramme de classes du Sprint 4}
+  \label{fig:class-sprint4}
+\end{figure}
+
+
+\subsection{Diagrammes de séquence}
+
+\subsubsection{Diagramme de séquence <<~Planifier un entretien en ligne~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-online-interview.jpg}
+  \caption{Diagramme de séquence --- Planifier un entretien en ligne}
+  \label{fig:seq-online-interview}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Confirmer une embauche~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-hire.jpg}
+  \caption{Diagramme de séquence --- Confirmer une embauche}
+  \label{fig:seq-hire}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Consulter le tableau de bord~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-dashboard.jpg}
+  \caption{Diagramme de séquence --- Consulter le tableau de bord}
+  \label{fig:seq-dashboard}
+\end{figure}
+
+
+\section{Réalisation}
+
+\subsection{Interface RH --- décisions et entretiens}
+
+La page \texttt{/rh/candidates} propose le flux décisionnel~: \textbf{Retenu
+en ligne}, \textbf{Réunion physique}, \textbf{Embauche}, ainsi que
+\textbf{Non retenu} et \textbf{Désisté}. Un modal permet de saisir la date
+et les horaires avant envoi au backend.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-decisions.png}
+  \caption{Interface de traitement des candidatures --- décisions RH}
+  \label{fig:ui-rh-decisions}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-interview-modal.png}
+  \caption{Interface de planification d'un entretien}
+  \label{fig:ui-interview-modal}
+\end{figure}
+
+
+\subsection{Calendrier et historique}
+
+Le calendrier RH regroupe les entretiens planifiés. L'historique candidat
+permet au RH de consulter les candidatures antérieures avant de statuer.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-calendar.png}
+  \caption{Interface du calendrier des entretiens (RH)}
+  \label{fig:ui-calendar}
+\end{figure}
+
+
+\subsection{Confirmation d'embauche}
+
+Après l'entretien physique, le RH confirme l'embauche via un formulaire
+(contractuel) qui déclenche l'e-mail de confirmation au candidat.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-hire-modal.png}
+  \caption{Interface de confirmation d'embauche}
+  \label{fig:ui-hire-modal}
+\end{figure}
+
+
+\subsection{Tableau de bord et exports}
+
+Le tableau de bord \texttt{/rh/dashboard} synthétise les campagnes, le taux
+de sélection, les intégrations du mois et les répartitions par agence et
+par poste. Les exports Excel complètent le pilotage opérationnel.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-dashboard.png}
+  \caption{Interface du tableau de bord de sélection (RH)}
+  \label{fig:ui-dashboard}
+\end{figure}
+
+
+\subsection{Espace candidat --- convocation}
+
+Le candidat retenu consulte la date de son entretien et le lien de réunion
+depuis \texttt{/jobs/applications}.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-candidate-interview.png}
+  \caption{Interface candidat --- convocation à l'entretien}
+  \label{fig:ui-candidate-interview}
+\end{figure}
+
+
+\section{Conclusion}
+
+Le Sprint~4 a complété le parcours métier après la candidature~: décision
+RH, entretiens en ligne et physique, confirmation d'embauche, pilotage par
+tableau de bord et exports. Le workflow impose une progression logique
+(en ligne $\rightarrow$ physique $\rightarrow$ embauche) et automatise les
+communications par e-mail.
+
+Le chapitre suivant présentera le \textbf{module Réclamations et
+Notifications}, microservice complémentaire prévu dans l'architecture
+globale de la plateforme.
+
+\clearpage

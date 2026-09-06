@@ -40,18 +40,18 @@ export class RhRecruitmentsComponent implements OnInit {
   }
 
   create(): void {
-    this.router.navigate(['/rh/recruitments/new']);
+    void this.router.navigateByUrl('/rh/recruitments/new');
   }
 
   edit(id: string): void {
-    this.router.navigate(['/rh/recruitments', id, 'edit']);
+    void this.router.navigate(['/rh/recruitments', id, 'edit']);
   }
 
   delete(item: Recruitment): void {
     this.recruitmentService.deleteRecruitment(item.recruitmentId).subscribe({
       next: (response) => {
         if (response.success) {
-          this.message.success('Recrutement supprime');
+          this.message.success('Recrutement supprimé');
           this.loadRecruitments();
         }
       },
@@ -65,5 +65,14 @@ export class RhRecruitmentsComponent implements OnInit {
     if (status === 'PUBLISHED') return 'green';
     if (status === 'CLOSED') return 'red';
     return 'default';
+  }
+
+  statusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      DRAFT: 'Brouillon',
+      PUBLISHED: 'Publié',
+      CLOSED: 'Fermé'
+    };
+    return labels[status] || status;
   }
 }

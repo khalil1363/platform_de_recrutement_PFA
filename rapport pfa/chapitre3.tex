@@ -1,0 +1,580 @@
+% ============================================================
+% CHAPITRE 3 — Sprint 0 : Étude préliminaire
+% ============================================================
+\chapter{Sprint 0 --- Étude Préliminaire}
+
+\section{Introduction}
+
+Le Sprint~0 est une étape fondamentale dans la planification et l'organisation
+du développement de la plateforme de gestion du recrutement DAAM. Ce sprint
+ne produit pas encore de fonctionnalités opérationnelles livrables aux utilisateurs
+finaux, mais sert à établir les bases du projet~: identification des besoins,
+définition des fonctionnalités clés, choix technologiques, ainsi que la
+planification des itérations.
+
+Cette phase permet également de construire une vision globale du système à
+travers des modèles de cas d'utilisation et un Product Backlog structuré. Elle
+prépare ainsi les sprints suivants, consacrés à la réalisation progressive des
+modules métier.
+
+
+\section{Analyse des besoins}
+
+L'analyse des besoins est essentielle pour assurer que la plateforme réponde
+aux attentes des utilisateurs finaux et au contexte multi-agences de DAAM.
+Elle consiste à identifier les différents acteurs du système, puis à préciser
+leurs besoins fonctionnels et non fonctionnels.
+
+
+\subsection{Identification des acteurs}
+
+Trois types d'utilisateurs principaux ont été identifiés dans le système~:
+
+\begin{itemize}
+  \item \textbf{Administrateur}
+  \begin{itemize}
+    \item Dispose des droits de gouvernance globale de la plateforme.
+    \item Gère les utilisateurs, les zones, les agences et les affectations RH.
+    \item Consulte une vue transverse sur les recrutements, les candidatures
+          et les candidats admis, organisée par responsable RH.
+    \item Accède au dashboard global de sélection.
+  \end{itemize}
+
+  \item \textbf{RH (Responsable Ressources Humaines)}
+  \begin{itemize}
+    \item Gère les opérations quotidiennes de recrutement sur son périmètre
+          (zones / agences affectées).
+    \item Crée et publie les offres, traite les candidatures, planifie les
+          entretiens et confirme les embauches.
+    \item Utilise le dashboard, le calendrier, les QCM et le suivi des
+          candidats admis.
+  \end{itemize}
+
+  \item \textbf{Candidat}
+  \begin{itemize}
+    \item Consulte les offres publiées.
+    \item Dépose sa candidature avec CV et informations personnelles.
+    \item Suit l'état de ses dossiers et participe aux évaluations / QCM.
+  \end{itemize}
+\end{itemize}
+
+
+\subsection{Définition des besoins fonctionnels}
+
+Les besoins fonctionnels décrivent les fonctionnalités essentielles que la
+plateforme doit offrir. Ils couvrent l'ensemble du cycle de vie du recrutement,
+depuis l'authentification jusqu'au suivi post-embauche.
+
+
+\subsubsection{Gestion des comptes et de l'authentification}
+
+\begin{itemize}
+  \item \textbf{Authentification sécurisée}~: les utilisateurs doivent pouvoir
+        s'authentifier de manière sécurisée (approche basée sur JWT).
+  \item \textbf{Gestion de profil}~: chaque utilisateur doit pouvoir consulter
+        et mettre à jour ses informations personnelles.
+  \item \textbf{Administration des comptes}~: l'administrateur doit pouvoir
+        créer, modifier et activer/désactiver des comptes selon les rôles.
+  \item \textbf{Gestion des comptes candidats (côté RH)}~: le RH doit pouvoir
+        consulter les comptes candidats et gérer leur statut (activation /
+        désactivation) lorsqu'une action réglementaire ou opérationnelle
+        l'exige.
+\end{itemize}
+
+
+\subsubsection{Gestion organisationnelle (zones, agences, affectations)}
+
+\begin{itemize}
+  \item \textbf{Gestion des zones}~: l'administrateur doit pouvoir créer et
+        administrer les zones géographiques / organisationnelles.
+  \item \textbf{Gestion des agences}~: chaque agence doit être rattachée à une
+        zone, avec ses informations (adresse, localisation éventuelle).
+  \item \textbf{Affectation RH}~: un responsable RH doit pouvoir être associé
+        à une ou plusieurs zones afin de garantir le respect du périmètre
+        d'accès.
+\end{itemize}
+
+
+\subsubsection{Gestion des recrutements (offres)}
+
+\begin{itemize}
+  \item \textbf{Création et édition d'offres}~: le RH doit pouvoir créer des
+        offres détaillées (intitulé, description, compétences, disponibilité,
+        langues, références, etc.).
+  \item \textbf{Publication / clôture}~: une offre doit pouvoir passer d'un
+        état brouillon à publié, puis être clôturée.
+  \item \textbf{Rattachement organisationnel}~: chaque offre doit être liée
+        à une agence / zone.
+  \item \textbf{Association d'un QCM}~: une offre peut être liée à un
+        questionnaire de présélection.
+\end{itemize}
+
+
+\subsubsection{Gestion des candidatures}
+
+\begin{itemize}
+  \item \textbf{Dépôt de candidature}~: le candidat doit pouvoir postuler à une
+        offre publiée en fournissant son CV et ses réponses éventuelles au QCM.
+  \item \textbf{Suivi des dossiers}~: le candidat doit pouvoir consulter le
+        statut de ses candidatures.
+  \item \textbf{Traitement RH}~: le RH doit pouvoir consulter, filtrer et
+        analyser les candidatures (score QCM, analyse CV, historique).
+  \item \textbf{Workflow de statuts}~: une candidature doit évoluer selon des
+        états métier clairs (en attente, retenu, non retenu, désisté, admis).
+\end{itemize}
+
+
+\subsubsection{Entretiens, meetings et embauche}
+
+\begin{itemize}
+  \item \textbf{Planification d'entretiens}~: le RH doit pouvoir planifier un
+        entretien en ligne ou physique, avec horaires et lien éventuel.
+  \item \textbf{Calendrier}~: les entretiens doivent être visibles dans un
+        calendrier RH.
+  \item \textbf{Confirmation d'embauche}~: après acceptation et entretien
+        physique le cas échéant, le RH doit pouvoir confirmer l'embauche
+        (contrat, date de prise de fonction, etc.).
+  \item \textbf{Suivi des admis}~: les candidats embauchés doivent rester
+        accessibles pour le suivi post-recrutement (évaluations, rapports).
+\end{itemize}
+
+
+\subsubsection{QCM, évaluation et aide à la décision}
+
+\begin{itemize}
+  \item \textbf{Gestion des QCM}~: le RH doit pouvoir créer et maintenir des
+        questionnaires.
+  \item \textbf{Évaluations}~: le candidat doit pouvoir passer des évaluations
+        associées à son parcours.
+  \item \textbf{Analyse assistée du CV}~: le système doit pouvoir extraire et
+        comparer des compétences pour aider à la présélection.
+  \item \textbf{Tableaux de bord}~: Admin et RH doivent disposer d'indicateurs
+        (volumes, retenus, non retenus, désistés, taux de sélection).
+\end{itemize}
+
+
+\subsubsection{Exports et reporting}
+
+\begin{itemize}
+  \item \textbf{Export Excel}~: le RH doit pouvoir exporter des suivis de
+        candidatures / évaluations.
+  \item \textbf{Historique candidat}~: Admin et RH doivent pouvoir consulter
+        l'historique des candidatures d'un même profil.
+\end{itemize}
+
+
+\subsubsection{Perspectives (hors Sprint actuel)}
+
+\begin{itemize}
+  \item \textbf{Module de réclamations}~: à prévoir dans une évolution future.
+  \item \textbf{Notifications in-app plus complètes}~: à enrichir au-delà des
+        e-mails métier déjà présents (entretien, embauche).
+\end{itemize}
+
+
+\subsection{Définition des besoins non fonctionnels}
+
+Ces besoins garantissent la qualité du système au-delà de ses fonctions de base~:
+
+\begin{itemize}
+  \item \textbf{Sécurité}~: authentification, contrôle d'accès par rôle et
+        protection des données personnelles des candidats.
+  \item \textbf{Confidentialité}~: isolation des données selon le périmètre RH
+        (zones) et séparation claire Admin / RH / Candidat.
+  \item \textbf{Utilisabilité}~: interfaces claires, parcours simple pour les
+        candidats, navigation structurée pour RH et Admin.
+  \item \textbf{Maintenabilité}~: architecture modulaire (frontend / microservices)
+        facilitant l'évolution.
+  \item \textbf{Performance}~: temps de réponse acceptables pour la consultation
+        des listes, dashboards et dépôts de candidatures.
+  \item \textbf{Évolutivité}~: possibilité d'ajouter des modules (réclamations,
+        notifications) sans remettre en cause le cœur métier.
+  \item \textbf{Traçabilité}~: conservation de l'historique des candidatures,
+        décisions et entretiens.
+\end{itemize}
+
+
+\section{Diagramme de cas d'utilisation globale}
+
+Le diagramme de cas d'utilisation globale fournit une vue d'ensemble des
+interactions entre les acteurs et le système. Il synthétise les grandes
+familles de fonctionnalités~: authentification, administration organisationnelle,
+gestion des offres, candidatures, entretiens, embauche, dashboards et
+évaluations.
+
+\clearpage
+\begin{figure}[p]
+  \centering
+  \reportfig{img/uc-global-hires.jpg}
+  \caption{Diagramme de cas d'utilisation globale de la plateforme DAAM}
+  \label{fig:uc-global}
+\end{figure}
+\clearpage
+
+
+\section{Product Backlog}
+
+Le Product Backlog est une liste priorisée des fonctionnalités à implémenter.
+Il est structuré autour de User Stories, représentant les besoins exprimés par
+les acteurs. La priorisation privilégie d'abord les fondations (auth, organisation),
+puis le cœur métier (offres, candidatures), ensuite le pilotage (entretiens,
+embauche, dashboards).
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Product Backlog du projet (extrait priorisé)}
+  \label{tab:product-backlog}
+  \begin{tabular}{|c|p{3.4cm}|p{6.2cm}|c|}
+    \hline
+    \textbf{ID} & \textbf{Fonctionnalité} & \textbf{Description} & \textbf{Priorité} \\
+    \hline
+    US-01 & Authentification & En tant qu'utilisateur, je m'authentifie et j'accède à mon espace selon mon rôle. & Haute \\
+    \hline
+    US-02 & Profil & En tant qu'utilisateur, je consulte et mets à jour mon profil. & Haute \\
+    \hline
+    US-03 & Gestion utilisateurs & En tant qu'Admin, je gère les comptes et les rôles. & Haute \\
+    \hline
+    US-04 & Zones / agences & En tant qu'Admin, je gère zones et agences. & Haute \\
+    \hline
+    US-05 & Affectation RH & En tant qu'Admin, j'affecte un RH à des zones. & Haute \\
+    \hline
+    US-06 & Offres RH & En tant que RH, je crée, publie et clôture des offres. & Haute \\
+    \hline
+    US-07 & QCM & En tant que RH, je crée un QCM et l'associe à une offre. & Moyenne \\
+    \hline
+    US-08 & Candidature & En tant que candidat, je postule avec mon CV. & Haute \\
+    \hline
+    US-09 & Traitement candidatures & En tant que RH, je suis les statuts et l'historique. & Haute \\
+    \hline
+    US-10 & Entretiens & En tant que RH, je planifie un meeting / entretien. & Haute \\
+    \hline
+    US-11 & Embauche & En tant que RH, je confirme l'embauche d'un candidat. & Haute \\
+    \hline
+    US-12 & Candidats admis & En tant que RH/Admin, je suis les profils embauchés. & Moyenne \\
+    \hline
+    US-13 & Dashboards & En tant que RH/Admin, je consulte les KPI de sélection. & Moyenne \\
+    \hline
+    US-14 & Exports Excel & En tant que RH, j'exporte les suivis. & Moyenne \\
+    \hline
+    US-15 & Réclamations / notif. & Perspectives d'évolution. & Basse \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\section{Planification des itérations --- répartition en sprints}
+
+Compte tenu de la durée du PFA (environ deux mois) et de la nature progressive
+de SCRUM, le travail a été découpé en sprints cohérents. Le Sprint~0 correspond
+à la présente étude préliminaire. Les sprints suivants livrent des incréments
+fonctionnels.
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Répartition prévisionnelle des sprints}
+  \label{tab:sprints-plan}
+  \begin{tabular}{|c|p{3.6cm}|p{7.2cm}|}
+    \hline
+    \textbf{Sprint} & \textbf{Thème} & \textbf{Contenu principal} \\
+    \hline
+    0 & Étude préliminaire & Besoins, acteurs, backlog, architecture, techno \\
+    \hline
+    1 & Authentification \& profils & Login, rôles, profil, sécurité JWT \\
+    \hline
+    2 & Organisation Admin & Zones, agences, affectations RH, utilisateurs \\
+    \hline
+    3 & Offres et candidatures & CRUD offres, publication, dépôt CV, QCM, suivi \\
+    \hline
+    4 & Entretiens \& décisions & Meetings, workflow de statuts, historique \\
+    \hline
+    5 & Embauche \& pilotage & Confirmation embauche, admis, dashboards, exports \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/gant.png}
+  \caption{Diagramme de Gantt --- planification des sprints du projet}
+  \label{fig:gantt-sprints}
+\end{figure}
+
+Cette répartition garantit d'abord un socle solide (identité, organisation),
+puis le cœur du métier recrutement, et enfin le pilotage décisionnel.
+
+
+\section{Conception architecturale}
+
+Dans cette section, nous présentons l'architecture de la plateforme \textbf{DAAM}
+afin de fournir une vue complète de ses composants fonctionnels.
+L'architecture générale adopte un modèle à trois niveaux,
+comprenant trois couches principales~: le front-end, le back-end sous forme
+de microservices, et les bases de données, comme illustré dans la figure
+ci-dessous.
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/arch-three-tiers.png}
+  \caption{Architecture générale à trois niveaux de la plateforme DAAM}
+  \label{fig:arch-three-tiers}
+\end{figure}
+
+L'architecture de la plateforme DAAM repose sur une organisation en trois
+couches principales afin d'assurer modularité, maintenabilité et
+évolutivité.
+
+\begin{itemize}
+  \item \textbf{Le front-end (client)}~: conçu avec Angular, il gère
+        l'interface utilisateur et permet aux acteurs (Administrateur, RH,
+        Responsable de recrutement et Candidat) d'interagir avec le système
+        via des formulaires, des listes, des tableaux de bord et un calendrier
+        d'entretiens. Cette couche se charge de l'envoi des requêtes vers
+        les services du back-end et de l'affichage des réponses.
+  \item \textbf{Le back-end (serveur)}~: développé sous forme de
+        microservices Spring Boot, il centralise la logique métier de
+        l'application. Chaque service est dédié à un domaine
+        spécifique (identité, recrutement, réclamations et notifications),
+        ce qui favorise la scalabilité et facilite le déploiement
+        indépendant de chaque composant.
+  \item \textbf{La couche base de données}~: elle assure le stockage
+        persistant des informations nécessaires au fonctionnement du
+        système, notamment les comptes utilisateurs, l'organisation
+        administrative (zones, entreprises), les données de recrutement
+        (offres, candidatures, QCM, entretiens, embauches), ainsi que
+        les réclamations et l'historique des notifications.
+\end{itemize}
+
+La communication entre ces couches s'effectue de manière synchrone via
+HTTP/REST. Les ressources protégées s'appuient sur un jeton JWT transmis
+par le client, garantissant un échange sécurisé et structuré entre
+les composants.
+
+
+\subsection{Conception et implémentation de l'architecture microservices}
+
+L'architecture microservices repose sur une approche où l'application est
+décomposée en plusieurs services autonomes, chacun ayant une
+responsabilité métier spécifique. Cette conception permet une meilleure
+scalabilité, modularité, maintenabilité et facilité de déploiement
+indépendant de chaque composant.
+
+Le projet DAAM est construit à l'aide de Spring Boot pour le back-end,
+organisé en microservices, et d'un frontend Angular pour la couche client.
+Les microservices retenus dans le périmètre du projet sont les suivants~:
+
+\begin{itemize}
+  \item \textbf{API Gateway}~: point d'entrée unique du système
+        (port~8080). Il route les requêtes du frontend vers les
+        microservices concernés et constitue la façade d'accès aux
+        API REST.
+  \item \textbf{Discovery Service (Eureka)}~: service de découverte qui
+        permet aux microservices de s'enregistrer dynamiquement et de se
+        localiser mutuellement sans configuration manuelle des adresses.
+  \item \textbf{User Service}~: gère les opérations liées aux
+        utilisateurs~: authentification JWT, création et gestion des
+        comptes, profils, rôles (Admin, RH, Responsable de recrutement,
+        Candidat) et droits d'accès.
+  \item \textbf{Recruitment Service}~: porte le cœur métier du
+        recrutement~: gestion des offres, candidatures et CV, QCM et
+        scoring, suivi RH, planification des entretiens, décisions
+        (retenu / non retenu / embauche), tableaux de bord et exports.
+  \item \textbf{Reclamation \& Notification Service}~: un même
+        microservice regroupant~:
+        \begin{itemize}
+          \item la \textbf{gestion des réclamations} (création, suivi,
+                traitement et clôture) liées au parcours de recrutement~;
+          \item l'\textbf{émission et la journalisation des notifications}
+                métier (changement de statut, convocation à un entretien,
+                rappel, confirmation d'embauche), avec possibilité
+                d'évoluer vers plusieurs canaux (in-app, e-mail, etc.).
+        \end{itemize}
+        Ce choix mutualise le support utilisateurs et les alertes
+        associées au sein d'un seul composant déployable.
+\end{itemize}
+
+À date, les services \textbf{User} et \textbf{Recruitment} sont opérationnels
+dans l'application. Le microservice \textbf{Reclamation \& Notification}
+est intégré à la conception architecturale et prévu comme extension du
+système~; son implémentation complète constitue une perspective
+d'évolution.
+
+Chaque microservice dispose de sa propre base de données MySQL, et les
+communications entre services s'effectuent principalement via des requêtes
+HTTP RESTful.
+
+Cette architecture microservices permet~:
+\begin{itemize}
+  \item une évolutivité horizontale, chaque service pouvant être
+        répliqué et déployé indépendamment~;
+  \item une meilleure résilience, car une panne dans un service
+        n'impacte pas l'ensemble du système~;
+  \item une gestion granulaire de la sécurité et des responsabilités
+        métier~;
+  \item un déploiement continu facilité par l'indépendance des
+        composants.
+\end{itemize}
+
+
+\subsection{Architecture logique}
+
+L'architecture logique du projet DAAM décrit les composants fonctionnels
+et leurs interactions. Elle est organisée en plusieurs couches logiques~:
+
+\begin{itemize}
+  \item \textbf{Client}~: interface utilisateur Angular qui communique avec
+        le backend via des appels HTTP. Elle gère la navigation par rôle
+        et la conservation du jeton JWT côté navigateur.
+  \item \textbf{API Gateway}~: couche de médiation assurant le routage
+        des requêtes vers les microservices appropriés.
+  \item \textbf{Microservices principaux}~:
+        \begin{itemize}
+          \item \textbf{User Service}~: authentification JWT, comptes,
+                profils et permissions~;
+          \item \textbf{Recruitment Service}~: offres, candidatures, QCM,
+                entretiens, embauche, dashboards et exports~;
+          \item \textbf{Reclamation \& Notification Service}~: dépôt /
+                suivi des réclamations et diffusion des alertes métier
+                au sein du même service.
+        \end{itemize}
+  \item \textbf{Services transversaux}~:
+        \begin{itemize}
+          \item \textbf{Discovery Service (Eureka)}~: localisation
+                dynamique des microservices.
+        \end{itemize}
+  \item \textbf{Stockage de fichiers}~: conservation des CV et documents
+        associés aux candidatures.
+  \item \textbf{Bases de données}~: chaque microservice possède son
+        propre schéma MySQL, assurant l'isolation des données
+        (utilisateurs, recrutement, réclamations/notifications).
+\end{itemize}
+
+Les interactions se font principalement en REST synchrone, avec un
+découplage fort grâce à l'indépendance des services et à l'usage
+d'un service de découverte dynamique. Le service
+\textbf{Reclamation \& Notification} pourra être sollicité par le
+\textbf{Recruitment Service} lors d'événements clés du processus
+(ex.~planification d'entretien, changement de statut), tout en exposant
+ses propres API de support via le Gateway.
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/arch-logic.png}
+  \caption{Architecture logique de la plateforme DAAM}
+  \label{fig:arch-logic}
+\end{figure}
+
+
+\subsection{Architecture physique (environnement d'exécution)}
+
+L'architecture physique fait référence à l'infrastructure réelle qui
+supporte le système logiciel. Dans le cadre du développement et des
+tests, la plateforme DAAM s'exécute localement avec les composants
+suivants~:
+
+\begin{itemize}
+  \item \textbf{Frontend Angular (port~4200)}~: accessible via le navigateur,
+        il consomme les API REST exposées à travers la passerelle.
+  \item \textbf{API Gateway (port~8080)}~: point d'entrée unique pour
+        toutes les requêtes frontend~; il redirige les appels vers les
+        microservices appropriés.
+  \item \textbf{Eureka Server (port~8761)}~: registre central permettant la
+        découverte dynamique des services.
+  \item \textbf{Microservices Spring Boot} (communication synchrone)~:
+        chaque service expose ses fonctionnalités via des API REST sur un
+        port dédié~:
+        \begin{itemize}
+          \item User Service --- port~8089~;
+          \item Recruitment Service --- port~8090~;
+          \item Reclamation \& Notification Service --- port~8091 (prévu).
+        \end{itemize}
+  \item \textbf{Bases de données MySQL (port~3306)}~: chaque microservice
+        dispose de son propre schéma, garantissant une séparation stricte
+        des données.
+  \item \textbf{Espace de stockage local}~: répertoire dédié aux
+        fichiers CV téléchargés lors des candidatures.
+\end{itemize}
+
+Cette architecture assure~:
+\begin{itemize}
+  \item une haute disponibilité potentielle, chaque composant pouvant
+        être répliqué~;
+  \item une scalabilité horizontale, les microservices étant extensibles
+        indépendamment~;
+  \item un déploiement isolé, permettant des mises à jour ciblées
+        sans interruption de l'ensemble du système~;
+  \item une résilience accrue, limitant l'impact d'une panne à un seul
+        service.
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/arch-physical.png}
+  \caption{Architecture physique de la plateforme DAAM}
+  \label{fig:arch-physical}
+\end{figure}
+
+\section{Choix et exigences technologiques}
+
+Les choix technologiques ont été retenus pour assurer une architecture robuste,
+moderne et adaptée à une application web métier multi-rôles.
+
+
+\subsection{Environnement matériel}
+
+Le développement a été réalisé sur un poste de travail personnel présentant les
+caractéristiques suivantes (à ajuster si nécessaire)~:
+\begin{itemize}
+  \item Processeur multi-cœurs récent~;
+  \item Mémoire vive suffisante pour faire tourner frontend + microservices~;
+  \item Stockage SSD~;
+  \item Système d'exploitation Windows.
+\end{itemize}
+
+
+\subsection{Environnement logiciel}
+
+\subsubsection{Frameworks et bibliothèques principales}
+
+\begin{itemize}
+  \item \textbf{Angular}~: construction de l'interface SPA et des espaces Admin /
+        RH / Candidat.
+  \item \textbf{ng-zorro-antd}~: composants UI (tables, formulaires, layout).
+  \item \textbf{Spring Boot}~: développement des microservices REST.
+  \item \textbf{Spring Security + JWT}~: sécurisation des API et gestion des
+        autorités (rôles).
+\end{itemize}
+
+
+\subsubsection{Outils de développement}
+
+\begin{itemize}
+  \item \textbf{VS Code / Cursor}~: développement frontend et rédaction.
+  \item \textbf{IntelliJ / IDE Java}~: développement backend.
+  \item \textbf{Git}~: gestion de versions.
+  \item \textbf{Postman} (ou équivalent)~: tests d'API.
+\end{itemize}
+
+
+\subsubsection{Langages}
+
+\begin{itemize}
+  \item \textbf{TypeScript / HTML / CSS}~: frontend.
+  \item \textbf{Java}~: backend Spring Boot.
+  \item \textbf{SQL}~: persistance relationnelle.
+\end{itemize}
+
+
+\section{Conclusion}
+
+Le Sprint~0 a permis de poser les fondations du projet~: acteurs clairement
+identifiés, besoins fonctionnels et non fonctionnels formalisés, Product Backlog
+priorisé, découpage en sprints, et architecture technique définie.
+
+Cette étude préliminaire garantit que les itérations suivantes s'appuient sur
+une vision partagée du produit et sur une trajectoire de livraison réaliste.
+Le chapitre suivant présente le Sprint~1, consacré à l'authentification, aux
+profils et à la gestion de base des utilisateurs.
+
+\clearpage

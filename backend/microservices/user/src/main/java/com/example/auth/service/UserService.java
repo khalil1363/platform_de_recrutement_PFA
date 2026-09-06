@@ -21,6 +21,16 @@ public interface UserService {
     List<UserResponse> getAllUsers();
 
     /**
+     * Retrieves candidate accounts only ({@code ROLE_USER}).
+     */
+    List<UserResponse> getCandidateUsers();
+
+    /**
+     * Retrieves recruitment responsables ({@code ROLE_RESPONSABLE_RECRUTEMENT}).
+     */
+    List<UserResponse> getResponsableUsers();
+
+    /**
      * Retrieves the currently authenticated user's profile.
      *
      * @param username the authenticated username
@@ -54,6 +64,11 @@ public interface UserService {
      * @return updated user profile response
      */
     UserResponse updateUserStatus(String userId, boolean active);
+
+    /**
+     * RH may only activate/deactivate candidate accounts ({@code ROLE_USER}).
+     */
+    UserResponse updateCandidateStatus(String userId, boolean active);
 
     /**
      * Updates the authenticated user's profile.

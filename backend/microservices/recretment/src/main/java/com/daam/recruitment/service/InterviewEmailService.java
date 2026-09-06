@@ -28,8 +28,9 @@ public class InterviewEmailService {
             DateTimeFormatter.ofPattern("H'h'mm", Locale.FRENCH);
     private static final DateTimeFormatter HIRE_DATE_FORMAT =
             DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH);
-    private static final String HIRE_DOC_PATH = "hire-docs/liste-documentation-dossier-employe.docx";
-    private static final String HIRE_DOC_FILENAME = "Liste documentation dossier employe.docx";
+    private static final String HIRE_DOC_PATH = "hire-docs/liste-documentation-dossier-employe.pdf";
+    private static final String HIRE_DOC_FILENAME = "Liste documentation dossier employe.pdf";
+    private static final String HIRE_DOC_MIME = "application/pdf";
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
 
@@ -287,8 +288,8 @@ public class InterviewEmailService {
                     <li>Confirmer par retour d’e-mail votre acceptation de la présente offre ;</li>
                     <li>Confirmer votre disponibilité à la date de prise de fonction mentionnée ci-dessus ;</li>
                     <li>Transmettre une copie de votre carte d’identité nationale dans les meilleurs délais ;</li>
-                    <li>Présenter l’ensemble des documents requis le jour de votre intégration
-                    (liste documentaire envoyée dans un e-mail séparé).</li>
+                    <li>Présenter l’ensemble des documents requis le jour de votre intégration,
+                    conformément à la liste jointe au présent courrier.</li>
                   </ul>
                   <p>Par ailleurs, un lien d’évaluation en ligne vous sera transmis prochainement via la
                   plateforme KEEJOB EVALUATION. Nous vous invitons à compléter ce test dans les délais
@@ -333,7 +334,7 @@ public class InterviewEmailService {
                 Votre intégration est prévue le %s à 08h00 à l’adresse suivante :
                 %s
                 %s
-                Afin de finaliser votre dossier administratif, veuillez confirmer votre acceptation par retour d’e-mail, confirmer votre disponibilité, transmettre une copie de votre CIN, et présenter les documents requis (liste documentaire envoyée dans un e-mail séparé).
+                Afin de finaliser votre dossier administratif, veuillez confirmer votre acceptation par retour d’e-mail, confirmer votre disponibilité, transmettre une copie de votre CIN, et présenter les documents requis (liste jointe).
 
                 Cordialement,
                 L'equipe RH DAAM
@@ -341,42 +342,8 @@ public class InterviewEmailService {
                 poste, poste, agency, contractType, dateFr, workingHours, netSalary,
                 benefitsText, dateFr, address, gpsText);
 
-        // 1) Confirmation without attachment — same pattern as interview emails (inbox).
-        sendMail(toEmail, subject, textBody, htmlBody, "candidate-hire", false);
-        // 2) Word list in a separate mail (attachment alone is what usually triggers spam).
-        sendHireDocumentationEmail(toEmail, greeting, poste, agency);
-    }
-
-    private void sendHireDocumentationEmail(
-            String toEmail,
-            String candidateName,
-            String jobTitle,
-            String companyName) {
-        String subject = "Documents d'integration — " + jobTitle + " | " + companyName;
-        String greeting = StringUtils.hasText(candidateName) ? candidateName.trim() : "Madame / Monsieur";
-        String htmlBody = """
-                <html>
-                <body style="font-family: Arial, sans-serif; color: #222; line-height: 1.6;">
-                  <p>Bonjour %s,</p>
-                  <p>Suite à votre confirmation d'embauche pour le poste <strong>%s</strong>
-                  (%s), vous trouverez en pièce jointe la liste des documents à présenter
-                  le jour de votre intégration.</p>
-                  <p>Cordialement,<br/>L'equipe RH DAAM</p>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(greeting),
-                escapeHtml(jobTitle),
-                escapeHtml(companyName));
-        String textBody = """
-                Bonjour %s,
-
-                Suite à votre confirmation d'embauche pour le poste %s (%s), vous trouverez en pièce jointe la liste des documents à présenter le jour de votre intégration.
-
-                Cordialement,
-                L'equipe RH DAAM
-                """.formatted(greeting, jobTitle, companyName);
-        sendMail(toEmail, subject, textBody, htmlBody, "candidate-hire-docs", true);
+        // One email: confirmation + PDF document list attached.
+        sendMail(toEmail, subject, textBody, htmlBody, "candidate-hire", true);
     }
 
     private void sendHireRhCopy(
@@ -402,7 +369,7 @@ public class InterviewEmailService {
                     <li><strong>Date de prise de fonction :</strong> %s</li>
                     <li><strong>Rémunération :</strong> %s</li>
                   </ul>
-                  <p>La liste de documentation a été envoyée au candidat dans un e-mail séparé.</p>
+                  <p>La liste de documentation a été jointe à l'e-mail du candidat.</p>
                 </body></html>
                 """.formatted(
                 escapeHtml(greeting),
@@ -548,7 +515,7 @@ public class InterviewEmailService {
             if (attachHireDoc) {
                 ClassPathResource doc = new ClassPathResource(HIRE_DOC_PATH);
                 if (doc.exists()) {
-                    helper.addAttachment(HIRE_DOC_FILENAME, doc);
+                    helper.addAttachment(HIRE_DOC_FILENAME, doc, HIRE_DOC_MIME);
                 } else {
                     log.warn("Hire documentation file missing on classpath: {}", HIRE_DOC_PATH);
                 }

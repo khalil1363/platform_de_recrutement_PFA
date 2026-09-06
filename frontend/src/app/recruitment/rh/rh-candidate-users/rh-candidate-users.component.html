@@ -1,0 +1,90 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Gestion des candidats</h2>
+    <p>Activez ou désactivez les comptes candidats uniquement</p>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <div class="filter-bar">
+    <input
+      nz-input
+      placeholder="Prénom"
+      [(ngModel)]="filterFirstName"
+      (ngModelChange)="applyFilters()"
+      class="filter-input"
+    />
+    <input
+      nz-input
+      placeholder="Nom"
+      [(ngModel)]="filterLastName"
+      (ngModelChange)="applyFilters()"
+      class="filter-input"
+    />
+    <input
+      nz-input
+      placeholder="CIN"
+      [(ngModel)]="filterCin"
+      (ngModelChange)="applyFilters()"
+      class="filter-input filter-cin"
+      maxlength="8"
+    />
+    <button nz-button nzType="default" type="button" (click)="clearFilters()">
+      <span nz-icon nzType="clear" nzTheme="outline"></span>
+      Réinitialiser
+    </button>
+  </div>
+
+  <nz-table
+    #usersTable
+    [nzData]="filteredUsers"
+    [nzPageSize]="10"
+    nzShowSizeChanger
+    [nzFrontPagination]="true"
+    [nzScroll]="{ x: '900px' }"
+  >
+    <thead>
+      <tr>
+        <th nzWidth="60px"></th>
+        <th>Nom</th>
+        <th>CIN</th>
+        <th>Email</th>
+        <th>Utilisateur</th>
+        <th>Inscription</th>
+        <th>Statut</th>
+        <th nzWidth="120px">Activer / Désactiver</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of usersTable.data">
+        <td>
+          <nz-avatar
+            [nzSize]="36"
+            [nzSrc]="authService.resolveImageUrl(user.profileImageUrl) || undefined"
+            nzIcon="user"
+          ></nz-avatar>
+        </td>
+        <td>{{ user.firstName }} {{ user.lastName }}</td>
+        <td>{{ user.cin || '—' }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.joinDate | date: 'dd/MM/yyyy' }}</td>
+        <td>
+          <nz-tag [nzColor]="user.active ? 'success' : 'error'">
+            {{ user.active ? 'Actif' : 'Inactif' }}
+          </nz-tag>
+        </td>
+        <td>
+          <nz-switch
+            [ngModel]="user.active"
+            (ngModelChange)="onStatusChange(user, $event)"
+            nzCheckedChildren="ON"
+            nzUnCheckedChildren="OFF"
+          ></nz-switch>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+
+  <nz-empty *ngIf="!loading && filteredUsers.length === 0" nzNotFoundContent="Aucun candidat"></nz-empty>
+</nz-spin>

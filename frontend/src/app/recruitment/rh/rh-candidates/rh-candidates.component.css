@@ -4,6 +4,43 @@
   gap: 8px;
 }
 
+.test-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.test-indicator:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.test-indicator.sent {
+  background: #e8f7ee;
+  color: #1f7a3f;
+}
+
+.test-indicator.not-sent {
+  background: #fdecee;
+  color: #c0392b;
+}
+
+.test-score-input {
+  width: 72px;
+  max-width: 100%;
+}
+
+.muted {
+  color: #9aa5a0;
+}
+
 .page-header-bar {
   display: flex;
   align-items: flex-start;

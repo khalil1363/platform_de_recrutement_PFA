@@ -150,6 +150,7 @@ export class ProfileComponent implements OnInit {
     const labels: Record<string, string> = {
       ROLE_ADMIN: 'Administrateur',
       ROLE_RH: 'Ressources Humaines',
+      ROLE_RESPONSABLE_RECRUTEMENT: 'Responsable de recrutement',
       ROLE_DEVELOPER: 'Développeur',
       ROLE_USER: 'Candidat'
     };

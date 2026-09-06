@@ -87,6 +87,9 @@ export interface Recruitment {
   anonymousMode?: boolean;
   publicationDate?: string;
   responsibleName?: string;
+  responsibleUserId?: string;
+  createdByRhUserId?: string;
+  createdByRhName?: string;
   internalReference?: string;
   keejobReference?: string;
   status: RecruitmentStatus;
@@ -121,14 +124,21 @@ export interface JobApplication {
   applicationId: string;
   recruitmentId: string;
   recruitmentTitle?: string;
+  zoneId?: string;
   zoneName?: string;
   region?: string;
+  city?: string;
+  createdByRhUserId?: string;
+  createdByRhName?: string;
   candidateUserId: string;
   candidate?: UserSummary;
   cvFileUrl?: string;
   status: ApplicationStatus;
   qcmScore?: number;
   qcmTotalQuestions?: number;
+  /** Anti-cheat flagged this application QCM. */
+  qcmViolated?: boolean;
+  qcmRetakeAllowed?: boolean;
   cvMatchScore?: number | null;
   extractedSkills?: string;
   matchedSkills?: string;
@@ -182,12 +192,14 @@ export interface JobApplication {
   hebergement?: string;
   dateDebutPotentielle?: string;
   entretienRespAt?: string;
+  testLinkSent?: boolean;
+  testLinkSentAt?: string;
+  testScore?: number | null;
   responsibleName?: string;
   coworking?: boolean;
   coworkingMonth?: string | null;
   keejobReference?: string;
   internalReference?: string;
-  city?: string;
   appliedAt?: string;
   answers?: ApplicationAnswer[];
 }
@@ -222,6 +234,8 @@ export interface ApplicationTrackingUpdateRequest {
   hebergement?: string | null;
   dateDebutPotentielle?: string | null;
   entretienRespAt?: string | null;
+  testLinkSent?: boolean | null;
+  testScore?: number | null;
 }
 
 export interface ApplicationStatusUpdateRequest {
@@ -295,6 +309,7 @@ export interface RecruitmentRequest {
   anonymousMode?: boolean;
   publicationDate?: string;
   responsibleName?: string;
+  responsibleUserId?: string | null;
   internalReference?: string;
   keejobReference?: string;
   status?: RecruitmentStatus;

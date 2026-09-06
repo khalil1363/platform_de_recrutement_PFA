@@ -10,9 +10,8 @@ import { RhCandidatesComponent } from './rh/rh-candidates/rh-candidates.componen
 import { RhCalendarComponent } from './rh/rh-calendar/rh-calendar.component';
 import { RhQcmListComponent } from './rh/rh-qcm-list/rh-qcm-list.component';
 import { RhQcmFormComponent } from './rh/rh-qcm-form/rh-qcm-form.component';
-
-import { RhHiredCandidatesComponent } from './rh/rh-hired-candidates/rh-hired-candidates.component';
 import { RhDashboardComponent } from './rh/rh-dashboard/rh-dashboard.component';
+import { RhCandidateUsersComponent } from './rh/rh-candidate-users/rh-candidate-users.component';
 
 const routes: Routes = [
   {
@@ -22,14 +21,14 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: RhDashboardComponent },
-      { path: 'recruitments', component: RhRecruitmentsComponent },
       { path: 'recruitments/new', component: RhRecruitmentFormComponent },
       { path: 'recruitments/:id/edit', component: RhRecruitmentFormComponent },
-      { path: 'qcm', component: RhQcmListComponent },
+      { path: 'recruitments', component: RhRecruitmentsComponent },
       { path: 'qcm/new', component: RhQcmFormComponent },
       { path: 'qcm/:id/edit', component: RhQcmFormComponent },
+      { path: 'qcm', component: RhQcmListComponent },
       { path: 'candidates', component: RhCandidatesComponent },
-      { path: 'hired', component: RhHiredCandidatesComponent },
+      { path: 'users', component: RhCandidateUsersComponent },
       { path: 'calendar', component: RhCalendarComponent },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule) }
     ]
@@ -45,7 +44,7 @@ const routes: Routes = [
     RhQcmListComponent,
     RhQcmFormComponent,
     RhCandidatesComponent,
-    RhHiredCandidatesComponent,
+    RhCandidateUsersComponent,
     RhCalendarComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]

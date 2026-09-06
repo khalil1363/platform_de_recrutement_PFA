@@ -47,6 +47,23 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getCandidateUsers() {
+        return userRepository.findByRole(Role.USER.getAuthority()).stream()
+                .map(this::mapToUserResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getResponsableUsers() {
+        return userRepository.findByRole(Role.RESPONSABLE_RECRUTEMENT.getAuthority()).stream()
+                .filter(User::isActive)
+                .map(this::mapToUserResponse)
+                .toList();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -122,6 +139,18 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUserStatus(String userId, boolean active) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        user.setActive(active);
+        return mapToUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateCandidateStatus(String userId, boolean active) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        if (!Role.USER.getAuthority().equals(user.getRole())) {
+            throw new OperationNotAllowedException("RH can only enable/disable candidate accounts");
+        }
         user.setActive(active);
         return mapToUserResponse(userRepository.save(user));
     }
@@ -237,6 +266,9 @@ public class UserServiceImpl implements UserService {
         }
         if (Role.RH.getAuthority().equals(roleAuthority)) {
             return new ArrayList<>(List.of("read", "edit", "manage_candidates"));
+        }
+        if (Role.RESPONSABLE_RECRUTEMENT.getAuthority().equals(roleAuthority)) {
+            return new ArrayList<>(List.of("read"));
         }
         if (Role.DEVELOPER.getAuthority().equals(roleAuthority)) {
             return new ArrayList<>(List.of("read", "edit", "manage_system"));

@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByCinAndUserIdNot(String cin, String userId);
 
     boolean existsByEmailAndUserIdNot(String email, String userId);
+
+    java.util.List<User> findByRole(String role);
 }

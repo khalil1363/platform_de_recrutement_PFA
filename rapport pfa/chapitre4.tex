@@ -1,0 +1,346 @@
+missing label fig:seq-add-user missing label fig:seq-profile missing label fig:seq-login missing label fig:class-sprint1 replaced fig:uc-sprint1 % ============================================================
+% CHAPITRE 4 — Sprint 1 : Utilisateurs, profils, authentification
+% ============================================================
+\chapter{Sprint 1 --- Gestion des Utilisateurs et Profils, Authentification}
+
+\section{Introduction}
+
+Ce premier sprint de développement marque le démarrage concret de la plateforme
+\textbf{DAAM}. Il se concentre sur les fondations liées à l'identité numérique~:
+authentification sécurisée, gestion des profils et administration des comptes
+utilisateurs. Ces briques sont indispensables avant d'aborder le métier du
+recrutement, car chaque espace (Admin, RH, Responsable de recrutement,
+Candidat) repose sur une connexion fiable et sur des droits clairement
+définis.
+
+Durant ce sprint, le microservice \textbf{User}, l'intégration JWT ainsi que
+les premières interfaces Angular (connexion, inscription, profil, gestion
+des utilisateurs) ont été mis en place.
+
+
+\section{Objectifs du Sprint}
+
+Les principaux objectifs de ce sprint sont~:
+\begin{itemize}
+  \item mettre en œuvre l'authentification des utilisateurs via
+        Spring~Security et JWT~;
+  \item permettre l'inscription d'un candidat et la connexion de tous les
+        rôles prévus~;
+  \item créer les composants Angular nécessaires à la connexion, à
+        l'inscription et à l'affichage / modification du profil~;
+  \item permettre à l'administrateur de gérer les comptes (création,
+        modification, activation / désactivation, suppression)~;
+  \item concevoir les interfaces frontend correspondantes et brancher le
+        frontend sur l'API Gateway.
+\end{itemize}
+
+
+\section{Spécification et Analyse des Besoins}
+
+Cette section détaille les exigences fonctionnelles et les scénarios
+d'utilisation qui ont guidé le développement durant ce sprint. Le Sprint
+Backlog ci-dessous décompose les User Stories en tâches techniques, tandis
+que le diagramme de cas d'utilisation illustre les interactions clés des
+acteurs avec le système.
+
+
+\subsection{Sprint Backlog}
+
+Le tableau suivant présente le Sprint Backlog du sprint~1, détaillant les
+fonctionnalités, les scénarios utilisateurs, les tâches associées ainsi que
+leurs estimations en charge de travail.
+
+\begin{table}[htbp]
+  \centering
+  \scriptsize
+  \caption{Sprint Backlog du Sprint 1}
+  \label{tab:sprint1-backlog}
+  \begin{tabular}{|p{2.1cm}|c|p{4.0cm}|c|p{3.4cm}|c|}
+    \hline
+    \textbf{Fonctionnalité} & \textbf{ID} & \textbf{Scénario utilisateur} &
+    \textbf{ID Tâche} & \textbf{Tâches} & \textbf{Est.} \\
+    \hline
+    Authentification
+    & US-01
+    & En tant qu'utilisateur, je m'authentifie pour accéder à mon espace selon mon rôle.
+    & T1
+    & Backend login / register + JWT
+    & 2 j \\
+    \cline{4-6}
+    & & & T2 & Interfaces connexion / inscription & 1,5 j \\
+    \cline{4-6}
+    & & & T3 & Intercepteur HTTP + guards Angular & 1 j \\
+    \hline
+    Profil
+    & US-02
+    & En tant qu'utilisateur connecté, je consulte et mets à jour mon profil (y compris photo).
+    & T4
+    & API \texttt{/me} + upload image
+    & 1,5 j \\
+    \cline{4-6}
+    & & & T5 & Interface profil & 1 j \\
+    \hline
+    Gestion des utilisateurs
+    & US-03
+    & En tant qu'Admin, je crée, modifie, active/désactive et supprime des comptes (rôles inclus).
+    & T6
+    & CRUD utilisateurs backend
+    & 2 j \\
+    \cline{4-6}
+    & & & T7 & Interface admin \texttt{/admin/users} & 1,5 j \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Diagramme de cas d'utilisation du Sprint}
+
+Le diagramme de cas d'utilisation du sprint~1 met en évidence les acteurs
+principaux (Administrateur, RH, Responsable de recrutement, Candidat /
+utilisateur) et les cas liés à l'authentification, au profil et à la gestion
+des comptes.
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/uc-sprint1.png}
+  \caption{Diagramme de cas d'utilisation du Sprint 1}
+  \label{fig:uc-sprint1}
+\end{figure}
+
+
+\section{Description textuelle des cas d'utilisation}
+
+\subsection{Description textuelle du cas d'utilisation <<~S'authentifier~>>}
+
+Ce cas d'utilisation décrit le processus par lequel un utilisateur accède à
+la plateforme de manière sécurisée. Il couvre la validation des identifiants
+et la gestion des accès via un token JWT.
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~S'authentifier~>>}
+  \label{tab:uc-login}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & S'authentifier \\
+    \hline
+    \textbf{Acteur} & Utilisateur (Admin, RH, Responsable de recrutement ou Candidat) \\
+    \hline
+    \textbf{Précondition} & L'utilisateur possède un compte valide et actif. \\
+    \hline
+    \textbf{Postcondition} & L'utilisateur est authentifié, reçoit un JWT et est redirigé vers son espace. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'utilisateur ouvre la page de connexion.
+      \item Le système affiche le formulaire (identifiant / e-mail et mot de passe).
+      \item L'utilisateur saisit ses identifiants et valide.
+      \item La requête est envoyée via l'API Gateway vers le User Service.
+      \item Le service vérifie les identifiants en base de données.
+      \item Si les identifiants sont valides, un token JWT est généré.
+      \item Le token est renvoyé au client et stocké (localStorage).
+      \item L'utilisateur est redirigé selon son rôle
+            (Admin~$\rightarrow$ utilisateurs, RH~$\rightarrow$ recrutements,
+            Candidat~$\rightarrow$ offres).
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Identifiants invalides, compte désactivé ou verrouillé~: message d'erreur, pas de token. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Description textuelle du cas d'utilisation <<~Modifier profil~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~Modifier profil~>>}
+  \label{tab:uc-profile}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Modifier profil \\
+    \hline
+    \textbf{Acteur} & Utilisateur authentifié \\
+    \hline
+    \textbf{Précondition} & L'utilisateur est connecté (JWT valide). \\
+    \hline
+    \textbf{Postcondition} & Les informations du profil sont mises à jour. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'utilisateur ouvre la page profil de son espace.
+      \item Le système charge les données via \texttt{GET /api/auth/me}.
+      \item L'utilisateur modifie les champs autorisés (coordonnées, photo, etc.).
+      \item Le client envoie \texttt{PUT /api/auth/me} (et éventuellement l'upload d'image).
+      \item Le User Service persiste les modifications.
+      \item Le système confirme la mise à jour à l'utilisateur.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Description textuelle du cas d'utilisation <<~Ajouter un compte utilisateur~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~Ajouter un compte utilisateur~>>}
+  \label{tab:uc-add-user}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Ajouter un compte utilisateur \\
+    \hline
+    \textbf{Acteur} & Administrateur \\
+    \hline
+    \textbf{Précondition} & L'administrateur est authentifié avec le rôle \texttt{ROLE\_ADMIN}. \\
+    \hline
+    \textbf{Postcondition} & Un nouveau compte est créé avec le rôle choisi. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'Admin ouvre la page de gestion des utilisateurs.
+      \item Il saisit les informations du compte et sélectionne un rôle
+            (RH, Responsable de recrutement, Candidat, etc.).
+      \item Le frontend envoie \texttt{POST /api/auth/users}.
+      \item Le User Service valide les données, encode le mot de passe et enregistre l'utilisateur.
+      \item Le nouveau compte apparaît dans la liste.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & E-mail / username déjà existant~: création refusée avec message d'erreur. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Gestion des autres actions liées aux comptes utilisateurs}
+
+En complément des cas détaillés ci-dessus, le sprint couvre également~:
+\begin{itemize}
+  \item \textbf{Inscription publique}~: un candidat crée son propre compte
+        (\texttt{POST /api/auth/register})~; le rôle attribué est
+        \texttt{ROLE\_USER}.
+  \item \textbf{Lister les utilisateurs}~: l'Admin consulte l'ensemble des
+        comptes (\texttt{GET /api/auth/users}).
+  \item \textbf{Modifier un compte}~: l'Admin met à jour les informations
+        d'un utilisateur (\texttt{PUT /api/auth/users/\{userId\}}).
+  \item \textbf{Activer / désactiver}~: l'Admin change le statut d'un compte
+        (\texttt{PATCH /api/auth/users/\{userId\}/status}).
+  \item \textbf{Supprimer un compte}~: l'Admin retire un utilisateur
+        (\texttt{DELETE /api/auth/users/\{userId\}}).
+\end{itemize}
+
+
+\section{Conception}
+
+\subsection{Diagramme de classes}
+
+Le diagramme de classes du sprint~1 concentre le domaine d'identité autour
+de l'entité \textbf{User} (identifiants, coordonnées, rôle, statut, photo de
+profil) et des services associés (authentification JWT, gestion des comptes,
+stockage de fichiers).
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/class-sprint1.png}
+  \caption{Diagramme de classes du Sprint 1}
+  \label{fig:class-sprint1}
+\end{figure}
+
+
+\subsection{Diagrammes de séquence}
+
+\subsubsection{Diagramme de séquence <<~S'authentifier~>>}
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/seq-login.png}
+  \caption{Diagramme de s\'equence --- S'authentifier}
+  \label{fig:seq-login}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Modifier profil~>>}
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/seq-profile.png}
+  \caption{Diagramme de s\'equence --- Modifier profil}
+  \label{fig:seq-profile}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Ajouter un compte utilisateur~>>}
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/seq-add-user.png}
+  \caption{Diagramme de s\'equence --- Ajouter un compte utilisateur}
+  \label{fig:seq-add-user}
+\end{figure}
+
+
+\section{Réalisation}
+
+Cette section présente les interfaces réalisées pour le sprint~1.
+
+\subsection{Interface d'authentification (login / inscription)}
+
+L'écran d'authentification permet la connexion et l'inscription. Après succès,
+le JWT est conservé côté client et la navigation est orientée selon le rôle.
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/ui-login.png}
+  \caption{Interface de connexion / inscription de la plateforme DAAM}
+  \label{fig:ui-login}
+\end{figure}
+
+
+\subsection{Interface de gestion des utilisateurs}
+
+L'espace Admin propose la liste des comptes, la création d'utilisateurs avec
+choix du rôle, ainsi que les actions de modification, d'activation et de
+suppression.
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/ui-users.png}
+  \caption{Interface de gestion des utilisateurs (Admin)}
+  \label{fig:ui-users}
+\end{figure}
+
+
+\subsection{Interface du profil utilisateur}
+
+Chaque acteur dispose d'une page profil pour consulter et mettre à jour ses
+informations personnelles (y compris la photo de profil).
+
+\begin{figure}[htbp]
+  \centering
+  \reportfig{img/ui-profile.png}
+  \caption{Interface du profil utilisateur}
+  \label{fig:ui-profile}
+\end{figure}
+
+
+\section{Conclusion}
+
+Le Sprint~1 a permis de poser le socle d'identité de la plateforme DAAM~:
+authentification JWT, inscription candidat, gestion des profils et
+administration des comptes multi-rôles. Ces fondations sécurisent l'accès aux
+espaces et préparent les sprints suivants dédiés à l'organisation
+administrative puis au cœur métier du recrutement.
+
+Le chapitre suivant présente le Sprint~2, consacré à l'organisation Admin
+(zones, entreprises / agences et affectations RH).
+
+\clearpage

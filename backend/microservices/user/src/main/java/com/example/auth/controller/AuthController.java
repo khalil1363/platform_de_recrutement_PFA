@@ -102,6 +102,26 @@ public class AuthController {
     }
 
     /**
+     * Returns candidate accounts only (ROLE_USER). Available to Admin and RH.
+     */
+    @GetMapping("/users/candidates")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RH')")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getCandidateUsers() {
+        List<UserResponse> users = userService.getCandidateUsers();
+        return ResponseEntity.ok(ApiResponse.success("Candidates retrieved successfully", users, HttpStatus.OK.value()));
+    }
+
+    /**
+     * Returns active recruitment responsables for RH assignment lists.
+     */
+    @GetMapping("/users/responsables")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RH')")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getResponsableUsers() {
+        List<UserResponse> users = userService.getResponsableUsers();
+        return ResponseEntity.ok(ApiResponse.success("Responsables retrieved successfully", users, HttpStatus.OK.value()));
+    }
+
+    /**
      * Creates a new user account with a specific role (admin only).
      *
      * @param request admin create user payload
@@ -130,6 +150,18 @@ public class AuthController {
             @Valid @RequestBody UpdateUserStatusRequest request) {
         UserResponse user = userService.updateUserStatus(userId, request.getActive());
         return ResponseEntity.ok(ApiResponse.success("User status updated successfully", user, HttpStatus.OK.value()));
+    }
+
+    /**
+     * RH (or Admin) can enable/disable candidate accounts only.
+     */
+    @PatchMapping("/users/candidates/{userId}/status")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RH')")
+    public ResponseEntity<ApiResponse<UserResponse>> updateCandidateStatus(
+            @PathVariable String userId,
+            @Valid @RequestBody UpdateUserStatusRequest request) {
+        UserResponse user = userService.updateCandidateStatus(userId, request.getActive());
+        return ResponseEntity.ok(ApiResponse.success("Candidate status updated successfully", user, HttpStatus.OK.value()));
     }
 
     /**

@@ -89,6 +89,8 @@
           <th>CIN</th>
           <th>Match CV</th>
           <th>Score QCM</th>
+          <th>Test</th>
+          <th>Note test</th>
           <th>Date</th>
           <th>Statut</th>
           <th>Actions</th>
@@ -115,7 +117,43 @@
             </nz-tag>
             <span *ngIf="app.cvMatchScore == null" class="pending-analysis">Analyse…</span>
           </td>
-          <td>{{ app.qcmScore }}/{{ app.qcmTotalQuestions }}</td>
+          <td>
+            <ng-container *ngIf="app.qcmScore != null; else noQcmScore">
+              {{ app.qcmScore }}/{{ app.qcmTotalQuestions }}
+            </ng-container>
+            <ng-template #noQcmScore>
+              <nz-tag *ngIf="app.qcmRetakeAllowed" nzColor="blue">À repasser</nz-tag>
+              <span *ngIf="!app.qcmRetakeAllowed">—</span>
+            </ng-template>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="test-indicator"
+              [class.sent]="app.testLinkSent"
+              [class.not-sent]="!app.testLinkSent"
+              (click)="toggleTestLinkSent(app, $event)"
+              [title]="app.testLinkSent ? 'Test envoyé — cliquer pour annuler' : 'Test non envoyé — cliquer pour marquer envoyé'"
+            >
+              <span nz-icon [nzType]="app.testLinkSent ? 'check-circle' : 'close-circle'" nzTheme="fill"></span>
+              <span>{{ app.testLinkSent ? 'Envoyé' : 'Non envoyé' }}</span>
+            </button>
+          </td>
+          <td>
+            <input
+              *ngIf="app.testLinkSent"
+              nz-input
+              type="number"
+              min="0"
+              class="test-score-input"
+              [ngModel]="app.testScore"
+              (ngModelChange)="app.testScore = $event"
+              (blur)="saveTestScore(app, app.testScore ?? null)"
+              (keyup.enter)="saveTestScore(app, app.testScore ?? null)"
+              placeholder="Note"
+            />
+            <span *ngIf="!app.testLinkSent" class="muted">—</span>
+          </td>
           <td>{{ app.appliedAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td><nz-tag [nzColor]="statusColor(app.status)">{{ statusLabel(app.status) }}</nz-tag></td>
           <td class="actions-cell">
@@ -129,6 +167,22 @@
                   <span nz-icon nzType="history" nzTheme="outline"></span>
                   <span>Historique</span>
                 </button>
+                <button
+                  *ngIf="app.qcmScore != null && !app.qcmRetakeAllowed"
+                  type="button"
+                  class="act-btn act-retenu"
+                  [disabled]="actionLoading"
+                  nz-popconfirm
+                  nzPopconfirmTitle="Réinitialiser le QCM et autoriser le candidat à le repasser ?"
+                  nzOkText="Oui"
+                  nzCancelText="Non"
+                  (nzOnConfirm)="allowQcmRetake(app)"
+                  title="Réinitialiser le QCM"
+                >
+                  <span nz-icon nzType="reload" nzTheme="outline"></span>
+                  <span>Reset QCM</span>
+                </button>
+                <nz-tag *ngIf="app.qcmRetakeAllowed" nzColor="blue">QCM à repasser</nz-tag>
               </div>
 
               <div class="action-row action-row-flow" *ngIf="app.status !== 'ACCEPTED' && !isFinalStatus(app.status)">
@@ -227,6 +281,14 @@
         <nz-descriptions-item nzTitle="Score QCM">
           {{ selectedApplication.qcmScore }}/{{ selectedApplication.qcmTotalQuestions }}
         </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Test partagé">
+          <nz-tag [nzColor]="selectedApplication.testLinkSent ? 'green' : 'red'">
+            {{ selectedApplication.testLinkSent ? 'Envoyé' : 'Non envoyé' }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Note du test">
+          {{ selectedApplication.testLinkSent ? (selectedApplication.testScore ?? '—') : '—' }}
+        </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Match CV">
           <nz-tag *ngIf="selectedApplication.cvMatchScore != null" [nzColor]="matchColor(selectedApplication.cvMatchScore)">
             {{ selectedApplication.cvMatchScore }}%
@@ -279,7 +341,7 @@
           Responsable de recrutement (offre) : <strong>{{ selectedApplication.responsibleName }}</strong>
         </p>
         <p class="tracking-hint" *ngIf="selectedApplication?.coworking">
-          Coworking : <strong>Oui</strong>
+          Cohort : <strong>Oui</strong>
           <ng-container *ngIf="selectedApplication?.coworkingMonth">
             ({{ selectedApplication.coworkingMonth | date:'MMMM yyyy' }})
           </ng-container>

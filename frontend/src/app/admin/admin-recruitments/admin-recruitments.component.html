@@ -1,0 +1,76 @@
+<div class="admin-page">
+  <header class="page-hero">
+    <div class="page-hero-copy">
+      <div class="page-badges">
+        <span class="page-badge">DAAM ADMIN</span>
+        <span class="page-badge page-badge-light">Par RH</span>
+      </div>
+      <h1>Recrutements</h1>
+      <p>Toutes les offres, clairement regroupées par le RH qui les a créées</p>
+    </div>
+    <div class="page-hero-stat" *ngIf="!loading">
+      <strong>{{ totalCount }}</strong>
+      <span>offre(s)</span>
+    </div>
+  </header>
+
+  <div class="filter-card">
+    <span nz-icon nzType="search" nzTheme="outline" class="filter-icon"></span>
+    <input
+      nz-input
+      class="filter-input"
+      placeholder="Rechercher un RH, un titre, une agence, une zone…"
+      [(ngModel)]="search"
+      (ngModelChange)="applyFilter()"
+    />
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-empty *ngIf="!loading && !groups.length" nzNotFoundContent="Aucun recrutement"></nz-empty>
+
+    <section class="rh-card" *ngFor="let group of groups; let i = index" [style.--delay]="i * 40 + 'ms'">
+      <header class="rh-card-head">
+        <div class="rh-identity">
+          <div class="rh-avatar">{{ initials(group.rhName) }}</div>
+          <div>
+            <h3>{{ group.rhName }}</h3>
+            <p>Offres créées par ce responsable RH</p>
+          </div>
+        </div>
+        <span class="count-pill">{{ group.items.length }} offre(s)</span>
+      </header>
+
+      <div class="rh-card-body">
+        <nz-table #recTable [nzData]="group.items" [nzFrontPagination]="true" [nzPageSize]="8" nzSize="middle">
+          <thead>
+            <tr>
+              <th>Titre</th>
+              <th>Agence</th>
+              <th>Zone</th>
+              <th>Cohort</th>
+              <th>Statut</th>
+              <th>Créé le</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of recTable.data">
+              <td><strong class="title-cell">{{ item.title }}</strong></td>
+              <td>{{ item.companyName || '—' }}</td>
+              <td><span class="zone-chip">{{ item.zoneName || '—' }}</span></td>
+              <td>
+                <nz-tag *ngIf="item.coworking" nzColor="cyan">
+                  {{ item.coworkingMonth ? (item.coworkingMonth | date: 'MMM yyyy') : 'Oui' }}
+                </nz-tag>
+                <span class="empty-dash" *ngIf="!item.coworking">—</span>
+              </td>
+              <td>
+                <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+              </td>
+              <td class="date-cell">{{ item.createdAt ? (item.createdAt | date: 'dd/MM/yyyy') : '—' }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </section>
+  </nz-spin>
+</div>

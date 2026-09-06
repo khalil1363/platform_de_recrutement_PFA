@@ -23,6 +23,9 @@ export class JobApplyComponent implements OnInit, OnDestroy {
   qcmViolated = false;
   violationMessage = '';
   quizMonitoring = false;
+  /** When set, candidate is retaking QCM on an existing application. */
+  retakeApplicationId: string | null = null;
+  isRetake = false;
 
   private quizBaselineWidth = 0;
   private quizBaselineHeight = 0;
@@ -39,6 +42,8 @@ export class JobApplyComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    this.retakeApplicationId = this.route.snapshot.queryParamMap.get('retakeApplicationId');
+    this.isRetake = !!this.retakeApplicationId;
     if (!id) {
       this.router.navigate(['/jobs']);
       return;
@@ -76,12 +81,41 @@ export class JobApplyComponent implements OnInit, OnDestroy {
           if (!this.recruitment.questions?.length) {
             this.message.warning('Cette offre ne contient pas encore de QCM');
           }
+          if (this.isRetake) {
+            this.prepareRetake();
+          }
         }
       },
       error: () => {
         this.loading = false;
         this.message.error('Offre introuvable');
         this.router.navigate(['/jobs']);
+      }
+    });
+  }
+
+  private prepareRetake(): void {
+    if (!this.retakeApplicationId) {
+      return;
+    }
+    this.loading = true;
+    this.recruitmentService.getMyApplications().subscribe({
+      next: (response) => {
+        this.loading = false;
+        const app = response.data?.find((a) => a.applicationId === this.retakeApplicationId);
+        if (!app || !app.qcmRetakeAllowed) {
+          this.message.error('Aucun nouveau passage QCM n\'est autorisé pour cette candidature');
+          this.router.navigate(['/jobs/applications']);
+          return;
+        }
+        this.cvFileUrl = app.cvFileUrl || '';
+        this.currentStep = 1;
+        this.startQuizMonitoring();
+      },
+      error: () => {
+        this.loading = false;
+        this.message.error('Impossible de préparer le nouveau passage QCM');
+        this.router.navigate(['/jobs/applications']);
       }
     });
   }
@@ -270,19 +304,28 @@ export class JobApplyComponent implements OnInit, OnDestroy {
       }));
 
     this.submitting = true;
-    this.recruitmentService.apply({
-      recruitmentId: this.recruitment.recruitmentId,
-      cvFileUrl: this.cvFileUrl,
-      answers: answerList,
-      qcmViolated: violated
-    }).subscribe({
+    const request$ = this.isRetake && this.retakeApplicationId
+      ? this.recruitmentService.retakeQcm(this.retakeApplicationId, {
+          answers: answerList,
+          qcmViolated: violated
+        })
+      : this.recruitmentService.apply({
+          recruitmentId: this.recruitment.recruitmentId,
+          cvFileUrl: this.cvFileUrl,
+          answers: answerList,
+          qcmViolated: violated
+        });
+
+    request$.subscribe({
       next: (response) => {
         this.submitting = false;
         if (response.success) {
           if (violated) {
             setTimeout(() => this.router.navigate(['/jobs/applications']), 2500);
           } else {
-            this.message.success('Candidature envoyée avec succès');
+            this.message.success(
+              this.isRetake ? 'QCM mis à jour avec succès' : 'Candidature envoyée avec succès'
+            );
             this.router.navigate(['/jobs/applications']);
           }
         }
@@ -291,7 +334,10 @@ export class JobApplyComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.qcmViolated = false;
         this.violationMessage = '';
-        this.message.error(err.error?.message || 'Échec de l\'envoi de la candidature');
+        this.message.error(
+          err.error?.message
+            || (this.isRetake ? 'Échec du nouveau passage QCM' : 'Échec de l\'envoi de la candidature')
+        );
       }
     });
   }

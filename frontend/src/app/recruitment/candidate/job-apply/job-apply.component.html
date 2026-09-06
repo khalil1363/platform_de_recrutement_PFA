@@ -8,20 +8,25 @@
     <ng-container *ngIf="recruitment">
       <section class="apply-hero">
         <div class="apply-hero-content">
-          <span class="hero-badge">Candidature</span>
+          <span class="hero-badge">{{ isRetake ? 'Nouveau passage QCM' : 'Candidature' }}</span>
           <h1>{{ recruitment.title }}</h1>
-          <p>{{ recruitment.companyName }} · Complétez les étapes ci-dessous pour envoyer votre dossier</p>
+          <p *ngIf="!isRetake">{{ recruitment.companyName }} · Complétez les étapes ci-dessous pour envoyer votre dossier</p>
+          <p *ngIf="isRetake">{{ recruitment.companyName }} · Repassez le QCM autorisé par le RH</p>
         </div>
       </section>
 
       <div class="apply-card">
-        <nz-steps [nzCurrent]="currentStep" nzSize="small" class="apply-steps">
+        <nz-steps [nzCurrent]="currentStep" nzSize="small" class="apply-steps" *ngIf="!isRetake">
           <nz-step nzTitle="CV" nzDescription="Téléversement"></nz-step>
           <nz-step nzTitle="QCM" nzDescription="Questions"></nz-step>
           <nz-step nzTitle="Envoi" nzDescription="Confirmation"></nz-step>
         </nz-steps>
+        <nz-steps [nzCurrent]="0" nzSize="small" class="apply-steps" *ngIf="isRetake">
+          <nz-step nzTitle="QCM" nzDescription="Nouveau passage"></nz-step>
+          <nz-step nzTitle="Envoi" nzDescription="Confirmation"></nz-step>
+        </nz-steps>
 
-        <div class="step-content" *ngIf="currentStep === 0">
+        <div class="step-content" *ngIf="currentStep === 0 && !isRetake">
           <div class="step-intro">
             <span nz-icon nzType="file-text" nzTheme="outline" class="step-icon"></span>
             <div>
@@ -59,10 +64,15 @@
           <p class="violation-detail">
             Votre score au QCM est <strong>0 / {{ totalQuestions }}</strong>.
             Vous ne pouvez plus continuer le questionnaire.
+            Le RH pourra éventuellement vous autoriser un nouveau passage.
           </p>
           <p class="violation-submit">
             <span nz-icon nzType="loading" nzTheme="outline" *ngIf="submitting"></span>
-            {{ submitting ? 'Envoi automatique de votre candidature...' : 'Candidature envoyée. Redirection...' }}
+            {{
+              submitting
+                ? (isRetake ? 'Envoi du QCM...' : 'Envoi automatique de votre candidature...')
+                : (isRetake ? 'QCM enregistré. Redirection...' : 'Candidature envoyée. Redirection...')
+            }}
           </p>
         </div>
 

@@ -58,3 +58,31 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+
+:host ::ng-deep .users-table .ant-table-cell {
+  vertical-align: middle;
+  white-space: normal;
+}
+
+:host ::ng-deep .users-table .role-tag {
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.35;
+  padding: 2px 10px;
+  margin: 0;
+  height: auto;
+  word-break: break-word;
+}
+
+.date-cell {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-ellipsis {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

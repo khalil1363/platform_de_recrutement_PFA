@@ -12,6 +12,7 @@ import {
   HiredQcmSubmitRequest,
   JobApplication,
   ApplicationTrackingUpdateRequest,
+  QcmAnswer,
   Recruitment,
   RecruitmentRequest,
   RhZoneAssignment,
@@ -153,6 +154,23 @@ export class RecruitmentService {
   ): Observable<ApiResponse<JobApplication>> {
     return this.http.patch<ApiResponse<JobApplication>>(
       `${this.apiUrl}/applications/${applicationId}/tracking`,
+      request
+    );
+  }
+
+  allowQcmRetake(applicationId: string): Observable<ApiResponse<JobApplication>> {
+    return this.http.post<ApiResponse<JobApplication>>(
+      `${this.apiUrl}/applications/${applicationId}/allow-qcm-retake`,
+      {}
+    );
+  }
+
+  retakeQcm(
+    applicationId: string,
+    request: { answers: QcmAnswer[]; qcmViolated?: boolean }
+  ): Observable<ApiResponse<JobApplication>> {
+    return this.http.post<ApiResponse<JobApplication>>(
+      `${this.apiUrl}/applications/${applicationId}/retake-qcm`,
       request
     );
   }

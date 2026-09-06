@@ -55,12 +55,24 @@ export class AuthService {
     return this.http.get<ApiResponse<UserProfile[]>>(`${this.apiUrl}/users`);
   }
 
+  getCandidateUsers(): Observable<ApiResponse<UserProfile[]>> {
+    return this.http.get<ApiResponse<UserProfile[]>>(`${this.apiUrl}/users/candidates`);
+  }
+
+  getResponsableUsers(): Observable<ApiResponse<UserProfile[]>> {
+    return this.http.get<ApiResponse<UserProfile[]>>(`${this.apiUrl}/users/responsables`);
+  }
+
   createUser(request: AdminCreateUserRequest): Observable<ApiResponse<UserProfile>> {
     return this.http.post<ApiResponse<UserProfile>>(`${this.apiUrl}/users`, request);
   }
 
   updateUserStatus(userId: string, active: boolean): Observable<ApiResponse<UserProfile>> {
     return this.http.patch<ApiResponse<UserProfile>>(`${this.apiUrl}/users/${userId}/status`, { active });
+  }
+
+  updateCandidateStatus(userId: string, active: boolean): Observable<ApiResponse<UserProfile>> {
+    return this.http.patch<ApiResponse<UserProfile>>(`${this.apiUrl}/users/candidates/${userId}/status`, { active });
   }
 
   updateProfile(request: UpdateProfileRequest): Observable<ApiResponse<UserProfile>> {

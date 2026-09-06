@@ -93,6 +93,7 @@ public final class RecruitmentDtos {
         private Boolean anonymousMode;
         private LocalDate publicationDate;
         private String responsibleName;
+        private String responsibleUserId;
         private String internalReference;
         private String keejobReference;
         private RecruitmentStatus status;
@@ -134,6 +135,9 @@ public final class RecruitmentDtos {
         private Boolean anonymousMode;
         private LocalDate publicationDate;
         private String responsibleName;
+        private String responsibleUserId;
+        private String createdByRhUserId;
+        private String createdByRhName;
         private String internalReference;
         private String keejobReference;
         private RecruitmentStatus status;
@@ -332,6 +336,13 @@ public final class RecruitmentDtos {
         private Boolean qcmViolated;
     }
 
+    /** Candidate resubmits QCM answers after RH authorized a retake. */
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class RetakeQcmRequest {
+        private List<QcmAnswerRequest> answers;
+        private Boolean qcmViolated;
+    }
+
     /** RH can complete Excel suivi fields missing from auto application data. */
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class ApplicationTrackingUpdateRequest {
@@ -364,6 +375,8 @@ public final class RecruitmentDtos {
         private String hebergement;
         private java.time.LocalDate dateDebutPotentielle;
         private java.time.LocalDateTime entretienRespAt;
+        private Boolean testLinkSent;
+        private Integer testScore;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -371,15 +384,20 @@ public final class RecruitmentDtos {
         private String applicationId;
         private String recruitmentId;
         private String recruitmentTitle;
+        private String zoneId;
         private String zoneName;
         private String region;
         private String city;
+        private String createdByRhUserId;
+        private String createdByRhName;
         private String candidateUserId;
         private UserSummary candidate;
         private String cvFileUrl;
         private ApplicationStatus status;
         private Integer qcmScore;
         private Integer qcmTotalQuestions;
+        private boolean qcmViolated;
+        private boolean qcmRetakeAllowed;
         private Integer cvMatchScore;
         private String extractedSkills;
         private String matchedSkills;
@@ -432,6 +450,9 @@ public final class RecruitmentDtos {
         private String hebergement;
         private java.time.LocalDate dateDebutPotentielle;
         private java.time.LocalDateTime entretienRespAt;
+        private boolean testLinkSent;
+        private LocalDateTime testLinkSentAt;
+        private Integer testScore;
         /** From linked recruitment offer. */
         private String responsibleName;
         private boolean coworking;

@@ -1,0 +1,324 @@
+% ============================================================
+% CHAPITRE 5 — Sprint 2 : Organisation Admin
+% ============================================================
+\chapter{Sprint 2 --- Organisation Admin (Zones, Agences et Affectation RH)}
+
+\section{Introduction}
+
+Après la mise en place de l'identité (Sprint~1), le Sprint~2 structure
+l'organisation territoriale de la plateforme \textbf{DAAM}. Le recrutement
+est rattaché à des \textbf{zones} et à des \textbf{agences} (entreprises) ;
+un RH ne peut piloter des offres que dans les zones qui lui sont affectées.
+
+Ce sprint se concentre donc sur trois briques Admin~: création des zones,
+création des agences rattachées à une zone, et affectation exclusive d'un
+RH à une ou plusieurs zones. Ces fondations conditionnent ensuite la
+création des offres (Sprint~3).
+
+
+\section{Objectifs du Sprint}
+
+Les principaux objectifs de ce sprint sont~:
+\begin{itemize}
+  \item permettre à l'administrateur de créer et lister les zones
+        géographiques / organisationnelles~;
+  \item permettre de créer des agences (nom, adresse, localisation) liées
+        à une zone~;
+  \item affecter un compte RH à une ou plusieurs zones, avec la règle
+        \textbf{un seul RH par zone}~;
+  \item exposer ces données via le microservice Recruitment et les
+        interfaces Admin correspondantes~;
+  \item garantir que, dès ce sprint, le périmètre RH est borné par ses
+        affectations (filtrage des agences visibles).
+\end{itemize}
+
+
+\section{Spécification et Analyse des Besoins}
+
+Cette section détaille les exigences et scénarios qui ont guidé le
+développement. Le Sprint Backlog décompose les User Stories en tâches,
+tandis que le diagramme de cas d'utilisation illustre les interactions
+Admin (et la consultation RH limitée).
+
+
+\subsection{Sprint Backlog}
+
+\begin{table}[htbp]
+  \centering
+  \scriptsize
+  \caption{Sprint Backlog du Sprint 2}
+  \label{tab:sprint2-backlog}
+  \begin{tabular}{|p{2.2cm}|c|p{4.0cm}|c|p{3.3cm}|c|}
+    \hline
+    \textbf{Fonctionnalité} & \textbf{ID} & \textbf{Scénario utilisateur} &
+    \textbf{ID Tâche} & \textbf{Tâches} & \textbf{Est.} \\
+    \hline
+    Zones
+    & US-04
+    & En tant qu'Admin, je crée et consulte les zones.
+    & T1
+    & API \texttt{POST/GET /zones}
+    & 1,5 j \\
+    \cline{4-6}
+    & & & T2 & Interface \texttt{/admin/zones} & 1 j \\
+    \hline
+    Agences
+    & US-05
+    & En tant qu'Admin, je crée une agence rattachée à une zone (adresse, carte).
+    & T3
+    & API \texttt{POST/GET /companies}
+    & 2 j \\
+    \cline{4-6}
+    & & & T4 & Interface \texttt{/admin/companies} & 1,5 j \\
+    \hline
+    Affectation RH
+    & US-06
+    & En tant qu'Admin, j'affecte un RH à une ou plusieurs zones (1 RH / zone).
+    & T5
+    & API \texttt{POST/GET /rh-zone-assignments}
+    & 2 j \\
+    \cline{4-6}
+    & & & T6 & Interface \texttt{/admin/rh-assignments} & 1,5 j \\
+    \hline
+    Périmètre RH
+    & US-07
+    & En tant que RH, je ne vois que les agences de mes zones affectées.
+    & T7
+    & Filtrage \texttt{GET /companies} selon affectations
+    & 1 j \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Diagramme de cas d'utilisation du Sprint}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/uc-sprint2.png}
+  \caption{Diagramme de cas d'utilisation du Sprint 2}
+  \label{fig:uc-sprint2}
+\end{figure}
+
+
+\section{Description textuelle des cas d'utilisation}
+
+\subsection{Description textuelle du cas d'utilisation <<~Ajouter une zone~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~Ajouter une zone~>>}
+  \label{tab:uc-add-zone}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Ajouter une zone \\
+    \hline
+    \textbf{Acteur} & Administrateur \\
+    \hline
+    \textbf{Précondition} & L'Admin est authentifié (\texttt{ROLE\_ADMIN}). \\
+    \hline
+    \textbf{Postcondition} & Une zone active est créée (identifiant \texttt{zoneId}). \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'Admin ouvre \texttt{/admin/zones}.
+      \item Il saisit le nom (unique) et éventuellement une description.
+      \item Le frontend envoie \texttt{POST /api/recruitment/zones}.
+      \item Le microservice Recruitment enregistre la zone.
+      \item La liste des zones est mise à jour.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Nom déjà utilisé~: création refusée. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Description textuelle du cas d'utilisation <<~Ajouter une agence~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~Ajouter une agence~>>}
+  \label{tab:uc-add-company}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Ajouter une agence \\
+    \hline
+    \textbf{Acteur} & Administrateur \\
+    \hline
+    \textbf{Précondition} & Au moins une zone existe. \\
+    \hline
+    \textbf{Postcondition} & Une agence est créée et rattachée à une zone. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'Admin ouvre \texttt{/admin/companies}.
+      \item Il choisit la zone, saisit le nom, l'adresse et éventuellement
+            les coordonnées / lien Google Maps.
+      \item Le frontend envoie \texttt{POST /api/recruitment/companies}.
+      \item Le service persiste l'agence avec \texttt{companyId} et \texttt{zoneId}.
+      \item L'agence apparaît dans la liste.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Description textuelle du cas d'utilisation <<~Affecter un RH a des zones~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle du cas d'utilisation <<~Affecter un RH a des zones~>>}
+  \label{tab:uc-assign-rh}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Affecter un RH a des zones \\
+    \hline
+    \textbf{Acteur} & Administrateur \\
+    \hline
+    \textbf{Précondition} & Un compte \texttt{ROLE\_RH} existe~; des zones sont disponibles. \\
+    \hline
+    \textbf{Postcondition} & Le RH est lié aux zones choisies. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'Admin ouvre \texttt{/admin/rh-assignments}.
+      \item Il sélectionne un RH et une ou plusieurs zones encore libres.
+      \item Le frontend envoie \texttt{POST /api/recruitment/rh-zone-assignments}.
+      \item Le service vérifie que le compte est bien RH et qu'aucune
+            autre affectation n'existe déjà pour chaque zone.
+      \item Les affectations sont enregistrées.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Zone déjà attribuée à un autre RH, ou utilisateur non RH~: erreur. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Autres cas d'utilisation}
+
+\begin{itemize}
+  \item \textbf{Lister les zones / agences / affectations}~: l'Admin
+        consulte l'organisation complète.
+  \item \textbf{Consulter les agences de son périmètre}~: le RH appelle
+        \texttt{GET /companies} et ne reçoit que les agences des zones
+        qui lui sont affectées (préparation du Sprint~3).
+\end{itemize}
+
+
+\section{Conception}
+
+\subsection{Diagramme de classes}
+
+Le domaine du sprint~2 s'articule autour de \textbf{Zone}, \textbf{Company}
+(agence) et \textbf{RhZoneAssignment}. Une agence appartient à une zone ;
+une affectation relie un \texttt{rhUserId} à un \texttt{zoneId}.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/class-sprint2.png}
+  \caption{Diagramme de classes du Sprint 2}
+  \label{fig:class-sprint2}
+\end{figure}
+
+
+\subsection{Diagrammes de séquence}
+
+\subsubsection{Diagramme de séquence <<~Ajouter une zone~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-add-zone.png}
+  \caption{Diagramme de s\'equence --- Ajouter une zone}
+  \label{fig:seq-add-zone}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Ajouter une agence~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-add-company.png}
+  \caption{Diagramme de s\'equence --- Ajouter une agence}
+  \label{fig:seq-add-company}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Affecter un RH a des zones~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-assign-rh.png}
+  \caption{Diagramme de s\'equence --- Affecter un RH a des zones}
+  \label{fig:seq-assign-rh}
+\end{figure}
+
+
+\section{Réalisation}
+
+\subsection{Interface de gestion des zones}
+
+L'espace Admin permet de créer une zone (nom, description) et d'en
+consulter la liste.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-zones.png}
+  \caption{Interface de gestion des zones (Admin)}
+  \label{fig:ui-zones}
+\end{figure}
+
+
+\subsection{Interface de gestion des agences}
+
+La page agences permet de rattacher une entreprise à une zone et de
+saisir l'adresse / le lien cartographique.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-companies-1.png}
+  \caption{Interface de gestion des agences (Admin) --- liste}
+  \label{fig:ui-companies}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-companies-2.png}
+  \caption{Interface de gestion des agences (Admin) --- formulaire}
+  \label{fig:ui-companies-form}
+\end{figure}
+
+
+\subsection{Interface d'affectation RH}
+
+L'Admin sélectionne un utilisateur RH et les zones encore libres. La
+règle métier impose un unique RH par zone.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-assign.png}
+  \caption{Interface d'affectation RH -- zones (Admin)}
+  \label{fig:ui-rh-assign}
+\end{figure}
+
+
+\section{Conclusion}
+
+Le Sprint~2 a posé l'organisation territoriale de DAAM~: zones, agences
+et affectations RH. L'administrateur pilote la structure~; le RH est
+ensuite limité à son périmètre.
+
+Le chapitre suivant présente le Sprint~3, consacré aux
+\textbf{offres de recrutement} et aux \textbf{candidatures}.
+
+\clearpage

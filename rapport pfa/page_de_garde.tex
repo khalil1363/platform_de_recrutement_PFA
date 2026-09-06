@@ -1,0 +1,151 @@
+% ============================================================
+% PAGE DE GARDE — ESPRIT style
+% ============================================================
+% Modifiez facilement les infos ci-dessous :
+
+\newcommand{\Auteur}{Fray Khalil}
+\newcommand{\Annee}{2025 -- 2026}
+\newcommand{\TypeProjet}{PROJET DE FIN D'ANNÉE}
+\newcommand{\Specialite}{SPÉCIALITÉ : GÉNIE LOGICIEL}
+\newcommand{\TitreProjet}{Conception et développement\\d'une plateforme intelligente\\de gestion du recrutement}
+\newcommand{\EncadrantEsprit}{Samit}
+\newcommand{\EncadrantEntreprise}{\textit{(à compléter)}}
+
+\newcommand{\makecoverpage}{%
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{tikzpicture}[remember picture, overlay]
+
+  % Fond légèrement grisé
+  \fill[bggray] (current page.south west) rectangle (current page.north east);
+
+  % Triangles décoratifs FAINT en arrière-plan (centre / droite)
+  \foreach \x/\y/\s/\a in {
+      8/25/3.2/15, 12/22/2.5/-10, 15/18/3.5/25,
+      10/12/2.8/-20, 14/8/3.0/10, 17/14/2.2/35,
+      9/5/2.5/-15, 13/3/3.2/5
+  }{
+    \begin{scope}[shift={(current page.south west)}]
+      \fill[verylightgray, opacity=0.55, rotate around={\a:(\x,\y)}]
+        (\x,\y) -- ++(\s,0) -- ++(-\s/2,{\s*0.866}) -- cycle;
+    \end{scope}
+  }
+
+  % ========================================================
+  % Motif de triangles à GAUCHE (colonne décorative)
+  % ========================================================
+  \begin{scope}[shift={(current page.south west)}]
+    % Rangée haut
+    \fill[darkgray] (0.3,26.5) -- (2.0,26.5) -- (1.15,27.9) -- cycle;
+    \fill[espritred] (1.4,26.0) -- (2.8,26.0) -- (2.1,27.2) -- cycle;
+    \draw[midgray, thick] (0.5,25.2) -- (2.2,25.2) -- (1.35,26.6) -- cycle;
+    \fill[midgray] (0.2,24.0) -- (1.6,24.0) -- (0.9,25.2) -- cycle;
+    \fill[lightgray] (1.8,24.3) -- (3.0,24.3) -- (2.4,25.4) -- cycle;
+    \fill[espritred] (0.6,23.0) -- (1.9,23.0) -- (1.25,24.1) -- cycle;
+    \draw[darkgray, thick] (2.0,22.5) -- (3.2,22.5) -- (2.6,23.6) -- cycle;
+    \fill[darkgray] (0.3,21.5) -- (1.8,21.5) -- (1.05,22.8) -- cycle;
+    \fill[midgray] (1.5,20.8) -- (2.9,20.8) -- (2.2,22.0) -- cycle;
+    \draw[midgray, thick] (0.4,19.8) -- (1.7,19.8) -- (1.05,20.9) -- cycle;
+    \fill[espritred] (1.9,19.5) -- (3.1,19.5) -- (2.5,20.6) -- cycle;
+    \fill[lightgray] (0.2,18.3) -- (1.5,18.3) -- (0.85,19.4) -- cycle;
+    \fill[darkgray] (1.6,17.8) -- (2.8,17.8) -- (2.2,18.9) -- cycle;
+    \draw[darkgray, thick] (0.5,16.8) -- (2.0,16.8) -- (1.25,18.0) -- cycle;
+    \fill[midgray] (0.3,15.5) -- (1.7,15.5) -- (1.0,16.7) -- cycle;
+    \fill[espritred] (1.8,15.2) -- (3.0,15.2) -- (2.4,16.3) -- cycle;
+    \fill[lightgray] (0.6,14.0) -- (2.0,14.0) -- (1.3,15.2) -- cycle;
+    \draw[midgray, thick] (1.5,13.2) -- (2.8,13.2) -- (2.15,14.3) -- cycle;
+    \fill[darkgray] (0.2,12.2) -- (1.6,12.2) -- (0.9,13.4) -- cycle;
+    \fill[midgray] (1.7,11.5) -- (3.0,11.5) -- (2.35,12.7) -- cycle;
+    \fill[espritred] (0.4,10.5) -- (1.8,10.5) -- (1.1,11.7) -- cycle;
+    \draw[darkgray, thick] (1.9,10.0) -- (3.1,10.0) -- (2.5,11.1) -- cycle;
+    \fill[lightgray] (0.3,9.0) -- (1.7,9.0) -- (1.0,10.2) -- cycle;
+    \fill[darkgray] (1.6,8.3) -- (2.9,8.3) -- (2.25,9.5) -- cycle;
+    \fill[midgray] (0.5,7.2) -- (1.9,7.2) -- (1.2,8.4) -- cycle;
+    \draw[midgray, thick] (1.8,6.6) -- (3.0,6.6) -- (2.4,7.7) -- cycle;
+    \fill[espritred] (0.2,5.5) -- (1.5,5.5) -- (0.85,6.6) -- cycle;
+    \fill[lightgray] (1.5,4.8) -- (2.8,4.8) -- (2.15,6.0) -- cycle;
+    \fill[darkgray] (0.4,3.6) -- (1.8,3.6) -- (1.1,4.8) -- cycle;
+    \draw[darkgray, thick] (1.7,3.0) -- (3.0,3.0) -- (2.35,4.2) -- cycle;
+    \fill[midgray] (0.3,2.0) -- (1.6,2.0) -- (0.95,3.1) -- cycle;
+  \end{scope}
+
+  % ========================================================
+  % Logos haut : DAAM (gauche) + ESPRIT (droite)
+  % ========================================================
+  \node[anchor=north west] at ([xshift=3.6cm, yshift=-0.65cm]current page.north west) {%
+    \includegraphics[width=4.2cm]{img/daam-logo.jpg}%
+  };
+  \node[anchor=north east] at ([xshift=-1.2cm, yshift=-0.8cm]current page.north east) {%
+    \includegraphics[width=4.2cm]{img/esprit-logo.png}%
+  };
+
+  % ========================================================
+  % Année + type de projet (centrés)
+  % ========================================================
+  \node[anchor=north, font=\bfseries\Large, text=espritred]
+    at ([yshift=-3.2cm]current page.north) {\Annee};
+
+  \node[anchor=north, font=\bfseries\large, text=black]
+    at ([yshift=-4.0cm]current page.north) {\TypeProjet};
+
+  % ========================================================
+  % Bandeau rouge
+  % ========================================================
+  \fill[espritred]
+    ([yshift=-5.2cm]current page.north west) --
+    ([yshift=-5.2cm]current page.north east) --
+    ([yshift=-6.5cm]current page.north east) --
+    ([yshift=-6.5cm]current page.north west) -- cycle;
+
+  % Ombre légère sous le bandeau
+  \fill[black, opacity=0.12]
+    ([yshift=-6.5cm]current page.north west) --
+    ([yshift=-6.5cm]current page.north east) --
+    ([yshift=-6.65cm]current page.north east) --
+    ([yshift=-6.65cm]current page.north west) -- cycle;
+
+  \node[anchor=center, font=\bfseries\large, text=white]
+    at ([yshift=-5.85cm]current page.north) {DIPLÔME NATIONAL D'INGÉNIEUR};
+
+  % ========================================================
+  % Spécialité + Titre
+  % ========================================================
+  \node[anchor=north, font=\bfseries\large, text=black]
+    at ([yshift=-7.2cm]current page.north) {\Specialite};
+
+  \node[anchor=north, font=\bfseries\Large, text=black, align=center]
+    at ([yshift=-8.3cm]current page.north) {\TitreProjet};
+
+  % ========================================================
+  % Auteur + Encadrants
+  % ========================================================
+  \node[anchor=west, font=\bfseries\large, text=black, align=left]
+    at ([xshift=5.5cm, yshift=7.5cm]current page.south west) {%
+      Réalisé par: \Auteur\\[0.6cm]
+      Encadrant ESPRIT: \EncadrantEsprit\\[0.25cm]
+      Encadrant Entreprise: \EncadrantEntreprise
+    };
+
+  % Cadre pointillé (cachet / signature)
+  \node[anchor=west, draw=lightgray, densely dotted, thick,
+        minimum width=5.5cm, minimum height=2.2cm, inner sep=0pt]
+    at ([xshift=5.5cm, yshift=4.2cm]current page.south west) {};
+
+  % ========================================================
+  % Logos bas de page
+  % ========================================================
+  \node[anchor=south] at ([xshift=-4.5cm, yshift=0.7cm]current page.south) {%
+    \includegraphics[height=1.0cm]{img/cdio-logo.jpg}%
+  };
+  \node[anchor=south] at ([xshift=0cm, yshift=0.7cm]current page.south) {%
+    \includegraphics[height=1.0cm]{img/eur-ace-logo.jpg}%
+  };
+  \node[anchor=south] at ([xshift=4.5cm, yshift=0.7cm]current page.south) {%
+    \includegraphics[height=0.95cm]{img/esprit-logo.png}%
+  };
+
+\end{tikzpicture}
+\clearpage
+\end{titlepage}%
+}

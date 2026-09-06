@@ -1,5 +1,23 @@
 .page-header-bar {
-  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page-header-bar h2 {
+  margin: 0 0 4px;
+  color: #35654d;
+}
+
+.page-header-bar p {
+  margin: 0;
+  color: #6b7c72;
+}
+
+.create-link {
+  text-decoration: none;
 }
 
 .actions {

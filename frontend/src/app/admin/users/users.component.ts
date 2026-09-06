@@ -30,7 +30,7 @@ export class UsersComponent implements OnInit {
 
   readonly roleOptions = [
     { label: 'RH', value: 'ROLE_RH' },
-    { label: 'Développeur', value: 'ROLE_DEVELOPER' },
+    { label: 'Responsable de recrutement', value: 'ROLE_RESPONSABLE_RECRUTEMENT' },
     { label: 'Candidat', value: 'ROLE_USER' },
     { label: 'Admin', value: 'ROLE_ADMIN' }
   ];
@@ -234,6 +234,7 @@ export class UsersComponent implements OnInit {
     const labels: Record<string, string> = {
       ROLE_ADMIN: 'Admin',
       ROLE_RH: 'RH',
+      ROLE_RESPONSABLE_RECRUTEMENT: 'Responsable de recrutement',
       ROLE_DEVELOPER: 'Développeur',
       ROLE_USER: 'Candidat'
     };
@@ -244,6 +245,7 @@ export class UsersComponent implements OnInit {
     const colors: Record<string, string> = {
       ROLE_ADMIN: 'red',
       ROLE_RH: 'green',
+      ROLE_RESPONSABLE_RECRUTEMENT: 'orange',
       ROLE_DEVELOPER: 'blue',
       ROLE_USER: 'default'
     };

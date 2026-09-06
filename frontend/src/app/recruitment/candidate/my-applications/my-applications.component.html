@@ -14,6 +14,7 @@
         <th>Score QCM</th>
         <th>Statut</th>
         <th>Entretien</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -21,7 +22,11 @@
         <td><strong>{{ app.recruitmentTitle }}</strong></td>
         <td>{{ app.appliedAt | date:'dd/MM/yyyy HH:mm' }}</td>
         <td>
-          <span class="score-badge">{{ app.qcmScore }}/{{ app.qcmTotalQuestions }}</span>
+          <span class="score-badge" *ngIf="app.qcmScore != null">
+            {{ app.qcmScore }}/{{ app.qcmTotalQuestions }}
+          </span>
+          <span *ngIf="app.qcmScore == null && app.qcmRetakeAllowed">À repasser</span>
+          <span *ngIf="app.qcmScore == null && !app.qcmRetakeAllowed">—</span>
         </td>
         <td><nz-tag [nzColor]="statusColor(app.status)">{{ statusLabel(app.status) }}</nz-tag></td>
         <td>
@@ -41,6 +46,20 @@
             </div>
           </ng-container>
           <ng-template #noInterview>—</ng-template>
+        </td>
+        <td>
+          <button
+            *ngIf="app.qcmRetakeAllowed"
+            nz-button
+            nzType="primary"
+            nzSize="small"
+            type="button"
+            (click)="retakeQcm(app)"
+          >
+            <span nz-icon nzType="reload" nzTheme="outline"></span>
+            Repasser le QCM
+          </button>
+          <span *ngIf="!app.qcmRetakeAllowed">—</span>
         </td>
       </tr>
     </tbody>

@@ -54,13 +54,30 @@
           <nz-form-item>
             <nz-form-label>Responsable de recrutement</nz-form-label>
             <nz-form-control>
-              <input nz-input formControlName="responsibleName" placeholder="Nom du responsable RH" />
+              <nz-select
+                formControlName="responsibleUserId"
+                nzPlaceHolder="Sélectionner un responsable"
+                nzAllowClear
+                nzShowSearch
+                [nzLoading]="loadingResponsables"
+              >
+                <nz-option
+                  *ngFor="let r of responsables"
+                  [nzValue]="r.userId"
+                  [nzLabel]="responsableLabel(r)"
+                ></nz-option>
+              </nz-select>
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
             <nz-form-label>Référence interne</nz-form-label>
             <nz-form-control>
-              <input nz-input formControlName="internalReference" placeholder="Ex: REF-2026-001" />
+              <input
+                nz-input
+                formControlName="internalReference"
+                [readOnly]="!isEdit"
+                [placeholder]="isEdit ? 'Référence interne' : 'Générée automatiquement à la création'"
+              />
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
@@ -134,14 +151,14 @@
 
         <div class="coworking-row">
           <nz-form-item class="coworking-toggle">
-            <nz-form-label>Coworking</nz-form-label>
+            <nz-form-label>Cohort</nz-form-label>
             <nz-form-control>
               <nz-switch formControlName="coworking" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
-              <span class="coworking-hint">Activez si ce recrutement fait partie d'une campagne coworking</span>
+              <span class="coworking-hint">Activez si ce recrutement fait partie d'une campagne cohort</span>
             </nz-form-control>
           </nz-form-item>
           <nz-form-item *ngIf="form.value.coworking">
-            <nz-form-label nzRequired>Mois coworking</nz-form-label>
+            <nz-form-label nzRequired>Mois cohort</nz-form-label>
             <nz-form-control nzErrorTip="Sélectionnez le mois">
               <nz-date-picker
                 formControlName="coworkingMonth"

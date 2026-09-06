@@ -1,0 +1,370 @@
+% ============================================================
+% CHAPITRE 6 — Sprint 3 : Offres et candidatures
+% ============================================================
+\chapter{Sprint 3 --- Offres de Recrutement et Candidatures}
+
+\section{Introduction}
+
+Ce sprint constitue le cœur métier de la plateforme \textbf{DAAM}.
+Il permet au RH de créer, publier et clôturer des \textbf{offres}
+rattachées à une agence (donc à une zone), puis d'ouvrir ces offres aux
+\textbf{candidats}~: dépôt de CV, passage du QCM, scoring, et suivi RH
+des candidatures.
+
+\section{Objectifs du Sprint}
+
+
+
+\begin{itemize}
+  \item permettre au RH de créer une offre (poste, compétences, agence,
+        responsable de recrutement, QCM)~;
+  \item générer automatiquement une \textbf{référence interne}
+        (\texttt{REF-AAAA-NNN})~;
+  \item gérer le cycle de vie \texttt{DRAFT} / \texttt{PUBLISHED} /
+        \texttt{CLOSED}~;
+  \item publier l'offre sur l'espace candidat (\texttt{/jobs}) tout en
+        restant limité aux zones affectées au RH~;
+  \item permettre au candidat de postuler avec un CV et un QCM~;
+  \item calculer un score QCM et un score de matching CV~;
+  \item permettre au RH de lister, filtrer et traiter les candidatures
+        (non retenu, désisté, reset QCM, fiche de suivi)~;
+  \item interdire le double dépôt sur la même offre.
+\end{itemize}
+
+
+\section{Spécification et Analyse des Besoins}
+
+\subsection{Sprint Backlog}
+
+\begin{table}[htbp]
+  \centering
+  \scriptsize
+  \caption{Sprint Backlog du Sprint 3}
+  \label{tab:sprint3-backlog}
+  \begin{tabular}{|p{2.0cm}|c|p{4.1cm}|c|p{3.2cm}|c|}
+    \hline
+    \textbf{Fonctionnalité} & \textbf{ID} & \textbf{Scénario utilisateur} &
+    \textbf{ID Tâche} & \textbf{Tâches} & \textbf{Est.} \\
+    \hline
+    Créer une offre
+    & US-08
+    & En tant que RH, je crée une offre liée à une agence et à un QCM.
+    & T1
+    & API \texttt{POST /recruitments}
+    & 2 j \\
+    \cline{4-6}
+    & & & T2 & Formulaire \texttt{/rh/recruitments/new} & 2 j \\
+    \hline
+    Publier / clôturer
+    & US-09
+    & En tant que RH, je passe l'offre en publié ou clôturé.
+    & T3
+    & Statut DRAFT / PUBLISHED / CLOSED
+    & 1 j \\
+    \hline
+    Consulter les offres
+    & US-10
+    & En tant que candidat, je consulte les offres publiées.
+    & T4
+    & API publique + pages \texttt{/jobs}
+    & 1,5 j \\
+    \hline
+    Postuler
+    & US-11
+    & En tant que candidat, je dépose mon CV et passe le QCM.
+    & T5
+    & Upload CV + \texttt{POST /applications}
+    & 2,5 j \\
+    \hline
+    Scoring
+    & US-12
+    & Le système calcule note QCM et matching CV.
+    & T6
+    & Scoring QCM + analyse CV
+    & 2 j \\
+    \hline
+    Traitement RH
+    & US-13
+    & En tant que RH, je consulte et statue les candidatures de ma zone.
+    & T7
+    & Page \texttt{/rh/candidates} + PATCH statut
+    & 2 j \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Diagramme de cas d'utilisation}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/uc-sprint3.png}
+  \caption{Diagramme de cas d'utilisation des Sprint 3}
+  \label{fig:uc-sprint3}
+\end{figure}
+
+
+\section{Description textuelle des cas d'utilisation}
+
+\subsection{Cas d'utilisation <<~Créer une offre de recrutement~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Créer une offre de recrutement}
+  \label{tab:uc-create-offer}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Créer une offre de recrutement \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & RH authentifié, au moins une agence dans une zone affectée, QCM existant. \\
+    \hline
+    \textbf{Postcondition} & Offre créée (référence interne générée), statut brouillon ou publié. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH ouvre \texttt{/rh/recruitments/new}.
+      \item Il saisit le poste, les compétences, choisit l'agence, le
+            responsable de recrutement et le QCM.
+      \item Le frontend envoie \texttt{POST /api/recruitment/recruitments}.
+      \item Le service copie \texttt{zoneId} depuis l'agence, vérifie le
+            périmètre RH et génère \texttt{REF-AAAA-NNN}.
+      \item L'offre apparaît dans la liste RH.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Agence hors zone, ou RH sans affectation~: création refusée. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Publier / clôturer une offre~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Publier / clôturer une offre}
+  \label{tab:uc-publish-offer}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Publier ou clôturer une offre \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & L'offre existe dans une zone du RH. \\
+    \hline
+    \textbf{Postcondition} & Statut \texttt{PUBLISHED} (visible candidats) ou \texttt{CLOSED}. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH édite l'offre (\texttt{/rh/recruitments/:id/edit}).
+      \item Il choisit le statut (brouillon, publié, clôturé).
+      \item \texttt{PUT /api/recruitment/recruitments/\{id\}} met à jour le statut.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Postuler à une offre~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Postuler à une offre}
+  \label{tab:uc-apply}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Postuler à une offre \\
+    \hline
+    \textbf{Acteur} & Candidat (\texttt{ROLE\_USER}) \\
+    \hline
+    \textbf{Précondition} & Offre \texttt{PUBLISHED} avec QCM~; candidat authentifié. \\
+    \hline
+    \textbf{Postcondition} & Candidature \texttt{SUBMITTED} avec scores QCM et matching CV. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le candidat ouvre \texttt{/jobs/:id/apply}.
+      \item Il téléverse son CV (\texttt{POST /upload/cv}).
+      \item Il répond au QCM puis valide.
+      \item \texttt{POST /applications} enregistre les réponses, calcule
+            le score et lance l'analyse CV.
+      \item Le candidat retrouve la candidature dans
+            \texttt{/jobs/applications}.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Alternatives}
+    & Déjà postulé~: refus. Anti-triche (changement d'onglet)~: score QCM forcé à 0. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Traiter une candidature~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Traiter une candidature}
+  \label{tab:uc-process-app}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Traiter une candidature \\
+    \hline
+    \textbf{Acteur} & RH \\
+    \hline
+    \textbf{Précondition} & Candidature dans une zone affectée au RH. \\
+    \hline
+    \textbf{Postcondition} & Statut mis à jour et/ou QCM réinitialisé. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH ouvre \texttt{/rh/candidates}.
+      \item Il consulte matching CV, score QCM et fiche candidat.
+      \item Il peut marquer \textbf{Non retenu} ou \textbf{Désisté},
+            relancer l'analyse CV, ou autoriser un \textbf{Reset QCM}.
+    \end{enumerate}
+    \\
+    \hline
+    \textbf{Note} & La décision \textbf{Retenu} (entretien) est détaillée au sprint suivant. \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Autres cas d'utilisation}
+
+\begin{itemize}
+  \item \textbf{Lister / modifier / supprimer une offre}~: actions RH
+        dans \texttt{/rh/recruitments}.
+  \item \textbf{Consulter mes candidatures}~: espace candidat.
+  \item \textbf{Autoriser un nouveau QCM}~: le RH réinitialise le
+        questionnaire~; le candidat le repasse.
+  \item \textbf{Consultation Admin}~: listes en lecture
+        (\texttt{/admin/recruitments}, \texttt{/admin/applications}).
+\end{itemize}
+
+
+\section{Conception}
+
+\subsection{Diagramme de classes}
+
+Le domaine relie \textbf{Recruitment} (offre) à \textbf{Company} /
+\textbf{Zone} et à un QCM, puis \textbf{JobApplication} au candidat et à
+l'offre, avec scores QCM et matching CV.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/class-sprint3.png}
+  \caption{Diagramme de classes des Sprint 3}
+  \label{fig:class-sprint3}
+\end{figure}
+
+
+\subsection{Diagrammes de séquence}
+
+\subsubsection{Diagramme de séquence <<~Créer une offre~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-create-offer.png}
+  \caption{Diagramme de séquence --- Créer une offre}
+  \label{fig:seq-create-offer}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Postuler à une offre~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-apply.png}
+  \caption{Diagramme de séquence --- Postuler à une offre}
+  \label{fig:seq-apply}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Traiter une candidature~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-process-app.png}
+  \caption{Diagramme de séquence --- Traiter une candidature}
+  \label{fig:seq-process-app}
+\end{figure}
+
+
+\section{Réalisation}
+
+\subsection{Interface de gestion des offres (RH)}
+
+La liste RH affiche les offres de la zone (titre, agence, statut, cohort).
+La création / édition se fait via un formulaire unique.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-recruitments.png}
+  \caption{Interface de gestion des offres (RH)}
+  \label{fig:ui-rh-recruitments}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-recruitment-form.png}
+  \caption{Interface de création / modification d'une offre}
+  \label{fig:ui-rh-recruitment-form}
+\end{figure}
+
+
+\subsection{Interface candidat --- offres et candidature}
+
+Le candidat parcourt les offres publiées, consulte le détail, puis postule
+(CV + QCM).
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-jobs.png}
+  \caption{Interface de consultation des offres (candidat)}
+  \label{fig:ui-jobs}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-apply.png}
+  \caption{Interface de candidature (CV et QCM)}
+  \label{fig:ui-apply}
+\end{figure}
+
+
+\subsection{Interface RH --- candidatures}
+
+La page candidatures classe les postulants (matching CV, score QCM) et
+propose les actions de traitement.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-candidates.png}
+  \caption{Interface de gestion des candidatures (RH)}
+  \label{fig:ui-rh-candidates}
+\end{figure}
+
+
+\section{Conclusion}
+
+Le Sprint~3 a livré le flux complet \textbf{offre $\rightarrow$
+candidature $\rightarrow$ préselection}~: le RH publie une offre zonée, le
+candidat postule avec CV et QCM, le système score, et le RH statue
+(non retenu, désisté, reset QCM).
+
+Le chapitre suivant présente le Sprint~4, consacré aux \textbf{entretiens,
+décisions, embauche et pilotage RH} (tableaux de bord, exports).
+
+\clearpage

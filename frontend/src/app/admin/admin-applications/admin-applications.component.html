@@ -1,0 +1,149 @@
+<div class="admin-page">
+  <header class="page-hero">
+    <div class="page-hero-copy">
+      <div class="page-badges">
+        <span class="page-badge">DAAM ADMIN</span>
+        <span class="page-badge page-badge-light">Par RH</span>
+      </div>
+      <h1>Candidatures</h1>
+      <p>Toutes les candidatures avec statut, organisées par le RH responsable de l'offre</p>
+    </div>
+    <div class="page-hero-stat" *ngIf="!loading">
+      <strong>{{ totalCount }}</strong>
+      <span>candidature(s)</span>
+    </div>
+  </header>
+
+  <div class="filter-card filter-card-row">
+    <input
+      nz-input
+      class="filter-field"
+      placeholder="Prénom"
+      [(ngModel)]="filterFirstName"
+      (ngModelChange)="applyFilter()"
+    />
+    <input
+      nz-input
+      class="filter-field"
+      placeholder="Nom"
+      [(ngModel)]="filterLastName"
+      (ngModelChange)="applyFilter()"
+    />
+    <input
+      nz-input
+      class="filter-field filter-cin"
+      placeholder="CIN"
+      maxlength="8"
+      [(ngModel)]="filterCin"
+      (ngModelChange)="applyFilter()"
+    />
+    <nz-select
+      class="filter-select"
+      nzPlaceHolder="Statut"
+      nzAllowClear
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="applyFilter()"
+    >
+      <nz-option
+        *ngFor="let opt of statusOptions"
+        [nzValue]="opt.value"
+        [nzLabel]="opt.label"
+      ></nz-option>
+    </nz-select>
+    <button nz-button nzType="default" type="button" class="reset-btn" (click)="clearFilters()">
+      <span nz-icon nzType="clear" nzTheme="outline"></span>
+      Réinitialiser
+    </button>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <nz-empty *ngIf="!loading && !groups.length" nzNotFoundContent="Aucune candidature"></nz-empty>
+
+    <section class="rh-card" *ngFor="let group of groups; let i = index" [style.--delay]="i * 40 + 'ms'">
+      <header class="rh-card-head">
+        <div class="rh-identity">
+          <div class="rh-avatar">{{ initials(group.rhName) }}</div>
+          <div>
+            <h3>{{ group.rhName }}</h3>
+            <p>Candidatures sur les offres créées par ce RH</p>
+          </div>
+        </div>
+        <span class="count-pill">{{ group.items.length }} candidature(s)</span>
+      </header>
+
+      <div class="rh-card-body">
+        <nz-table #appsTable [nzData]="group.items" [nzFrontPagination]="true" [nzPageSize]="10" nzSize="middle">
+          <thead>
+            <tr>
+              <th>Candidat</th>
+              <th>Poste</th>
+              <th>Agence / Zone</th>
+              <th>Statut</th>
+              <th>Score QCM</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let app of appsTable.data">
+              <td>
+                <div class="candidate-cell">
+                  <nz-avatar
+                    [nzSrc]="authService.resolveImageUrl(app.candidate?.profileImageUrl) || undefined"
+                    nzIcon="user"
+                  ></nz-avatar>
+                  <div>
+                    <strong>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</strong>
+                    <div class="muted">{{ app.candidate?.email }}</div>
+                    <div class="muted" *ngIf="app.candidate?.cin">CIN : {{ app.candidate?.cin }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><strong class="title-cell">{{ app.recruitmentTitle || '—' }}</strong></td>
+              <td>
+                <div>{{ app.companyName || '—' }}</div>
+                <div class="muted">{{ app.zoneName || '—' }}</div>
+              </td>
+              <td>
+                <nz-tag [nzColor]="statusColor(app.status)">{{ statusLabel(app.status) }}</nz-tag>
+              </td>
+              <td>
+                <span class="score-chip" *ngIf="app.qcmScore != null">{{ app.qcmScore }}/{{ app.qcmTotalQuestions || '?' }}</span>
+                <span class="empty-dash" *ngIf="app.qcmScore == null">—</span>
+              </td>
+              <td>
+                <button nz-button nzSize="small" nzType="default" type="button" class="action-btn" (click)="openHistory(app)">
+                  Historique
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </section>
+  </nz-spin>
+</div>
+
+<nz-drawer
+  [nzVisible]="historyVisible"
+  nzTitle="Historique du candidat"
+  nzPlacement="right"
+  [nzWidth]="520"
+  (nzOnClose)="closeHistory()"
+>
+  <ng-container *nzDrawerContent>
+    <p class="history-intro"><strong>{{ historyCandidateLabel }}</strong> — parcours de candidatures</p>
+    <nz-spin [nzSpinning]="historyLoading">
+      <nz-empty *ngIf="!historyLoading && !historyItems.length" nzNotFoundContent="Aucun historique"></nz-empty>
+      <div class="history-card" *ngFor="let past of historyItems">
+        <div class="history-card-top">
+          <strong>{{ past.recruitmentTitle || 'Offre' }}</strong>
+          <nz-tag [nzColor]="statusColor(past.status)">{{ statusLabel(past.status) }}</nz-tag>
+        </div>
+        <div class="muted">RH : {{ past.createdByRhName || '—' }}</div>
+        <div class="muted">Agence : {{ past.companyName || '—' }} · Zone : {{ past.zoneName || '—' }}</div>
+        <div class="muted" *ngIf="past.appliedAt">Candidature : {{ past.appliedAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+        <div class="muted" *ngIf="past.hiredAt">Admis le : {{ past.hiredAt | date: 'dd/MM/yyyy' }}</div>
+      </div>
+    </nz-spin>
+  </ng-container>
+</nz-drawer>

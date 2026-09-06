@@ -22,6 +22,14 @@ public class JobApplication {
     @Builder.Default private ApplicationStatus status = ApplicationStatus.SUBMITTED;
     private Integer qcmScore;
     private Integer qcmTotalQuestions;
+    /** True when anti-cheat flagged this apply/retake QCM (score forced to 0). */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean qcmViolated = false;
+    /** When true, candidate may retake the apply QCM (after RH authorization). */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean qcmRetakeAllowed = false;
     /** 0–100 match between CV skills and job requirements */
     private Integer cvMatchScore;
     @Column(columnDefinition = "TEXT")
@@ -115,6 +123,14 @@ public class JobApplication {
     private java.time.LocalDate dateDebutPotentielle;
     /** CRM: Date / heure entretien responsable. */
     private LocalDateTime entretienRespAt;
+
+    /** RH shared external test link with candidate. */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean testLinkSent = false;
+    private LocalDateTime testLinkSentAt;
+    /** Manual score/note after RH sent the test. */
+    private Integer testScore;
 
     @CreationTimestamp private LocalDateTime appliedAt;
 

@@ -43,6 +43,15 @@ export class MyApplicationsComponent implements OnInit {
     this.router.navigate(['/jobs']);
   }
 
+  retakeQcm(app: JobApplication): void {
+    if (!app.recruitmentId || !app.applicationId) {
+      return;
+    }
+    void this.router.navigate(['/jobs', app.recruitmentId, 'apply'], {
+      queryParams: { retakeApplicationId: app.applicationId }
+    });
+  }
+
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
       SUBMITTED: 'En attente',

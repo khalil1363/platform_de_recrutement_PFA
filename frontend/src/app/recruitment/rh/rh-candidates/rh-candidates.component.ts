@@ -631,7 +631,6 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
           this.detailVisible = false;
           this.pendingApplication = null;
           this.loadApplications();
-          this.router.navigate(['/rh/hired']);
         }
       },
       error: (err) => {
@@ -643,6 +642,79 @@ Assurance groupe avec un plafond annuel de remboursement fixé à 6 500 DT.`
 
   cvUrl(path?: string): string | null {
     return this.recruitmentService.resolveFileUrl(path);
+  }
+
+  toggleTestLinkSent(app: JobApplication, event?: Event): void {
+    event?.stopPropagation();
+    const next = !app.testLinkSent;
+    this.recruitmentService
+      .updateApplicationTracking(app.applicationId, { testLinkSent: next })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.replaceApplication(response.data);
+            this.message.success(next ? 'Test marqué comme envoyé' : 'Test marqué comme non envoyé');
+          }
+        },
+        error: (err) => {
+          this.message.error(err.error?.message || 'Erreur mise à jour test');
+        }
+      });
+  }
+
+  allowQcmRetake(app: JobApplication): void {
+    this.actionLoading = true;
+    this.recruitmentService.allowQcmRetake(app.applicationId).subscribe({
+      next: (response) => {
+        this.actionLoading = false;
+        if (response.success && response.data) {
+          this.replaceApplication(response.data);
+          this.message.success('Le candidat peut maintenant repasser le QCM');
+        }
+      },
+      error: (err) => {
+        this.actionLoading = false;
+        this.message.error(err.error?.message || 'Impossible d\'autoriser un nouveau QCM');
+      }
+    });
+  }
+
+  saveTestScore(app: JobApplication, value: string | number | null): void {
+    if (!app.testLinkSent) {
+      this.message.warning('Marquez d\'abord le test comme envoyé');
+      return;
+    }
+    const parsed =
+      value === null || value === undefined || value === ''
+        ? null
+        : Number(value);
+    if (parsed !== null && (Number.isNaN(parsed) || parsed < 0)) {
+      this.message.error('Note invalide');
+      return;
+    }
+    this.recruitmentService
+      .updateApplicationTracking(app.applicationId, { testScore: parsed })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.replaceApplication(response.data);
+            this.message.success('Note du test enregistrée');
+          }
+        },
+        error: (err) => {
+          this.message.error(err.error?.message || 'Erreur enregistrement note');
+        }
+      });
+  }
+
+  private replaceApplication(updated: JobApplication): void {
+    this.applications = this.applications.map((a) =>
+      a.applicationId === updated.applicationId ? { ...a, ...updated } : a
+    );
+    if (this.selectedApplication?.applicationId === updated.applicationId) {
+      this.selectedApplication = { ...this.selectedApplication, ...updated };
+    }
+    this.rebuildGroups();
   }
 
   statusColor(status: string): string {

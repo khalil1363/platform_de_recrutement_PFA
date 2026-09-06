@@ -145,6 +145,9 @@ public class RecruitmentService {
         recruitment.setCreatedByRhUserId(authUser.getUserId());
         recruitment.setZoneId(company.getZoneId());
         if (recruitment.getStatus() == null) recruitment.setStatus(RecruitmentStatus.DRAFT);
+        if (!StringUtils.hasText(recruitment.getInternalReference())) {
+            recruitment.setInternalReference(generateInternalReference());
+        }
         assignQcmIfPresent(recruitment, request.getQcmId());
         Recruitment saved = recruitmentRepository.save(recruitment);
         return toRecruitmentResponse(saved, true);
@@ -182,17 +185,18 @@ public class RecruitmentService {
 
     @Transactional(readOnly = true)
     public List<RecruitmentResponse> getRecruitments(AuthUser authUser) {
+        Map<String, String> rhNameCache = new HashMap<>();
         if (authUser.isAdmin()) {
             return recruitmentRepository.findAll().stream()
-                    .map(r -> toRecruitmentResponse(r, false)).toList();
+                    .map(r -> toRecruitmentResponse(r, false, rhNameCache)).toList();
         }
         if (authUser.isRh()) {
             List<String> zoneIds = getRhZoneIds(authUser.getUserId());
             return recruitmentRepository.findByZoneIdIn(zoneIds).stream()
-                    .map(r -> toRecruitmentResponse(r, false)).toList();
+                    .map(r -> toRecruitmentResponse(r, false, rhNameCache)).toList();
         }
         return recruitmentRepository.findByStatus(RecruitmentStatus.PUBLISHED).stream()
-                .map(r -> toRecruitmentResponse(r, false)).toList();
+                .map(r -> toRecruitmentResponse(r, false, rhNameCache)).toList();
     }
 
     @Transactional(readOnly = true)
@@ -388,12 +392,102 @@ public class RecruitmentService {
                     .correct(correct).build());
         }
         saved.setQcmScore(violated ? 0 : score);
+        saved.setQcmViolated(violated);
         jobApplicationRepository.save(saved);
         try {
             saved = cvAnalysisService.analyzeApplication(saved.getApplicationId());
         } catch (Exception e) {
             // Score stays null only if analyze itself could not persist a fallback
         }
+        return toApplicationResponse(saved, recruitment, true);
+    }
+
+    /**
+     * RH resets the apply QCM so the candidate can retake it.
+     * Clears previous answers and score until the candidate submits again.
+     */
+    @Transactional
+    public ApplicationResponse allowQcmRetake(String applicationId, AuthUser authUser) {
+        JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+        Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
+        if (authUser.isRh()) {
+            ensureRhZone(authUser.getUserId(), recruitment.getZoneId());
+        } else if (!authUser.isAdmin()) {
+            throw new IllegalArgumentException("Only RH can authorize a QCM retake");
+        }
+        if (application.getQcmScore() == null && !application.isQcmRetakeAllowed()) {
+            throw new IllegalArgumentException("Aucun score QCM à réinitialiser pour cette candidature");
+        }
+        if (application.isQcmRetakeAllowed()) {
+            return toApplicationResponse(application, recruitment, true);
+        }
+        applicationAnswerRepository.deleteByApplicationId(applicationId);
+        application.setQcmScore(null);
+        application.setQcmTotalQuestions(null);
+        application.setQcmViolated(false);
+        application.setQcmRetakeAllowed(true);
+        JobApplication saved = jobApplicationRepository.save(application);
+        return toApplicationResponse(saved, recruitment, true);
+    }
+
+    /**
+     * Candidate resubmits QCM answers after RH authorized a retake.
+     */
+    @Transactional
+    public ApplicationResponse retakeQcm(String applicationId, RetakeQcmRequest request, AuthUser authUser) {
+        if (!authUser.isCandidate()) {
+            throw new IllegalArgumentException("Only candidates can retake the QCM");
+        }
+        JobApplication application = jobApplicationRepository.findByApplicationId(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+        if (!authUser.getUserId().equals(application.getCandidateUserId())) {
+            throw new IllegalArgumentException("Not your application");
+        }
+        if (!application.isQcmRetakeAllowed()) {
+            throw new IllegalArgumentException("Aucun nouveau passage QCM n'est autorisé pour cette candidature");
+        }
+        Recruitment recruitment = getRecruitmentOrThrow(application.getRecruitmentId());
+        if (recruitment.getStatus() != RecruitmentStatus.PUBLISHED) {
+            throw new IllegalArgumentException("Recruitment is not open");
+        }
+        List<QcmQuestion> questions = getQuestionsForRecruitment(recruitment);
+        if (questions.isEmpty()) {
+            throw new IllegalArgumentException("No QCM configured for this recruitment");
+        }
+
+        boolean violated = Boolean.TRUE.equals(request.getQcmViolated());
+        if (!violated && (request.getAnswers() == null || request.getAnswers().size() != questions.size())) {
+            throw new IllegalArgumentException("All QCM questions must be answered");
+        }
+
+        Map<String, QcmAnswerRequest> answerMap = request.getAnswers() == null
+                ? Map.of()
+                : request.getAnswers().stream()
+                        .filter(a -> a.getQuestionId() != null)
+                        .collect(Collectors.toMap(QcmAnswerRequest::getQuestionId, a -> a, (a, b) -> a));
+
+        applicationAnswerRepository.deleteByApplicationId(applicationId);
+
+        int score = 0;
+        for (QcmQuestion question : questions) {
+            QcmAnswerRequest answer = answerMap.get(question.getQuestionId());
+            String selected = answer != null ? answer.getSelectedOption() : null;
+            boolean correct = !violated
+                    && selected != null
+                    && question.getCorrectOption().equalsIgnoreCase(selected);
+            if (correct) score++;
+            applicationAnswerRepository.save(ApplicationAnswer.builder()
+                    .applicationId(application.getApplicationId())
+                    .questionId(question.getQuestionId())
+                    .selectedOption(selected != null ? selected : "-")
+                    .correct(correct).build());
+        }
+        application.setQcmTotalQuestions(questions.size());
+        application.setQcmScore(violated ? 0 : score);
+        application.setQcmViolated(violated);
+        application.setQcmRetakeAllowed(false);
+        JobApplication saved = jobApplicationRepository.save(application);
         return toApplicationResponse(saved, recruitment, true);
     }
 
@@ -440,13 +534,22 @@ public class RecruitmentService {
 
     @Transactional
     public List<ApplicationResponse> getApplicationsForRh(AuthUser authUser) {
-        List<String> zoneIds = getRhZoneIds(authUser.getUserId());
-        List<String> recruitmentIds = recruitmentRepository.findByZoneIdIn(zoneIds).stream()
-                .map(Recruitment::getRecruitmentId).toList();
-        if (recruitmentIds.isEmpty()) return List.of();
-        return jobApplicationRepository.findByRecruitmentIdIn(recruitmentIds).stream()
+        List<JobApplication> applications;
+        if (authUser.isAdmin()) {
+            applications = jobApplicationRepository.findAll();
+        } else {
+            List<String> zoneIds = getRhZoneIds(authUser.getUserId());
+            List<String> recruitmentIds = recruitmentRepository.findByZoneIdIn(zoneIds).stream()
+                    .map(Recruitment::getRecruitmentId).toList();
+            if (recruitmentIds.isEmpty()) {
+                return List.of();
+            }
+            applications = jobApplicationRepository.findByRecruitmentIdIn(recruitmentIds);
+        }
+        Map<String, String> rhNameCache = new HashMap<>();
+        return applications.stream()
                 .map(a -> ensureCvAnalyzed(a))
-                .map(a -> toApplicationResponse(a, getRecruitmentOrThrow(a.getRecruitmentId()), true))
+                .map(a -> toApplicationResponse(a, getRecruitmentOrThrow(a.getRecruitmentId()), true, rhNameCache))
                 .sorted(applicationRankingComparator())
                 .toList();
     }
@@ -491,6 +594,24 @@ public class RecruitmentService {
         if (request.getHebergement() != null) application.setHebergement(blankToNull(request.getHebergement()));
         if (request.getDateDebutPotentielle() != null) application.setDateDebutPotentielle(request.getDateDebutPotentielle());
         if (request.getEntretienRespAt() != null) application.setEntretienRespAt(request.getEntretienRespAt());
+        if (request.getTestLinkSent() != null) {
+            boolean sent = Boolean.TRUE.equals(request.getTestLinkSent());
+            application.setTestLinkSent(sent);
+            if (sent) {
+                if (application.getTestLinkSentAt() == null) {
+                    application.setTestLinkSentAt(LocalDateTime.now());
+                }
+            } else {
+                application.setTestLinkSentAt(null);
+                application.setTestScore(null);
+            }
+        }
+        if (request.getTestScore() != null) {
+            if (!application.isTestLinkSent()) {
+                throw new IllegalArgumentException("Marquez d'abord le test comme envoyé avant d'ajouter la note");
+            }
+            application.setTestScore(request.getTestScore());
+        }
         return toApplicationResponse(jobApplicationRepository.save(application), recruitment, true);
     }
 
@@ -892,8 +1013,13 @@ public class RecruitmentService {
         r.setInternationalTravel(req.getInternationalTravel());
         r.setAnonymousMode(req.getAnonymousMode());
         r.setPublicationDate(req.getPublicationDate());
-        r.setResponsibleName(req.getResponsibleName());
-        r.setInternalReference(req.getInternalReference());
+        applyResponsible(r, req);
+        // Keep existing auto ref on update if client sends blank
+        if (StringUtils.hasText(req.getInternalReference())) {
+            r.setInternalReference(req.getInternalReference().trim());
+        } else if (!StringUtils.hasText(r.getInternalReference())) {
+            r.setInternalReference(generateInternalReference());
+        }
         r.setKeejobReference(req.getKeejobReference());
         if (req.getStatus() != null) r.setStatus(req.getStatus());
 
@@ -901,12 +1027,35 @@ public class RecruitmentService {
         r.setCoworking(coworking);
         if (coworking) {
             if (req.getCoworkingMonth() == null) {
-                throw new IllegalArgumentException("Coworking month is required when coworking is enabled");
+                throw new IllegalArgumentException("Cohort month is required when cohort is enabled");
             }
             r.setCoworkingMonth(req.getCoworkingMonth().withDayOfMonth(1));
         } else {
             r.setCoworkingMonth(null);
         }
+    }
+
+    private void applyResponsible(Recruitment r, RecruitmentRequest req) {
+        String responsibleUserId = blankToNull(req.getResponsibleUserId());
+        r.setResponsibleUserId(responsibleUserId);
+        if (responsibleUserId != null) {
+            String name = resolveUserDisplayName(responsibleUserId, new HashMap<>());
+            if (!StringUtils.hasText(name)) {
+                throw new IllegalArgumentException("Responsable de recrutement introuvable");
+            }
+            r.setResponsibleName(name);
+        } else if (StringUtils.hasText(req.getResponsibleName())) {
+            r.setResponsibleName(req.getResponsibleName().trim());
+        } else {
+            r.setResponsibleName(null);
+        }
+    }
+
+    private String generateInternalReference() {
+        int year = java.time.Year.now().getValue();
+        String prefix = "REF-" + year + "-";
+        long next = recruitmentRepository.countByInternalReferenceStartingWith(prefix) + 1;
+        return String.format("%s%03d", prefix, next);
     }
 
     private ZoneResponse toZoneResponse(Zone zone) {
@@ -933,6 +1082,11 @@ public class RecruitmentService {
     }
 
     private RecruitmentResponse toRecruitmentResponse(Recruitment r, boolean includeCorrect) {
+        return toRecruitmentResponse(r, includeCorrect, new HashMap<>());
+    }
+
+    private RecruitmentResponse toRecruitmentResponse(
+            Recruitment r, boolean includeCorrect, Map<String, String> rhNameCache) {
         String companyName = companyRepository.findByCompanyId(r.getCompanyId()).map(Company::getName).orElse("");
         String zoneName = getZoneName(r.getZoneId());
         String qcmTitle = null;
@@ -965,6 +1119,9 @@ public class RecruitmentService {
                 .localTravel(r.getLocalTravel()).internationalTravel(r.getInternationalTravel())
                 .anonymousMode(r.getAnonymousMode()).publicationDate(r.getPublicationDate())
                 .responsibleName(r.getResponsibleName())
+                .responsibleUserId(r.getResponsibleUserId())
+                .createdByRhUserId(r.getCreatedByRhUserId())
+                .createdByRhName(resolveUserDisplayName(r.getCreatedByRhUserId(), rhNameCache))
                 .internalReference(r.getInternalReference()).keejobReference(r.getKeejobReference())
                 .status(r.getStatus()).createdAt(r.getCreatedAt())
                 .qcmId(r.getQcmId()).qcmTitle(qcmTitle)
@@ -975,6 +1132,11 @@ public class RecruitmentService {
     }
 
     private ApplicationResponse toApplicationResponse(JobApplication a, Recruitment r, boolean includeDetails) {
+        return toApplicationResponse(a, r, includeDetails, new HashMap<>());
+    }
+
+    private ApplicationResponse toApplicationResponse(
+            JobApplication a, Recruitment r, boolean includeDetails, Map<String, String> rhNameCache) {
         UserSummary candidate = null;
         if (includeDetails) {
             candidate = resolveCandidateSummary(a.getCandidateUserId());
@@ -995,11 +1157,17 @@ public class RecruitmentService {
 
         return ApplicationResponse.builder()
                 .applicationId(a.getApplicationId()).recruitmentId(a.getRecruitmentId())
-                .recruitmentTitle(r.getTitle()).zoneName(getZoneName(r.getZoneId()))
+                .recruitmentTitle(r.getTitle())
+                .zoneId(r.getZoneId())
+                .zoneName(getZoneName(r.getZoneId()))
                 .region(r.getRegion()).city(r.getCity())
+                .createdByRhUserId(r.getCreatedByRhUserId())
+                .createdByRhName(resolveUserDisplayName(r.getCreatedByRhUserId(), rhNameCache))
                 .candidateUserId(a.getCandidateUserId())
                 .candidate(candidate).cvFileUrl(a.getCvFileUrl()).status(a.getStatus())
                 .qcmScore(a.getQcmScore()).qcmTotalQuestions(a.getQcmTotalQuestions())
+                .qcmViolated(a.isQcmViolated())
+                .qcmRetakeAllowed(a.isQcmRetakeAllowed())
                 .cvMatchScore(a.getCvMatchScore())
                 .extractedSkills(a.getExtractedSkills())
                 .matchedSkills(a.getMatchedSkills())
@@ -1052,6 +1220,9 @@ public class RecruitmentService {
                 .hebergement(a.getHebergement())
                 .dateDebutPotentielle(a.getDateDebutPotentielle())
                 .entretienRespAt(a.getEntretienRespAt())
+                .testLinkSent(a.isTestLinkSent())
+                .testLinkSentAt(a.getTestLinkSentAt())
+                .testScore(a.getTestScore())
                 .responsibleName(r.getResponsibleName())
                 .coworking(r.isCoworking())
                 .coworkingMonth(r.getCoworkingMonth())
@@ -1059,6 +1230,34 @@ public class RecruitmentService {
                 .internalReference(r.getInternalReference())
                 .appliedAt(a.getAppliedAt()).answers(includeDetails ? answers : null)
                 .build();
+    }
+
+    private String resolveUserDisplayName(String userId, Map<String, String> cache) {
+        if (!StringUtils.hasText(userId)) {
+            return null;
+        }
+        if (cache.containsKey(userId)) {
+            return cache.get(userId);
+        }
+        String name = null;
+        try {
+            ApiResponse<UserDto> userResp = userClient.getUserById(internalApiKey, userId);
+            if (userResp.isSuccess() && userResp.getData() != null) {
+                UserDto u = userResp.getData();
+                name = ((u.getFirstName() != null ? u.getFirstName() : "")
+                        + " " + (u.getLastName() != null ? u.getLastName() : "")).trim();
+                if (!StringUtils.hasText(name)) {
+                    name = u.getUsername();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not resolve RH display name for {}: {}", userId, e.getMessage());
+        }
+        if (!StringUtils.hasText(name)) {
+            name = "RH inconnu";
+        }
+        cache.put(userId, name);
+        return name;
     }
 
     private Comparator<ApplicationResponse> applicationRankingComparator() {

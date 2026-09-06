@@ -3,10 +3,12 @@
     <h2>Mes recrutements</h2>
     <p>Créez et publiez des offres d'emploi pour votre zone</p>
   </div>
-  <button nz-button nzType="primary" (click)="create()">
-    <span nz-icon nzType="plus" nzTheme="outline"></span>
-    Nouveau recrutement
-  </button>
+  <a class="create-link" routerLink="/rh/recruitments/new" (click)="create()">
+    <button nz-button nzType="primary" type="button">
+      <span nz-icon nzType="plus" nzTheme="outline"></span>
+      Nouveau recrutement
+    </button>
+  </a>
 </div>
 
 <nz-spin [nzSpinning]="loading">
@@ -16,7 +18,7 @@
         <th>Titre</th>
         <th>Agence</th>
         <th>Zone</th>
-        <th>Coworking</th>
+        <th>Cohort</th>
         <th>QCM</th>
         <th>Statut</th>
         <th>Actions</th>
@@ -34,13 +36,18 @@
           <span *ngIf="!item.coworking">—</span>
         </td>
         <td>{{ item.qcmTitle || '—' }}</td>
-        <td><nz-tag [nzColor]="statusColor(item.status)">{{ item.status }}</nz-tag></td>
+        <td>
+          <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+        </td>
         <td class="actions">
-          <button nz-button nzSize="small" (click)="edit(item.recruitmentId)">Modifier</button>
+          <button nz-button nzSize="small" type="button" (click)="edit(item.recruitmentId)">
+            Modifier
+          </button>
           <button
             nz-button
             nzSize="small"
             nzDanger
+            type="button"
             nz-popconfirm
             nzPopconfirmTitle="Supprimer ce recrutement et toutes ses candidatures ?"
             (nzOnConfirm)="delete(item)"

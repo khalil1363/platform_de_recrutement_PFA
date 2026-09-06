@@ -1,0 +1,159 @@
+\babel@toc {french}{}\relax 
+\contentsline {chapter}{Dédicace}{i}{chapter*.1}%
+\contentsline {chapter}{Remerciements}{ii}{chapter*.2}%
+\contentsline {chapter}{Liste des figures}{vii}{chapter*.2}%
+\contentsline {chapter}{Liste des tableaux}{ix}{chapter*.2}%
+\contentsline {chapter}{Liste des abréviations}{x}{chapter*.3}%
+\contentsline {chapter}{Introduction Générale}{1}{chapter*.4}%
+\contentsline {chapter}{\numberline {1}Problèmes du Recrutement --- État des Lieux et Évolution}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Introduction}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Situation actuelle du recrutement et des RH numériques}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Limites de la gestion traditionnelle du recrutement}{3}{section.1.3}%
+\contentsline {paragraph}{Dispersion de l'information.}{3}{paragraph*.5}%
+\contentsline {paragraph}{Manque de traçabilité et de statut clair.}{3}{paragraph*.6}%
+\contentsline {paragraph}{Faible coordination multi-sites.}{3}{paragraph*.7}%
+\contentsline {paragraph}{Expérience candidat dégradée.}{4}{paragraph*.8}%
+\contentsline {paragraph}{Peu d'aide à la décision.}{4}{paragraph*.9}%
+\contentsline {paragraph}{Difficultés de reporting.}{4}{paragraph*.10}%
+\contentsline {section}{\numberline {1.4}Les tendances actuelles des systèmes de recrutement (ATS)}{4}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Conclusion}{5}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Contexte du Projet}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Introduction}{6}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Présentation de l'organisme d'accueil}{6}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Présentation de l'entreprise}{6}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Organigramme de l'entreprise}{7}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}Présentation du projet}{8}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Problématique}{8}{subsection.2.3.1}%
+\contentsline {section}{\numberline {2.4}Les pratiques existantes chez DAAM~: Excel et e-mails}{9}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Les solutions existantes sur le marché du recrutement}{9}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Apports de LinkedIn et des sites d'emploi}{10}{subsection.2.5.1}%
+\contentsline {section}{\numberline {2.6}Critique des solutions existantes dans le contexte DAAM}{10}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Solution proposée~: la plateforme de recrutement DAAM}{11}{section.2.7}%
+\contentsline {subsection}{\numberline {2.7.1}Présentation globale de l'application}{11}{subsection.2.7.1}%
+\contentsline {subsection}{\numberline {2.7.2}Fonctionnalités clés qui différencient la solution}{12}{subsection.2.7.2}%
+\contentsline {subsection}{\numberline {2.7.3}Pourquoi cette application est plus adaptée à DAAM}{12}{subsection.2.7.3}%
+\contentsline {section}{\numberline {2.8}Méthode de travail et planification}{13}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}Approches de gestion de projet}{13}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.2}Choix de la méthode~: SCRUM}{13}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.3}Modélisation fonctionnelle et technique avec UML}{14}{subsection.2.8.3}%
+\contentsline {section}{\numberline {2.9}Conclusion}{15}{section.2.9}%
+\contentsline {chapter}{\numberline {3}Sprint 0 --- Étude Préliminaire}{16}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Introduction}{16}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Analyse des besoins}{16}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Identification des acteurs}{16}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Définition des besoins fonctionnels}{17}{subsection.3.2.2}%
+\contentsline {subsubsection}{Gestion des comptes et de l'authentification}{17}{subsubsection*.11}%
+\contentsline {subsubsection}{Gestion organisationnelle (zones, agences, affectations)}{17}{subsubsection*.12}%
+\contentsline {subsubsection}{Gestion des recrutements (offres)}{18}{subsubsection*.13}%
+\contentsline {subsubsection}{Gestion des candidatures}{18}{subsubsection*.14}%
+\contentsline {subsubsection}{Entretiens, meetings et embauche}{18}{subsubsection*.15}%
+\contentsline {subsubsection}{QCM, évaluation et aide à la décision}{18}{subsubsection*.16}%
+\contentsline {subsubsection}{Exports et reporting}{19}{subsubsection*.17}%
+\contentsline {subsubsection}{Perspectives (hors Sprint actuel)}{19}{subsubsection*.18}%
+\contentsline {subsection}{\numberline {3.2.3}Définition des besoins non fonctionnels}{19}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Diagramme de cas d'utilisation globale}{19}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Product Backlog}{22}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Planification des itérations --- répartition en sprints}{22}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Conception architecturale}{24}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Conception et implémentation de l'architecture microservices}{25}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Architecture logique}{26}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Architecture physique (environnement d'exécution)}{27}{subsection.3.6.3}%
+\contentsline {section}{\numberline {3.7}Choix et exigences technologiques}{28}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Environnement matériel}{28}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Environnement logiciel}{29}{subsection.3.7.2}%
+\contentsline {subsubsection}{Frameworks et bibliothèques principales}{29}{subsubsection*.19}%
+\contentsline {subsubsection}{Outils de développement}{29}{subsubsection*.20}%
+\contentsline {subsubsection}{Langages}{29}{subsubsection*.21}%
+\contentsline {section}{\numberline {3.8}Conclusion}{29}{section.3.8}%
+\contentsline {chapter}{\numberline {4}Sprint 1 --- Gestion des Utilisateurs et Profils, Authentification}{31}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Introduction}{31}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Objectifs du Sprint}{31}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Spécification et Analyse des Besoins}{31}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Sprint Backlog}{32}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Diagramme de cas d'utilisation du Sprint}{32}{subsection.4.3.2}%
+\contentsline {section}{\numberline {4.4}Description textuelle des cas d'utilisation}{32}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Description textuelle du cas d'utilisation <<~S'authentifier~>>}{32}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Description textuelle du cas d'utilisation <<~Modifier profil~>>}{32}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Description textuelle du cas d'utilisation <<~Ajouter un compte utilisateur~>>}{32}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Gestion des autres actions liées aux comptes utilisateurs}{32}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Conception}{35}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Diagramme de classes}{35}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Diagrammes de séquence}{35}{subsection.4.5.2}%
+\contentsline {subsubsection}{Diagramme de séquence <<~S'authentifier~>>}{35}{subsubsection*.22}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Modifier profil~>>}{35}{subsubsection*.23}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Ajouter un compte utilisateur~>>}{35}{subsubsection*.24}%
+\contentsline {section}{\numberline {4.6}Réalisation}{35}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Interface d'authentification (login / inscription)}{40}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}Interface de gestion des utilisateurs}{40}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Interface du profil utilisateur}{41}{subsection.4.6.3}%
+\contentsline {section}{\numberline {4.7}Conclusion}{41}{section.4.7}%
+\contentsline {chapter}{\numberline {5}Sprint 2 --- Organisation Admin (Zones, Agences et Affectation RH)}{42}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Introduction}{42}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Objectifs du Sprint}{42}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Spécification et Analyse des Besoins}{42}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Sprint Backlog}{44}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Diagramme de cas d'utilisation du Sprint}{44}{subsection.5.3.2}%
+\contentsline {section}{\numberline {5.4}Description textuelle des cas d'utilisation}{45}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Description textuelle du cas d'utilisation <<~Ajouter une zone~>>}{45}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Description textuelle du cas d'utilisation <<~Ajouter une agence~>>}{45}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Description textuelle du cas d'utilisation <<~Affecter un RH a des zones~>>}{45}{subsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.4.4}Autres cas d'utilisation}{45}{subsection.5.4.4}%
+\contentsline {section}{\numberline {5.5}Conception}{46}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Diagramme de classes}{46}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Diagrammes de séquence}{48}{subsection.5.5.2}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Ajouter une zone~>>}{48}{subsubsection*.25}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Ajouter une agence~>>}{49}{subsubsection*.26}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Affecter un RH a des zones~>>}{50}{subsubsection*.27}%
+\contentsline {section}{\numberline {5.6}Réalisation}{50}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Interface de gestion des zones}{50}{subsection.5.6.1}%
+\contentsline {subsection}{\numberline {5.6.2}Interface de gestion des agences}{51}{subsection.5.6.2}%
+\contentsline {subsection}{\numberline {5.6.3}Interface d'affectation RH}{52}{subsection.5.6.3}%
+\contentsline {section}{\numberline {5.7}Conclusion}{52}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Sprint 3 --- Offres de Recrutement et Candidatures}{54}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Introduction}{54}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Objectifs du Sprint}{54}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Spécification et Analyse des Besoins}{55}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Sprint Backlog}{55}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Diagramme de cas d'utilisation}{55}{subsection.6.3.2}%
+\contentsline {section}{\numberline {6.4}Description textuelle des cas d'utilisation}{56}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Cas d'utilisation <<~Créer une offre de recrutement~>>}{56}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Cas d'utilisation <<~Publier / clôturer une offre~>>}{56}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Cas d'utilisation <<~Postuler à une offre~>>}{56}{subsection.6.4.3}%
+\contentsline {subsection}{\numberline {6.4.4}Cas d'utilisation <<~Traiter une candidature~>>}{56}{subsection.6.4.4}%
+\contentsline {subsection}{\numberline {6.4.5}Autres cas d'utilisation}{56}{subsection.6.4.5}%
+\contentsline {section}{\numberline {6.5}Conception}{58}{section.6.5}%
+\contentsline {subsection}{\numberline {6.5.1}Diagramme de classes}{58}{subsection.6.5.1}%
+\contentsline {subsection}{\numberline {6.5.2}Diagrammes de séquence}{60}{subsection.6.5.2}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Créer une offre~>>}{60}{subsubsection*.28}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Postuler à une offre~>>}{62}{subsubsection*.29}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Traiter une candidature~>>}{64}{subsubsection*.30}%
+\contentsline {section}{\numberline {6.6}Réalisation}{65}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}Interface de gestion des offres (RH)}{65}{subsection.6.6.1}%
+\contentsline {subsection}{\numberline {6.6.2}Interface candidat --- offres et candidature}{65}{subsection.6.6.2}%
+\contentsline {subsection}{\numberline {6.6.3}Interface RH --- candidatures}{66}{subsection.6.6.3}%
+\contentsline {section}{\numberline {6.7}Conclusion}{67}{section.6.7}%
+\contentsline {chapter}{\numberline {7}Sprint 4 --- Entretiens, Décisions et Pilotage du Recrutement}{68}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Introduction}{68}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Objectifs du Sprint}{68}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Spécification et Analyse des Besoins}{70}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Sprint Backlog}{70}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Diagramme de cas d'utilisation}{70}{subsection.7.3.2}%
+\contentsline {section}{\numberline {7.4}Description textuelle des cas d'utilisation}{72}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Cas d'utilisation <<~Planifier un entretien en ligne~>>}{72}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Cas d'utilisation <<~Planifier un entretien physique~>>}{72}{subsection.7.4.2}%
+\contentsline {subsection}{\numberline {7.4.3}Cas d'utilisation <<~Confirmer une embauche~>>}{72}{subsection.7.4.3}%
+\contentsline {subsection}{\numberline {7.4.4}Cas d'utilisation <<~Consulter le tableau de bord~>>}{72}{subsection.7.4.4}%
+\contentsline {subsection}{\numberline {7.4.5}Autres cas d'utilisation}{72}{subsection.7.4.5}%
+\contentsline {section}{\numberline {7.5}Conception}{72}{section.7.5}%
+\contentsline {subsection}{\numberline {7.5.1}Diagramme de classes}{72}{subsection.7.5.1}%
+\contentsline {subsection}{\numberline {7.5.2}Diagrammes de séquence}{74}{subsection.7.5.2}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Planifier un entretien en ligne~>>}{74}{subsubsection*.31}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Confirmer une embauche~>>}{75}{subsubsection*.32}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Consulter le tableau de bord~>>}{76}{subsubsection*.33}%
+\contentsline {section}{\numberline {7.6}Réalisation}{76}{section.7.6}%
+\contentsline {subsection}{\numberline {7.6.1}Interface RH --- décisions et entretiens}{76}{subsection.7.6.1}%
+\contentsline {subsection}{\numberline {7.6.2}Calendrier et historique}{77}{subsection.7.6.2}%
+\contentsline {subsection}{\numberline {7.6.3}Confirmation d'embauche}{78}{subsection.7.6.3}%
+\contentsline {subsection}{\numberline {7.6.4}Tableau de bord et exports}{78}{subsection.7.6.4}%
+\contentsline {subsection}{\numberline {7.6.5}Espace candidat --- convocation}{79}{subsection.7.6.5}%
+\contentsline {section}{\numberline {7.7}Conclusion}{79}{section.7.7}%

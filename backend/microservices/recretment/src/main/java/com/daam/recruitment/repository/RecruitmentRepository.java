@@ -14,4 +14,5 @@ public interface RecruitmentRepository extends JpaRepository<Recruitment, Long> 
     List<Recruitment> findByCompanyId(String companyId);
     List<Recruitment> findByQcmId(String qcmId);
     List<Recruitment> findByCoworkingTrueAndZoneIdIn(List<String> zoneIds);
+    long countByInternalReferenceStartingWith(String prefix);
 }

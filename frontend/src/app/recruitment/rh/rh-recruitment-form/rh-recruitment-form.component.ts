@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserProfile } from '../../../models/auth.model';
 import { RecruitmentService } from '../../services/recruitment.service';
 import { Company, Qcm, RecruitmentRequest } from '../../models/recruitment.model';
 import { JOB_TITLES } from '../../constants/job-titles';
@@ -15,8 +17,10 @@ export class RhRecruitmentFormComponent implements OnInit {
   form!: FormGroup;
   companies: Company[] = [];
   qcms: Qcm[] = [];
+  responsables: UserProfile[] = [];
   jobTitles: string[] = [...JOB_TITLES];
   loading = false;
+  loadingResponsables = false;
   saving = false;
   isEdit = false;
   recruitmentId = '';
@@ -61,6 +65,7 @@ export class RhRecruitmentFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly recruitmentService: RecruitmentService,
+    private readonly authService: AuthService,
     private readonly message: NzMessageService
   ) {}
 
@@ -69,10 +74,13 @@ export class RhRecruitmentFormComponent implements OnInit {
     this.loadCompanies();
     this.loadQcms();
     this.loadJobTitles();
+    this.loadResponsables();
     this.recruitmentId = this.route.snapshot.paramMap.get('id') || '';
     this.isEdit = !!this.recruitmentId && this.route.snapshot.url.some((s) => s.path === 'edit');
     if (this.isEdit) {
       this.loadRecruitment();
+    } else {
+      this.form.get('internalReference')?.disable({ emitEvent: false });
     }
   }
 
@@ -101,8 +109,8 @@ export class RhRecruitmentFormComponent implements OnInit {
       localTravel: [false],
       internationalTravel: [false],
       anonymousMode: [false],
-      responsibleName: [''],
-      internalReference: [''],
+      responsibleUserId: [null],
+      internalReference: [{ value: '', disabled: true }],
       keejobReference: [''],
       status: ['DRAFT'],
       qcmId: [null],
@@ -152,6 +160,26 @@ export class RhRecruitmentFormComponent implements OnInit {
     });
   }
 
+  loadResponsables(): void {
+    this.loadingResponsables = true;
+    this.authService.getResponsableUsers().subscribe({
+      next: (response) => {
+        this.loadingResponsables = false;
+        if (response.success && response.data) {
+          this.responsables = response.data;
+        }
+      },
+      error: () => {
+        this.loadingResponsables = false;
+      }
+    });
+  }
+
+  responsableLabel(user: UserProfile): string {
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    return name || user.username || user.email;
+  }
+
   loadRecruitment(): void {
     this.loading = true;
     this.recruitmentService.getRecruitment(this.recruitmentId).subscribe({
@@ -186,7 +214,7 @@ export class RhRecruitmentFormComponent implements OnInit {
             localTravel: data.localTravel,
             internationalTravel: data.internationalTravel,
             anonymousMode: data.anonymousMode,
-            responsibleName: data.responsibleName,
+            responsibleUserId: data.responsibleUserId || null,
             internalReference: data.internalReference,
             keejobReference: data.keejobReference,
             status: data.status,
@@ -194,6 +222,7 @@ export class RhRecruitmentFormComponent implements OnInit {
             coworking: !!data.coworking,
             coworkingMonth: data.coworkingMonth ? new Date(data.coworkingMonth) : null
           });
+          this.form.get('internalReference')?.disable({ emitEvent: false });
           if (data.coworking) {
             this.form.get('coworkingMonth')?.setValidators([Validators.required]);
             this.form.get('coworkingMonth')?.updateValueAndValidity();
@@ -213,8 +242,11 @@ export class RhRecruitmentFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const raw = { ...this.form.value };
+    const raw = { ...this.form.getRawValue() };
+    const selected = this.responsables.find((r) => r.userId === raw.responsibleUserId);
     const payload = { ...raw } as RecruitmentRequest;
+    payload.responsibleUserId = raw.responsibleUserId || null;
+    payload.responsibleName = selected ? this.responsableLabel(selected) : undefined;
     if (!payload.qcmId) {
       payload.qcmId = null;
     }
@@ -226,6 +258,9 @@ export class RhRecruitmentFormComponent implements OnInit {
       payload.coworkingMonth = `${y}-${m}-01`;
     } else {
       payload.coworkingMonth = null;
+    }
+    if (!this.isEdit) {
+      delete (payload as { internalReference?: string }).internalReference;
     }
     this.saving = true;
     const request$ = this.isEdit

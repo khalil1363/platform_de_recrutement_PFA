@@ -49,6 +49,8 @@ public class Recruitment {
     private Boolean anonymousMode;
     private LocalDate publicationDate;
     private String responsibleName;
+    /** User id of selected ROLE_RESPONSABLE_RECRUTEMENT. */
+    private String responsibleUserId;
     private String internalReference;
     private String keejobReference;
     @Enumerated(EnumType.STRING)

@@ -1,0 +1,481 @@
+% ============================================================
+% CHAPITRE 2 — Contexte du projet (version détaillée)
+% ============================================================
+\chapter{Contexte du Projet}
+
+\section{Introduction}
+
+Ce chapitre vise à présenter le contexte du projet de conception et de
+développement d'une plateforme intelligente de gestion du recrutement pour
+\textbf{DAAM}, une institution de microfinance tunisienne. Dans un secteur
+marqué par des exigences croissantes en matière d'efficacité, de traçabilité
+et de coordination multi-sites, l'étude du cadre organisationnel, des outils
+existants et des défis opérationnels est essentielle.
+
+Cette analyse permet de poser les bases du projet, en identifiant les limites
+des pratiques actuelles (Excel, e-mails) et des solutions du marché
+(LinkedIn, sites d'emploi, ATS généralistes), puis en justifiant le choix
+d'une plateforme métier dédiée. Elle précise également la démarche
+méthodologique retenue, fondée sur \textbf{SCRUM} et une modélisation
+\textbf{UML}. Ce chapitre détaille ainsi l'entreprise, la problématique,
+la solution proposée et les approches de travail mises en œuvre.
+
+
+\section{Présentation de l'organisme d'accueil}
+
+\subsection{Présentation de l'entreprise}
+
+\textbf{DAAM} œuvre pour l'inclusion financière des micro-entrepreneurs.
+L'institution, autrefois désignée sous le nom de \textbf{CFE Tunisie}, a
+récemment, le \textbf{17 mai 2023}, réalisé une transformation en adoptant le
+nouveau nom commercial de DAAM. Ce changement d'identité s'inscrit dans une
+volonté de modernisation et de renforcement de sa présence auprès des
+entrepreneurs et du grand public.
+
+DAAM est une institution de microfinance implantée en Tunisie depuis
+\textbf{2015}. Elle vise à accroître l'accessibilité des services financiers
+professionnels aux micros et petits entrepreneurs, afin de contribuer à la
+prospérité durable, à l'émergence du secteur privé et à l'amélioration des
+conditions de vie des Tunisiens. Par son positionnement, DAAM joue un rôle
+important dans l'accompagnement des porteurs de projets qui rencontrent
+souvent des difficultés d'accès aux financements classiques.
+
+Pour mener à bien sa mission, DAAM s'appuie sur un réseau d'agences et d'équipes
+réparties sur le territoire. Cette organisation multi-sites suppose une capacité
+à recruter, intégrer et mobiliser des collaborateurs compétents, aussi bien dans
+les fonctions métiers que dans les fonctions support. Dans ce cadre, le
+recrutement n'est pas une activité secondaire~: il conditionne directement la
+qualité du service rendu aux clients et la performance opérationnelle de
+l'institution.
+
+Le présent projet s'intéresse précisément à cette dimension RH. Il vise à
+doter DAAM d'un outil capable de mieux organiser les campagnes de recrutement,
+de centraliser les candidatures et d'offrir une meilleure visibilité aux
+responsables et à l'administration.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.55\textwidth]{img/daam-logo.jpg}
+  \caption{Logo de DAAM}
+  \label{fig:logo-daam}
+\end{figure}
+
+
+\subsection{Organigramme de l'entreprise}
+
+L'organigramme est un graphique représentant la structure d'une entreprise. Il
+illustre à la fois les différents éléments de l'organisation et leurs relations
+hiérarchiques. La figure suivante est réservée à l'organigramme officiel de
+DAAM, qui pourra être ajouté dès que le document institutionnel sera disponible.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{%
+    \parbox{0.85\textwidth}{%
+      \centering\vspace{3.5cm}
+      \textit{[Organigramme de DAAM à insérer]}\\[0.6em]
+      \small Emplacement réservé à la figure officielle de l'entreprise\\
+      \vspace{3.5cm}%
+    }%
+  }
+  \caption{Organigramme de DAAM}
+  \label{fig:organigramme-daam}
+\end{figure}
+
+Dans le périmètre de la plateforme de recrutement, trois profils d'utilisateurs
+sont particulièrement concernés~:
+
+\begin{itemize}
+  \item l'\textbf{Administrateur}, qui gère l'organisation globale
+        (utilisateurs, zones, agences, affectations RH) et dispose d'une vue
+        transverse sur l'activité de recrutement~;
+  \item le \textbf{RH}, qui crée et publie les offres, traite les candidatures
+        sur son périmètre, planifie les entretiens et suit les décisions
+        jusqu'à l'embauche~;
+  \item le \textbf{Candidat}, qui consulte les offres disponibles, dépose sa
+        candidature et suit l'avancement de son dossier.
+\end{itemize}
+
+Cette répartition des rôles reflète la réalité organisationnelle de DAAM et
+guide la conception des espaces applicatifs de la solution.
+
+
+\section{Présentation du projet}
+
+Ce projet s'inscrit dans le cadre d'un \textbf{Projet de Fin d'Année (PFA)}
+d'une durée d'environ \textbf{deux mois}, réalisé au sein de DAAM. Dans un
+contexte marqué par la digitalisation croissante des processus RH, la nécessité
+d'une solution performante, centralisée et adaptée au réseau multi-agences
+devient cruciale.
+
+L'objectif n'est pas seulement d'informatiser quelques étapes isolées, mais de
+construire un parcours de recrutement cohérent, depuis la publication de
+l'offre jusqu'à la confirmation d'embauche, avec un suivi lisible pour les RH
+et une supervision globale pour l'administration.
+
+
+\subsection{Problématique}
+
+DAAM, opérant à travers plusieurs zones et agences, fait face à des défis
+significatifs liés à une gestion encore largement manuelle du recrutement.
+Malgré l'usage d'outils de base comme Excel et la messagerie électronique,
+l'organisation globale du processus reste fragmentée, ce qui engendre plusieurs
+problématiques majeures~:
+
+\begin{itemize}
+  \item \textbf{Sélection et suivi non structurés}~: le traitement des
+        candidatures repose souvent sur l'expérience individuelle des
+        responsables RH, sans référentiel unique des statuts ni historique
+        facilement consultable.
+  \item \textbf{Communication peu industrialisée}~: les échanges liés aux
+        convocations, aux retours candidats ou aux validations internes
+        passent fréquemment par e-mail, ce qui multiplie les risques d'oubli,
+        de délais et d'erreurs.
+  \item \textbf{Absence de vision temps réel du pipeline}~: il est difficile
+        d'obtenir instantanément le nombre de candidatures par offre, par
+        zone ou par statut (en attente, retenu, non retenu, désisté, admis).
+  \item \textbf{Dépendance aux fichiers Excel}~: la gestion des offres, des
+        listes de candidats et de certains indicateurs se fait dans des
+        tableurs non centralisés, sources fréquentes de doublons et de
+        désynchronisation.
+  \item \textbf{Absence d'analyse décisionnelle solide}~: sans tableaux de
+        bord intégrés, l'évaluation des performances de recrutement
+        (volumes, taux de sélection, activité par RH) reste limitée.
+  \item \textbf{Risque d'erreurs humaines accru}~: la saisie manuelle
+        répétée, le copie-collage entre documents et le suivi informel
+        augmentent les risques d'incohérence.
+  \item \textbf{Perte de temps opérationnel}~: une part importante du temps
+        RH est consommée par des tâches de coordination et de reporting au
+        détriment de l'évaluation qualitative des profils.
+  \item \textbf{Expérience candidat irrégulière}~: selon les périodes et les
+        équipes, le candidat peut manquer de clarté sur l'avancée de son
+        dossier, ce qui nuit à l'attractivité de l'employeur.
+\end{itemize}
+
+Dans ce contexte, il apparaît impératif de concevoir une solution moderne,
+centralisée et évolutive, alignée sur les besoins métiers de DAAM, tout en
+améliorant la fiabilité, l'agilité et la transparence du recrutement.
+
+
+\section{Les pratiques existantes chez DAAM~: Excel et e-mails}
+
+Avant le développement de la plateforme, le recrutement chez DAAM s'appuyait
+principalement sur des pratiques classiques encore très répandues~: fichiers
+Excel pour le suivi, dossiers partagés pour les CV, et e-mails pour la
+communication entre RH, managers et candidats.
+
+Ces outils présentent des qualités immédiatement perceptibles. Excel est
+souple, largement maîtrisé et rapide à mettre en place. La messagerie permet
+des échanges directs sans déploiement informatique complexe. Pour un volume
+faible de candidatures, cette organisation peut sembler suffisante.
+
+Cependant, dès que l'activité s'intensifie ou que plusieurs agences
+interviennent simultanément, ces pratiques révèlent leurs faiblesses. Elles
+ne constituent pas un système de recrutement à proprement parler, mais plutôt
+un assemblage d'outils généraux détournés pour un usage RH.
+
+
+\section{Les solutions existantes sur le marché du recrutement}
+
+Au-delà des pratiques internes manuelles, de nombreuses organisations
+s'appuient également sur des plateformes grand public ou spécialisées pour
+diffuser des offres et collecter des candidatures. Parmi les plus connues,
+on retrouve notamment~:
+
+\begin{itemize}
+  \item \textbf{LinkedIn}~: réseau professionnel mondial permettant de publier
+        des offres, d'attirer des profils et d'échanger avec des candidats.
+        Il est particulièrement utile pour la visibilité employeur et le
+        sourcing actif.
+  \item \textbf{Les jobboards} (sites d'emploi nationaux et internationaux)~:
+        ils facilitent la publication d'annonces et la réception de candidatures
+        via un canal grand public. Sur le marché tunisien et régional, ces
+        plateformes sont souvent utilisées pour élargir rapidement le vivier
+        de postulants.
+  \item \textbf{Les ATS généralistes / suites RH cloud}~: des solutions
+        payantes de suivi des candidatures, souvent riches fonctionnellement,
+        mais parfois coûteuses et peu adaptées à une organisation multi-agences
+        spécifique.
+\end{itemize}
+
+Ces plateformes jouent un rôle important dans le paysage actuel du recrutement
+digital. Elles permettent d'augmenter la portée des annonces et d'entrer en
+contact avec un grand nombre de candidats. Toutefois, leur usage seul ne
+répond pas pleinement aux besoins internes d'une institution comme DAAM.
+
+
+\subsection{Apports de LinkedIn et des sites d'emploi}
+
+LinkedIn et les sites d'emploi offrent plusieurs avantages~:
+\begin{itemize}
+  \item une large audience de candidats~;
+  \item une publication rapide des offres~;
+  \item un canal moderne pour renforcer la marque employeur~;
+  \item des outils de recherche de profils (sourcing).
+\end{itemize}
+
+Ils constituent donc d'excellents compléments pour \textbf{attirer} des
+candidats. En revanche, ils restent principalement orientés diffusion et
+mise en relation.
+
+
+\section{Critique des solutions existantes dans le contexte DAAM}
+
+Malgré leurs qualités, LinkedIn, les jobboards et les outils généraux
+présentent plusieurs limites lorsqu'il s'agit de piloter le recrutement
+interne d'un réseau multi-agences~:
+
+\begin{itemize}
+  \item \textbf{Faible intégration au processus interne}~: la candidature peut
+        arriver via LinkedIn ou un site d'emploi, mais le suivi complet
+        (entretien, décision, embauche, historique) se poursuit souvent hors
+        plateforme, dans Excel ou par e-mail.
+  \item \textbf{Peu de gouvernance par zones et agences}~: ces outils ne
+        reproduisent pas naturellement l'organisation territoriale de DAAM
+        (zones, agences, RH responsables).
+  \item \textbf{Gestion RH limitée}~: LinkedIn n'est pas conçu pour
+        administrer les comptes RH, les affectations, ni la supervision
+        globale par un administrateur interne.
+  \item \textbf{Suivi incomplet des statuts de recrutement}~: le pipeline
+        métier (en attente, retenu, non retenu, désisté, admis) n'est pas
+        toujours formalisé de façon homogène et exploitable pour le reporting
+        interne.
+  \item \textbf{Planification d'entretiens et réunions}~: la gestion des
+        entretiens (en ligne ou physiques), du calendrier RH et des
+        confirmations liées au processus reste partielle ou externalisée.
+  \item \textbf{Absence de bout-en-bout jusqu'à l'embauche}~: la clôture du
+        processus (confirmation d'embauche, candidats admis, suivi post-sélection)
+        n'est généralement pas couverte de façon unifiée.
+  \item \textbf{Coût et dépendance}~: les suites RH / ATS commerciales peuvent
+        être onéreuses et difficiles à adapter finement au métier de DAAM.
+  \item \textbf{Reporting institutionnel insuffisant}~: l'administration a
+        besoin d'une vue consolidée par RH, par offre et par statut, ce que
+        les réseaux sociaux professionnels ne fournissent pas nativement.
+\end{itemize}
+
+En résumé, LinkedIn et les sites d'emploi sont utiles pour \textbf{capturer}
+des candidatures, mais insuffisants pour \textbf{gouverner} le recrutement
+interne de DAAM de bout en bout. Excel et les e-mails comblent mal ce vide.
+D'où la nécessité d'une plateforme métier dédiée.
+
+
+\section{Solution proposée~: la plateforme de recrutement DAAM}
+
+Dans le cadre de la modernisation des processus RH, la solution proposée est
+une \textbf{plateforme web intelligente de gestion du recrutement}, conçue
+spécifiquement pour DAAM. Elle ne remplace pas nécessairement LinkedIn ou les
+jobboards comme canaux d'attraction~: elle vient surtout \textbf{centraliser,
+piloter et finaliser} le processus interne, là où les outils grand public
+s'arrêtent.
+
+
+\subsection{Présentation globale de l'application}
+
+L'application offre trois espaces distincts~:
+
+\begin{itemize}
+  \item un espace \textbf{Administrateur}~: gestion des utilisateurs, des
+        zones, des agences, des affectations RH, consultation du dashboard
+        global, des recrutements, des candidatures et des candidats admis,
+        organisés clairement par responsable RH~;
+  \item un espace \textbf{RH}~: dashboard de sélection, création et publication
+        des offres, gestion des QCM, traitement des candidatures, planification
+        des entretiens, confirmation d'embauche, suivi des candidats admis,
+        calendrier et gestion des comptes candidats~;
+  \item un espace \textbf{Candidat}~: consultation des offres, dépôt de
+        candidature avec CV, suivi des dossiers et participation aux
+        évaluations.
+\end{itemize}
+
+
+\subsection{Fonctionnalités clés qui différencient la solution}
+
+Par rapport à LinkedIn, aux sites d'emploi et aux suivis Excel, la plateforme
+DAAM apporte une vraie valeur métier grâce aux fonctionnalités suivantes~:
+
+\begin{itemize}
+  \item \textbf{Gestion RH complète}~: création des offres, rattachement aux
+        zones et agences, traitement des candidatures, historique candidat et
+        export de suivi. Le RH dispose d'un espace dédié pour piloter son
+        activité au quotidien.
+  \item \textbf{Gestion administrative multi-sites}~: l'administrateur
+        structure le réseau (zones, agences, affectations) et supervise
+        l'ensemble des recrutements avec une organisation par RH, ce que
+        LinkedIn ne permet pas dans ce format interne.
+  \item \textbf{Suivi des statuts de recrutement de bout en bout}~: chaque
+        candidature évolue selon un workflow clair (en attente, retenu,
+        non retenu, désisté, admis). Cette traçabilité facilite les décisions
+        et le reporting.
+  \item \textbf{Planification des entretiens / meetings}~: le RH peut
+        organiser des entretiens (en ligne ou physiques), suivre le calendrier
+        et relier la réunion au dossier candidat. La communication associée
+        s'intègre au processus.
+  \item \textbf{Aide à la sélection}~: QCM de présélection, analyse assistée
+        du CV, tableaux de bord de sélection (volumes, retenus, taux, etc.).
+  \item \textbf{Finalisation du recrutement}~: confirmation d'embauche,
+        suivi des candidats admis et continuité après la décision, au lieu
+        de s'arrêter à la simple réception du CV.
+  \item \textbf{Expérience candidat structurée}~: le candidat consulte les
+        offres, postule, suit ses candidatures et réalise les évaluations
+        dans un même environnement.
+\end{itemize}
+
+
+\subsection{Pourquoi cette application est plus adaptée à DAAM}
+
+La force de la solution ne réside pas seulement dans le fait d'être
+\og{}digitale\fg{}. Elle réside dans le fait d'être \textbf{métier} et
+\textbf{alignée} sur l'organisation de DAAM.
+
+\begin{itemize}
+  \item Contrairement à \textbf{LinkedIn} et aux \textbf{sites d'emploi},
+        l'application ne se limite pas à publier une offre ou recevoir un CV~:
+        elle couvre la gestion RH, les meetings, les statuts et la clôture
+        du recrutement.
+  \item Contrairement à \textbf{Excel} et aux \textbf{e-mails}, elle fournit
+        un référentiel unique, des droits par rôle, un historique et des
+        indicateurs exploitables.
+  \item Contrairement à un ATS générique coûteux, elle est conçue autour des
+        besoins concrets de DAAM~: multi-zones, multi-agences, supervision
+        admin et pilotage RH.
+\end{itemize}
+
+Autrement dit, les plateformes externes aident à \textbf{trouver} des
+candidats~; la solution DAAM aide à \textbf{recruter correctement}, jusqu'à
+la décision finale et au suivi post-sélection.
+
+La plateforme a également été pensée pour rester évolutive. Certaines
+améliorations, notamment un module de \textbf{réclamations} et un système de
+\textbf{notifications} plus complet, sont identifiées comme perspectives et
+pourront être intégrées ultérieurement.
+
+
+\section{Méthode de travail et planification}
+
+\subsection{Approches de gestion de projet}
+
+Le succès d'un projet informatique dépend autant de la qualité technique de la
+solution que de la méthode employée pour la conduire. De manière générale,
+deux familles d'approches s'opposent.
+
+Les approches \textbf{prédictives}, souvent associées au cycle en V ou à un
+enchaînement séquentiel (analyse, conception, développement, tests,
+déploiement), reposent sur une définition relativement stable des besoins dès
+le départ. Elles offrent une documentation détaillée et une planification
+claire, mais leur rigidité peut devenir un frein lorsque les exigences
+évoluent en cours de projet.
+
+Les approches \textbf{agiles}, au contraire, privilégient des itérations
+courtes, la collaboration avec les utilisateurs et l'adaptation continue.
+Elles permettent de livrer rapidement des fonctionnalités utiles, de recueillir
+des retours et d'ajuster le produit.
+
+Pour une plateforme de recrutement, les besoins métier peuvent se préciser
+progressivement au contact des équipes RH et de l'administration. Les méthodes
+agiles apparaissent donc plus adaptées, car elles favorisent la flexibilité et
+la validation régulière de la valeur livrée.
+
+
+\subsection{Choix de la méthode~: SCRUM}
+
+Le développement de la plateforme de recrutement DAAM doit répondre à une
+complexité fonctionnelle liée à la diversité des acteurs (Administrateur, RH,
+Candidat) et à l'évolution possible des priorités pendant le PFA.
+\textbf{SCRUM}, méthode agile largement répandue, a été retenue pour sa
+flexibilité et son cadre itératif.
+
+SCRUM repose sur des cycles appelés \textbf{sprints}, au cours desquels
+l'équipe développe un ensemble de fonctionnalités priorisées. Un
+\textbf{Product Backlog} rassemble les besoins, tandis que le
+\textbf{Sprint Backlog} décrit le travail prévu pour l'itération en cours.
+Chaque sprint se conclut idéalement par un incrément testable, susceptible
+d'être présenté aux parties prenantes.
+
+SCRUM offre plusieurs avantages pour ce projet~:
+\begin{itemize}
+  \item \textbf{Priorisation}~: les fonctionnalités à plus forte valeur métier
+        (authentification, gestion des offres, candidatures, suivi) peuvent
+        être traitées en premier.
+  \item \textbf{Adaptabilité}~: les retours des utilisateurs sont intégrés
+        plus facilement entre deux sprints.
+  \item \textbf{Livraison continue}~: le projet avance par blocs concrets
+        plutôt que par une grande livraison unique en fin de stage.
+  \item \textbf{Collaboration}~: les échanges réguliers avec l'encadrement
+        et les acteurs métiers réduisent le risque de décalage entre le besoin
+        réel et le produit développé.
+  \item \textbf{Réduction des risques}~: les problèmes sont détectés plus tôt,
+        lorsque le coût de correction reste limité.
+\end{itemize}
+
+Le cadre SCRUM s'appuie classiquement sur trois rôles~: le Product Owner, qui
+porte la vision produit et priorise le backlog~; le Scrum Master, qui facilite
+le processus~; et l'équipe de développement, qui réalise les incréments. Dans
+le contexte d'un PFA, ces rôles peuvent être adaptés à la taille de l'équipe,
+tout en conservant l'esprit de la méthode~: transparence, inspection et
+adaptation.
+
+Les événements principaux (planification de sprint, synchronisation,
+revue et rétrospective) structurent le rythme de travail et garantissent un
+suivi régulier de l'avancement.
+
+
+\subsection{Modélisation fonctionnelle et technique avec UML}
+
+Le \textbf{Unified Modeling Language (UML)} est un langage standardisé permettant
+de modéliser graphiquement un système logiciel. Il facilite la communication
+entre les parties prenantes et améliore la traçabilité des exigences.
+
+Dans le cadre de la plateforme DAAM, UML est utilisé de manière légère, en
+soutien à SCRUM, sans alourdir le processus agile. Les diagrammes utiles se
+répartissent principalement en deux catégories~:
+\begin{itemize}
+  \item les diagrammes \textbf{structurels}, comme le diagramme de classes,
+        pour représenter les entités métier (offre, candidature, zone, agence,
+        utilisateur)~;
+  \item les diagrammes \textbf{comportementaux}, comme les cas d'utilisation
+        et les diagrammes de séquence, pour décrire les interactions entre
+        acteurs et système.
+\end{itemize}
+
+Concrètement, UML intervient à plusieurs moments du projet~:
+\begin{itemize}
+  \item avant un sprint, pour clarifier les besoins via des cas d'utilisation~;
+  \item pendant le sprint, pour guider l'implémentation grâce aux scénarios
+        de séquence~;
+  \item lors de la conception, pour structurer les principales entités et leurs
+        relations.
+\end{itemize}
+
+Les avantages d'UML pour ce projet sont les suivants~:
+\begin{itemize}
+  \item \textbf{Souplesse}~: une modélisation progressive, adaptée aux
+        évolutions du backlog~;
+  \item \textbf{Communication}~: des échanges plus clairs entre développeur,
+        encadrants et acteurs métiers~;
+  \item \textbf{Réduction des erreurs}~: une meilleure anticipation des
+        incohérences avant le développement.
+\end{itemize}
+
+Ainsi, UML renforce l'efficacité de SCRUM en assurant une modélisation claire,
+ciblée et compatible avec une approche itérative.
+
+
+\section{Conclusion}
+
+La gestion efficace du recrutement chez DAAM nécessite une solution adaptée aux
+besoins spécifiques d'une institution de microfinance multi-agences. L'analyse
+a montré que les pratiques internes (Excel, e-mails) et les plateformes grand
+public (LinkedIn, sites d'emploi) sont utiles pour diffuser ou collecter des
+candidatures, mais insuffisantes pour piloter le processus de bout en bout.
+
+Ces constats justifient le développement d'une plateforme dédiée, capable de
+assurer la gestion RH, le suivi des meetings, les statuts de recrutement et
+la finalisation jusqu'à l'embauche, avec une vision globale pour
+l'administration. En adoptant SCRUM et UML, ce projet garantit une approche
+agile, structurée et centrée sur la valeur métier.
+
+Le chapitre suivant présentera l'étude préliminaire du projet
+(\textbf{Sprint~0}), notamment l'analyse des besoins et l'organisation du
+travail en sprints.
+
+\clearpage

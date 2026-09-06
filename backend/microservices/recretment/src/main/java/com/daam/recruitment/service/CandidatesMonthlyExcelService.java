@@ -47,7 +47,7 @@ public class CandidatesMonthlyExcelService {
             "PRETENTION",
             "DATE DE DEBUT POTENTIELLE",
             "RESPONSABLE DE RECRUTEMENT",
-            "COWORKING"
+            "COHORT"
     };
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
