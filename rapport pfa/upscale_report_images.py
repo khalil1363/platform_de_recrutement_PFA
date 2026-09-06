@@ -51,6 +51,13 @@ NAMES = [
     "ui-hire-modal.png",
     "ui-dashboard.png",
     "ui-candidate-interview.png",
+    "uc-sprint5.jpg",
+    "class-sprint5.jpg",
+    "seq-create-reclamation.jpg",
+    "seq-process-reclamation.jpg",
+    "ui-my-reclamations.png",
+    "ui-rh-reclamations.png",
+    "ui-admin-reclamations.png",
 ]
 
 

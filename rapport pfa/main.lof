@@ -51,3 +51,11 @@
 \contentsline {figure}{\numberline {7.9}{\ignorespaces Interface de confirmation d'embauche}}{78}{figure.7.9}%
 \contentsline {figure}{\numberline {7.10}{\ignorespaces Interface du tableau de bord de sélection (RH)}}{79}{figure.7.10}%
 \contentsline {figure}{\numberline {7.11}{\ignorespaces Interface candidat --- convocation à l'entretien}}{79}{figure.7.11}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {8.1}{\ignorespaces Diagramme de cas d'utilisation du Sprint 5}}{82}{figure.8.1}%
+\contentsline {figure}{\numberline {8.2}{\ignorespaces Diagramme de classes du Sprint 5}}{85}{figure.8.2}%
+\contentsline {figure}{\numberline {8.3}{\ignorespaces Diagramme de séquence --- Créer une réclamation}}{86}{figure.8.3}%
+\contentsline {figure}{\numberline {8.4}{\ignorespaces Diagramme de séquence --- Traiter une réclamation}}{87}{figure.8.4}%
+\contentsline {figure}{\numberline {8.5}{\ignorespaces Interface candidat --- mes réclamations}}{88}{figure.8.5}%
+\contentsline {figure}{\numberline {8.6}{\ignorespaces Interface RH --- traitement des réclamations}}{89}{figure.8.6}%
+\contentsline {figure}{\numberline {8.7}{\ignorespaces Interface Admin --- gestion des réclamations}}{89}{figure.8.7}%

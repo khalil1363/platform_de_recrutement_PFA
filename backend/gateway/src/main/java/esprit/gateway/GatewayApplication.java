@@ -26,6 +26,9 @@ public class GatewayApplication {
                 .route("recruitment", r -> r.path("/api/recruitment/**")
                         .uri("lb://RECRUITMENT"))
 
+                .route("reclamation", r -> r.path("/api/reclamation/**")
+                        .uri("lb://RECLAMATION"))
+
                 .build();
          }
 }

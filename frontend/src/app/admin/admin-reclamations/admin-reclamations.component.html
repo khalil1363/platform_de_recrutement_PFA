@@ -1,0 +1,83 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Réclamations</h2>
+    <p>Supervision et traitement des réclamations</p>
+  </div>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="reclamations" [nzShowPagination]="false" *ngIf="reclamations.length; else empty">
+    <thead>
+      <tr>
+        <th>Auteur</th>
+        <th>Titre</th>
+        <th>Statut</th>
+        <th>Traité par</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of reclamations">
+        <td>{{ item.createdByName || item.createdByUserId }}</td>
+        <td>
+          <strong>{{ item.title }}</strong>
+          <div class="desc">{{ item.description }}</div>
+        </td>
+        <td>
+          <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+        </td>
+        <td>{{ item.handledByName || '—' }}</td>
+        <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td class="actions">
+          <button nz-button nzType="primary" nzSize="small" type="button" (click)="openTreat(item)">
+            Traiter
+          </button>
+          <button
+            nz-button
+            nzDanger
+            nzSize="small"
+            nz-popconfirm
+            nzPopconfirmTitle="Supprimer définitivement ?"
+            (nzOnConfirm)="delete(item)"
+          >
+            Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-spin>
+
+<ng-template #empty>
+  <nz-empty nzNotFoundContent="Aucune réclamation"></nz-empty>
+</ng-template>
+
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  nzTitle="Traiter la réclamation"
+  (nzOnCancel)="modalVisible = false"
+  (nzOnOk)="save()"
+  [nzOkLoading]="modalLoading"
+>
+  <ng-container *nzModalContent>
+    <p *ngIf="selected"><strong>{{ selected.title }}</strong></p>
+    <p *ngIf="selected" class="desc">{{ selected.description }}</p>
+    <form nz-form [formGroup]="form">
+      <nz-form-item>
+        <nz-form-label nzRequired>Statut</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="status" style="width: 100%">
+            <nz-option *ngFor="let s of statuses" [nzValue]="s" [nzLabel]="statusLabel(s)"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Réponse</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input rows="4" formControlName="rhResponse"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

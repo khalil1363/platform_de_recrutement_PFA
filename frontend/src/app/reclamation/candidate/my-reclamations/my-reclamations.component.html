@@ -1,0 +1,77 @@
+<div class="page-header-bar">
+  <div>
+    <h2>Mes réclamations</h2>
+    <p>Déposez et suivez vos réclamations auprès de DAAM</p>
+  </div>
+  <button nz-button nzType="primary" type="button" (click)="openCreate()">
+    <span nz-icon nzType="plus" nzTheme="outline"></span>
+    Nouvelle réclamation
+  </button>
+</div>
+
+<nz-spin [nzSpinning]="loading">
+  <nz-table [nzData]="reclamations" [nzShowPagination]="false" *ngIf="reclamations.length; else empty">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Statut</th>
+        <th>Réponse RH</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of reclamations">
+        <td>
+          <strong>{{ item.title }}</strong>
+          <div class="desc">{{ item.description }}</div>
+        </td>
+        <td>
+          <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+        </td>
+        <td>{{ item.rhResponse || '—' }}</td>
+        <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <button
+            *ngIf="item.status === 'OPEN'"
+            nz-button
+            nzDanger
+            nzSize="small"
+            nz-popconfirm
+            nzPopconfirmTitle="Supprimer cette réclamation ?"
+            (nzOnConfirm)="delete(item)"
+          >
+            Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-spin>
+
+<ng-template #empty>
+  <nz-empty nzNotFoundContent="Aucune réclamation pour le moment"></nz-empty>
+</ng-template>
+
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  nzTitle="Nouvelle réclamation"
+  (nzOnCancel)="modalVisible = false"
+  (nzOnOk)="save()"
+  [nzOkLoading]="modalLoading"
+>
+  <form nz-form [formGroup]="form" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label nzRequired>Titre</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="title" placeholder="Objet de la réclamation" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired>Description</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input rows="4" formControlName="description" placeholder="Décrivez votre problème"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

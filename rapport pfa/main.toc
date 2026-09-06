@@ -1,9 +1,9 @@
 \babel@toc {french}{}\relax 
 \contentsline {chapter}{Dédicace}{i}{chapter*.1}%
 \contentsline {chapter}{Remerciements}{ii}{chapter*.2}%
-\contentsline {chapter}{Liste des figures}{vii}{chapter*.2}%
-\contentsline {chapter}{Liste des tableaux}{ix}{chapter*.2}%
-\contentsline {chapter}{Liste des abréviations}{x}{chapter*.3}%
+\contentsline {chapter}{Liste des figures}{viii}{chapter*.2}%
+\contentsline {chapter}{Liste des tableaux}{x}{chapter*.2}%
+\contentsline {chapter}{Liste des abréviations}{xi}{chapter*.3}%
 \contentsline {chapter}{Introduction Générale}{1}{chapter*.4}%
 \contentsline {chapter}{\numberline {1}Problèmes du Recrutement --- État des Lieux et Évolution}{2}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Introduction}{2}{section.1.1}%
@@ -157,3 +157,26 @@
 \contentsline {subsection}{\numberline {7.6.4}Tableau de bord et exports}{78}{subsection.7.6.4}%
 \contentsline {subsection}{\numberline {7.6.5}Espace candidat --- convocation}{79}{subsection.7.6.5}%
 \contentsline {section}{\numberline {7.7}Conclusion}{79}{section.7.7}%
+\contentsline {chapter}{\numberline {8}Sprint 5 --- Module Réclamations}{81}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Introduction}{81}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Objectifs du Sprint}{81}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Spécification et Analyse des Besoins}{82}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Sprint Backlog}{82}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Diagramme de cas d'utilisation}{82}{subsection.8.3.2}%
+\contentsline {section}{\numberline {8.4}Description textuelle des cas d'utilisation}{83}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Cas d'utilisation <<~Créer une réclamation~>>}{83}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}Cas d'utilisation <<~Traiter une réclamation~>>}{83}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Cas d'utilisation <<~Consulter mes réclamations~>>}{83}{subsection.8.4.3}%
+\contentsline {subsection}{\numberline {8.4.4}Autres cas d'utilisation}{83}{subsection.8.4.4}%
+\contentsline {section}{\numberline {8.5}Conception}{84}{section.8.5}%
+\contentsline {subsection}{\numberline {8.5.1}Architecture du microservice}{84}{subsection.8.5.1}%
+\contentsline {subsection}{\numberline {8.5.2}Diagramme de classes}{84}{subsection.8.5.2}%
+\contentsline {subsection}{\numberline {8.5.3}Diagrammes de séquence}{86}{subsection.8.5.3}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Créer une réclamation~>>}{86}{subsubsection*.34}%
+\contentsline {subsubsection}{Diagramme de séquence <<~Traiter une réclamation~>>}{87}{subsubsection*.35}%
+\contentsline {section}{\numberline {8.6}Réalisation}{87}{section.8.6}%
+\contentsline {subsection}{\numberline {8.6.1}API REST}{87}{subsection.8.6.1}%
+\contentsline {subsection}{\numberline {8.6.2}Interface candidat}{87}{subsection.8.6.2}%
+\contentsline {subsection}{\numberline {8.6.3}Interface RH}{88}{subsection.8.6.3}%
+\contentsline {subsection}{\numberline {8.6.4}Interface Admin}{89}{subsection.8.6.4}%
+\contentsline {section}{\numberline {8.7}Conclusion}{89}{section.8.7}%

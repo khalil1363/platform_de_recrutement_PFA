@@ -43,7 +43,9 @@ import {
   UserDeleteOutline,
   StopOutline,
   DashboardOutline,
-  CalendarOutline
+  CalendarOutline,
+  AlertOutline,
+  FormOutline
 } from '@ant-design/icons-angular/icons';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -89,7 +91,9 @@ const icons: IconDefinition[] = [
   UserDeleteOutline,
   StopOutline,
   DashboardOutline,
-  CalendarOutline
+  CalendarOutline,
+  AlertOutline,
+  FormOutline
 ];
 
 @NgModule({

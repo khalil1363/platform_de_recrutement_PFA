@@ -1,0 +1,12 @@
+.desc {
+  margin-top: 4px;
+  color: #666;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

@@ -10,6 +10,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { AdminRecruitmentsComponent } from './admin-recruitments/admin-recruitments.component';
 import { AdminApplicationsComponent } from './admin-applications/admin-applications.component';
 import { AdminHiredComponent } from './admin-hired/admin-hired.component';
+import { AdminReclamationsComponent } from './admin-reclamations/admin-reclamations.component';
 import { adminGuard } from '../core/guards/admin.guard';
 
 const routes: Routes = [
@@ -23,6 +24,7 @@ const routes: Routes = [
       { path: 'recruitments', component: AdminRecruitmentsComponent },
       { path: 'applications', component: AdminApplicationsComponent },
       { path: 'hired', component: AdminHiredComponent },
+      { path: 'reclamations', component: AdminReclamationsComponent },
       { path: 'users', component: UsersComponent },
       { path: 'zones', component: ZonesComponent },
       { path: 'rh-assignments', component: RhAssignmentsComponent },
@@ -39,6 +41,7 @@ const routes: Routes = [
     AdminRecruitmentsComponent,
     AdminApplicationsComponent,
     AdminHiredComponent,
+    AdminReclamationsComponent,
     UsersComponent,
     ZonesComponent,
     RhAssignmentsComponent,

@@ -1,0 +1,356 @@
+% ============================================================
+% CHAPITRE 8 — Sprint 5 : Module Réclamations
+% ============================================================
+\chapter{Sprint 5 --- Module Réclamations}
+
+\section{Introduction}
+
+Après le parcours de recrutement (offres, candidatures, entretiens et
+embauche), ce sprint ajoute un \textbf{canal de feedback} transversal~:
+les utilisateurs (candidats, RH, Admin) peuvent déposer une
+\textbf{réclamation}, et le RH / Admin la traite jusqu'à clôture.
+
+Conformément à l'architecture prévue au Sprint~0, les réclamations sont
+implémentées dans un \textbf{microservice dédié} (\texttt{RECLAMATION},
+port~8091), exposé via la Gateway sous le préfixe
+\texttt{/api/reclamation/**}, avec la même sécurité JWT et le même appel
+Feign vers le service \texttt{USER}.
+
+
+\section{Objectifs du Sprint}
+
+\begin{itemize}
+  \item créer le microservice \texttt{RECLAMATION} (Spring Boot, Eureka,
+        MySQL, JWT)~;
+  \item permettre à un utilisateur authentifié de \textbf{créer} une
+        réclamation (titre + description)~;
+  \item permettre au candidat de \textbf{consulter} et
+        \textbf{supprimer} ses réclamations encore ouvertes~;
+  \item permettre au RH et à l'Admin de \textbf{lister} toutes les
+        réclamations~;
+  \item permettre au RH / Admin de \textbf{traiter} une réclamation
+        (statut + réponse)~;
+  \item permettre à l'Admin de \textbf{supprimer} une réclamation~;
+  \item intégrer les écrans Angular côté candidat, RH et Admin.
+\end{itemize}
+
+
+\section{Spécification et Analyse des Besoins}
+
+\subsection{Sprint Backlog}
+
+\begin{table}[htbp]
+  \centering
+  \scriptsize
+  \caption{Sprint Backlog du Sprint 5 (réclamations)}
+  \label{tab:sprint5-backlog}
+  \begin{tabular}{|p{2.1cm}|c|p{4.0cm}|c|p{3.1cm}|c|}
+    \hline
+    \textbf{Fonctionnalité} & \textbf{ID} & \textbf{Scénario utilisateur} &
+    \textbf{ID Tâche} & \textbf{Tâches} & \textbf{Est.} \\
+    \hline
+    Microservice
+    & US-22
+    & En tant qu'équipe, je déploie le service réclamation autonome.
+    & T1
+    & Projet Spring Boot + Eureka + JWT
+    & 1,5 j \\
+    \hline
+    Créer une réclamation
+    & US-23
+    & En tant qu'utilisateur, je dépose une réclamation.
+    & T2
+    & \texttt{POST /reclamations}
+    & 1 j \\
+    \cline{4-6}
+    & & & T3 & Page candidat \texttt{/jobs/reclamations} & 1 j \\
+    \hline
+    Mes réclamations
+    & US-24
+    & En tant que candidat, je consulte et suis mes réclamations.
+    & T4
+    & \texttt{GET /reclamations/my}
+    & 0,5 j \\
+    \hline
+    Traiter (RH/Admin)
+    & US-25
+    & En tant que RH/Admin, je change le statut et réponds.
+    & T5
+    & \texttt{PATCH .../status} + écrans RH/Admin
+    & 1,5 j \\
+    \hline
+    Suppression
+    & US-26
+    & En tant qu'auteur (ouverte) ou Admin, je supprime une réclamation.
+    & T6
+    & \texttt{DELETE /reclamations/\{id\}}
+    & 0,5 j \\
+    \hline
+    Gateway
+    & US-27
+    & Le front appelle le service via \texttt{/api/reclamation/**}.
+    & T7
+    & Route Gateway + menu Angular
+    & 0,5 j \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Diagramme de cas d'utilisation}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/uc-sprint5.jpg}
+  \caption{Diagramme de cas d'utilisation du Sprint 5}
+  \label{fig:uc-sprint5}
+\end{figure}
+
+
+\section{Description textuelle des cas d'utilisation}
+
+\subsection{Cas d'utilisation <<~Créer une réclamation~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Créer une réclamation}
+  \label{tab:uc-create-reclamation}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Créer une réclamation \\
+    \hline
+    \textbf{Acteur} & Utilisateur authentifié (candidat, RH ou Admin) \\
+    \hline
+    \textbf{Précondition} & Compte actif, JWT valide. \\
+    \hline
+    \textbf{Postcondition} & Réclamation créée au statut \texttt{OPEN}. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item L'utilisateur ouvre \texttt{/jobs/reclamations} (candidat)
+            ou l'espace RH/Admin.
+      \item Il saisit un titre et une description.
+      \item Le frontend envoie \texttt{POST /api/reclamation/reclamations}.
+      \item Le service enregistre la réclamation liée à
+            \texttt{createdByUserId}.
+      \item La réclamation apparaît dans \texttt{Mes réclamations}.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Traiter une réclamation~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Traiter une réclamation}
+  \label{tab:uc-process-reclamation}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Traiter une réclamation \\
+    \hline
+    \textbf{Acteur} & RH ou Admin \\
+    \hline
+    \textbf{Précondition} & Au moins une réclamation existante. \\
+    \hline
+    \textbf{Postcondition} & Statut mis à jour et réponse RH éventuellement renseignée. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le RH ouvre \texttt{/rh/reclamations} (ou Admin
+            \texttt{/admin/reclamations}).
+      \item Il consulte la liste (auteur, titre, statut, date).
+      \item Il clique sur \textbf{Traiter}, choisit un statut
+            (\texttt{OPEN}, \texttt{IN\_PROGRESS}, \texttt{RESOLVED},
+            \texttt{CLOSED}) et saisit une réponse.
+      \item \texttt{PATCH /api/reclamation/reclamations/\{id\}/status}
+            met à jour la fiche et mémorise le traiteur
+            (\texttt{handledByUserId}).
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Cas d'utilisation <<~Consulter mes réclamations~>>}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Description textuelle --- Consulter mes réclamations}
+  \label{tab:uc-my-reclamations}
+  \begin{tabular}{|p{3.0cm}|p{10.2cm}|}
+    \hline
+    \textbf{Titre} & Consulter mes réclamations \\
+    \hline
+    \textbf{Acteur} & Candidat \\
+    \hline
+    \textbf{Précondition} & Candidat authentifié. \\
+    \hline
+    \textbf{Postcondition} & Liste personnelle affichée avec réponses RH. \\
+    \hline
+    \textbf{Scénario nominal}
+    &
+    \begin{enumerate}[leftmargin=*,itemsep=0.15em,topsep=0.2em]
+      \item Le candidat ouvre \texttt{/jobs/reclamations}.
+      \item \texttt{GET /api/reclamation/reclamations/my} retourne ses
+            réclamations triées par date.
+      \item Il peut supprimer une réclamation encore \texttt{OPEN}.
+    \end{enumerate}
+    \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Autres cas d'utilisation}
+
+\begin{itemize}
+  \item \textbf{Modifier une réclamation ouverte}~: l'auteur peut mettre
+        à jour titre / description tant que le statut est \texttt{OPEN}.
+  \item \textbf{Supprimer (Admin)}~: suppression définitive depuis
+        \texttt{/admin/reclamations}.
+  \item \textbf{Consulter le détail}~:
+        \texttt{GET /reclamations/\{id\}} réservé au propriétaire, au RH
+        ou à l'Admin.
+\end{itemize}
+
+
+\section{Conception}
+
+\subsection{Architecture du microservice}
+
+Le service \texttt{RECLAMATION} suit le même modèle que
+\texttt{RECRUITMENT}~:
+\begin{itemize}
+  \item validation JWT (secret partagé) et résolution de l'utilisateur via
+        Feign \texttt{USER}~;
+  \item base MySQL dédiée \texttt{reclamations}~;
+  \item enregistrement Eureka et routage Gateway
+        \texttt{/api/reclamation/**} $\rightarrow$ \texttt{lb://RECLAMATION}.
+\end{itemize}
+
+\subsection{Diagramme de classes}
+
+Le domaine est volontairement simple~: une entité \textbf{Reclamation}
+avec statut, auteur, traiteur et réponse RH.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/class-sprint5.jpg}
+  \caption{Diagramme de classes du Sprint 5}
+  \label{fig:class-sprint5}
+\end{figure}
+
+
+\subsection{Diagrammes de séquence}
+
+\subsubsection{Diagramme de séquence <<~Créer une réclamation~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-create-reclamation.jpg}
+  \caption{Diagramme de séquence --- Créer une réclamation}
+  \label{fig:seq-create-reclamation}
+\end{figure}
+
+\subsubsection{Diagramme de séquence <<~Traiter une réclamation~>>}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/seq-process-reclamation.jpg}
+  \caption{Diagramme de séquence --- Traiter une réclamation}
+  \label{fig:seq-process-reclamation}
+\end{figure}
+
+
+\section{Réalisation}
+
+\subsection{API REST}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Endpoints principaux du microservice Réclamation}
+  \label{tab:api-reclamation}
+  \begin{tabular}{|l|p{6.2cm}|p{3.8cm}|}
+    \hline
+    \textbf{Méthode} & \textbf{Endpoint} & \textbf{Accès} \\
+    \hline
+    POST & \texttt{/api/reclamation/reclamations} & Authentifié \\
+    \hline
+    GET & \texttt{/api/reclamation/reclamations/my} & Authentifié \\
+    \hline
+    GET & \texttt{/api/reclamation/reclamations} & RH / Admin \\
+    \hline
+    GET & \texttt{/api/reclamation/reclamations/\{id\}} & Propriétaire / RH / Admin \\
+    \hline
+    PUT & \texttt{/api/reclamation/reclamations/\{id\}} & Propriétaire (OPEN) / RH / Admin \\
+    \hline
+    PATCH & \texttt{/api/reclamation/reclamations/\{id\}/status} & RH / Admin \\
+    \hline
+    DELETE & \texttt{/api/reclamation/reclamations/\{id\}} & Propriétaire (OPEN) / Admin \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Les statuts gérés sont~: \texttt{OPEN}, \texttt{IN\_PROGRESS},
+\texttt{RESOLVED}, \texttt{CLOSED}.
+
+
+\subsection{Interface candidat}
+
+Le candidat crée et suit ses réclamations depuis
+\texttt{/jobs/reclamations}.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-my-reclamations.png}
+  \caption{Interface candidat --- mes réclamations}
+  \label{fig:ui-my-reclamations}
+\end{figure}
+
+
+\subsection{Interface RH}
+
+Le RH traite les réclamations (statut + réponse) depuis
+\texttt{/rh/reclamations}.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-rh-reclamations.png}
+  \caption{Interface RH --- traitement des réclamations}
+  \label{fig:ui-rh-reclamations}
+\end{figure}
+
+
+\subsection{Interface Admin}
+
+L'Admin dispose de la même liste, avec suppression définitive.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/ui-admin-reclamations.png}
+  \caption{Interface Admin --- gestion des réclamations}
+  \label{fig:ui-admin-reclamations}
+\end{figure}
+
+
+\section{Conclusion}
+
+Le Sprint~5 a livré un microservice \textbf{Réclamation} autonome,
+intégré à la Gateway et aux espaces candidat, RH et Admin. Le cycle de
+vie est simple et opérationnel~: dépôt $\rightarrow$ traitement
+$\rightarrow$ résolution / clôture.
+
+Le chapitre suivant présentera l'\textbf{industrialisation DevOps}
+(Docker, Jenkins / CI-CD) de la plateforme DAAM.
+
+\clearpage

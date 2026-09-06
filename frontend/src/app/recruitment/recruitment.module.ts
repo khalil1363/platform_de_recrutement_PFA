@@ -10,6 +10,7 @@ import { JobApplyComponent } from './candidate/job-apply/job-apply.component';
 import { MyApplicationsComponent } from './candidate/my-applications/my-applications.component';
 import { MyEvaluationsComponent } from './candidate/my-evaluations/my-evaluations.component';
 import { TakeEvaluationComponent } from './candidate/take-evaluation/take-evaluation.component';
+import { MyReclamationsComponent } from '../reclamation/candidate/my-reclamations/my-reclamations.component';
 
 const routes: Routes = [
   {
@@ -20,6 +21,7 @@ const routes: Routes = [
       { path: 'applications', component: MyApplicationsComponent, canActivate: [authGuard, candidateGuard] },
       { path: 'evaluations', component: MyEvaluationsComponent, canActivate: [authGuard, candidateGuard] },
       { path: 'evaluations/:assignmentId', component: TakeEvaluationComponent, canActivate: [authGuard, candidateGuard] },
+      { path: 'reclamations', component: MyReclamationsComponent, canActivate: [authGuard, candidateGuard] },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule), canActivate: [authGuard, candidateGuard] },
       { path: ':id/apply', component: JobApplyComponent, canActivate: [authGuard, candidateGuard] },
       { path: ':id', component: JobDetailComponent }
@@ -35,7 +37,8 @@ const routes: Routes = [
     JobApplyComponent,
     MyApplicationsComponent,
     MyEvaluationsComponent,
-    TakeEvaluationComponent
+    TakeEvaluationComponent,
+    MyReclamationsComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })

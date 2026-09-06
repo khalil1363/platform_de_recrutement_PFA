@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.10)  6 SEP 2026 17:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.10)  6 SEP 2026 18:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1051,27 +1051,27 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 ]
 Package babel Info: 'french' activates 'french' shorthands.
 (babel)             Reported on input line 86.
- [4] [5])
+ [4] [5] [6])
 \tf@toc=\write4
 \openout4 = `main.toc'.
 
- [6] (main.lof [7
+ [7] (main.lof [8
 
 ])
 \tf@lof=\write5
 \openout5 = `main.lof'.
 
- [8] (main.lot)
+ [9] (main.lot)
 \tf@lot=\write6
 \openout6 = `main.lot'.
 
- [9
+ [10
 
-] (abreviations.tex [10
+] (abreviations.tex
+[11
 
 
-])
-(introduction.tex
+]) (introduction.tex
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
@@ -1108,7 +1108,7 @@ i-nis-tra-teur doit pou-voir créer, mo-di-fier et ac-ti-ver/désactiver
  []
 
 [17] [18] [19] [20]
-<img/uc-global-hires.jpg, id=553, 2409.0pt x 5268.68375pt>
+<img/uc-global-hires.jpg, id=623, 2409.0pt x 5268.68375pt>
 File: img/uc-global-hires.jpg Graphic file (type jpg)
 <use img/uc-global-hires.jpg>
 Package pdftex.def Info: img/uc-global-hires.jpg  used on input line 208.
@@ -1130,7 +1130,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 248--248
 []\T1/ptm/m/n/10.95 (+20) Traitement can-di-da-
  []
 
-<img/gant.png, id=558, 2409.0pt x 1356.06625pt>
+<img/gant.png, id=628, 2409.0pt x 1356.06625pt>
 File: img/gant.png Graphic file (type png)
 <use img/gant.png>
 Package pdftex.def Info: img/gant.png  used on input line 299.
@@ -1139,20 +1139,20 @@ Package pdftex.def Info: img/gant.png  used on input line 299.
 
 
 ] [23 <./img/gant.png (PNG copy)>]
-<img/arch-three-tiers.png, id=567, 2409.0pt x 992.70876pt>
+<img/arch-three-tiers.png, id=637, 2409.0pt x 992.70876pt>
 File: img/arch-three-tiers.png Graphic file (type png)
 <use img/arch-three-tiers.png>
 Package pdftex.def Info: img/arch-three-tiers.png  used on input line 319.
 (pdftex.def)             Requested size: 455.2152pt x 187.5866pt.
  [24 <./img/arch-three-tiers.png>]
 [25]
-<img/arch-logic.png, id=577, 2409.0pt x 1386.17876pt>
+<img/arch-logic.png, id=648, 2409.0pt x 1386.17876pt>
 File: img/arch-logic.png Graphic file (type png)
 <use img/arch-logic.png>
 Package pdftex.def Info: img/arch-logic.png  used on input line 463.
 (pdftex.def)             Requested size: 455.2152pt x 261.9384pt.
  [26] [27 <./img/arch-logic.png>]
-<img/arch-physical.png, id=588, 2409.0pt x 1395.2125pt>
+<img/arch-physical.png, id=658, 2409.0pt x 1395.2125pt>
 File: img/arch-physical.png Graphic file (type png)
 <use img/arch-physical.png>
 Package pdftex.def Info: img/arch-physical.png  used on input line 513.
@@ -1176,7 +1176,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 90--90
 [31
 
 ]
-<img/uc-sprint1.png, id=609, 2409.0pt x 3617.515pt>
+<img/uc-sprint1.png, id=680, 2409.0pt x 3617.515pt>
 File: img/uc-sprint1.png Graphic file (type png)
 <use img/uc-sprint1.png>
 Package pdftex.def Info: img/uc-sprint1.png  used on input line 105.
@@ -1208,39 +1208,39 @@ ire un uti-li-sa-teur (\T1/cmtt/m/n/12 DELETE /api/auth/users/{userId}\T1/ptm/m
 /n/12 (-20) ). 
  []
 
-<img/class-sprint1.png, id=642, 2409.0pt x 2337.73375pt>
+<img/class-sprint1.png, id=712, 2409.0pt x 2337.73375pt>
 File: img/class-sprint1.png Graphic file (type png)
 <use img/class-sprint1.png>
 Package pdftex.def Info: img/class-sprint1.png  used on input line 255.
 (pdftex.def)             Requested size: 455.2152pt x 441.74841pt.
-<img/seq-login.png, id=643, 2409.0pt x 2419.0375pt>
+<img/seq-login.png, id=713, 2409.0pt x 2419.0375pt>
 File: img/seq-login.png Graphic file (type png)
 <use img/seq-login.png>
 Package pdftex.def Info: img/seq-login.png  used on input line 267.
 (pdftex.def)             Requested size: 455.2152pt x 457.11192pt.
-<img/seq-profile.png, id=644, 2409.0pt x 3467.95625pt>
+<img/seq-profile.png, id=714, 2409.0pt x 3467.95625pt>
 File: img/seq-profile.png Graphic file (type png)
 <use img/seq-profile.png>
 Package pdftex.def Info: img/seq-profile.png  used on input line 276.
 (pdftex.def)             Requested size: 443.67308pt x 638.70438pt.
-<img/seq-add-user.png, id=645, 2409.0pt x 2233.34375pt>
+<img/seq-add-user.png, id=715, 2409.0pt x 2233.34375pt>
 File: img/seq-add-user.png Graphic file (type png)
 <use img/seq-add-user.png>
 Package pdftex.def Info: img/seq-add-user.png  used on input line 285.
 (pdftex.def)             Requested size: 455.2152pt x 422.02242pt.
-<img/ui-login.png, id=646, 2409.0pt x 1133.23375pt>
+<img/ui-login.png, id=716, 2409.0pt x 1133.23375pt>
 File: img/ui-login.png Graphic file (type png)
 <use img/ui-login.png>
 Package pdftex.def Info: img/ui-login.png  used on input line 302.
 (pdftex.def)             Requested size: 455.2152pt x 214.14081pt.
 [35] [36 <./img/class-sprint1.png>] [37 <./img/seq-login.png>] [38 <./img/seq-p
 rofile.png>] [39 <./img/seq-add-user.png>]
-<img/ui-users.png, id=680, 2409.0pt x 1146.2825pt>
+<img/ui-users.png, id=750, 2409.0pt x 1146.2825pt>
 File: img/ui-users.png Graphic file (type png)
 <use img/ui-users.png>
 Package pdftex.def Info: img/ui-users.png  used on input line 316.
 (pdftex.def)             Requested size: 455.2152pt x 216.60655pt.
-<img/ui-profile.png, id=681, 2409.0pt x 1130.2225pt>
+<img/ui-profile.png, id=751, 2409.0pt x 1130.2225pt>
 File: img/ui-profile.png Graphic file (type png)
 <use img/ui-profile.png>
 Package pdftex.def Info: img/ui-profile.png  used on input line 329.
@@ -1288,7 +1288,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 87--88
 []\T1/ptm/m/n/8 (+20) Filtrage \T1/cmtt/m/n/8 GET /companies
  []
 
-<img/uc-sprint2.png, id=693, 2409.0pt x 3591.4175pt>
+<img/uc-sprint2.png, id=763, 2409.0pt x 3591.4175pt>
 File: img/uc-sprint2.png Graphic file (type png)
 <use img/uc-sprint2.png>
 Package pdftex.def Info: img/uc-sprint2.png  used on input line 98.
@@ -1306,48 +1306,48 @@ Overfull \hbox (38.49982pt too wide) in paragraph at lines 196--197
 ruitment/rh-zone-assignments\T1/ptm/m/n/10.95 (-20) . 
  []
 
-<img/class-sprint2.png, id=708, 2409.0pt x 3199.955pt>
+<img/class-sprint2.png, id=778, 2409.0pt x 3199.955pt>
 File: img/class-sprint2.png Graphic file (type png)
 <use img/class-sprint2.png>
 Package pdftex.def Info: img/class-sprint2.png  used on input line 231.
 (pdftex.def)             Requested size: 455.2152pt x 604.67752pt.
 [45] [46]
-<img/seq-add-zone.png, id=732, 2409.0pt x 2247.39626pt>
+<img/seq-add-zone.png, id=802, 2409.0pt x 2247.39626pt>
 File: img/seq-add-zone.png Graphic file (type png)
 <use img/seq-add-zone.png>
 Package pdftex.def Info: img/seq-add-zone.png  used on input line 243.
 (pdftex.def)             Requested size: 455.2152pt x 424.67784pt.
  [47 <./img/class-sprint2.png>]
-<img/seq-add-company.png, id=738, 2409.0pt x 2755.29375pt>
+<img/seq-add-company.png, id=808, 2409.0pt x 2755.29375pt>
 File: img/seq-add-company.png Graphic file (type png)
 <use img/seq-add-company.png>
 Package pdftex.def Info: img/seq-add-company.png  used on input line 252.
 (pdftex.def)             Requested size: 455.2152pt x 520.65237pt.
  [48 <./img/seq-add-zone.png>]
-<img/seq-assign-rh.png, id=745, 2409.0pt x 2491.3075pt>
+<img/seq-assign-rh.png, id=815, 2409.0pt x 2491.3075pt>
 File: img/seq-assign-rh.png Graphic file (type png)
 <use img/seq-assign-rh.png>
 Package pdftex.def Info: img/seq-assign-rh.png  used on input line 261.
 (pdftex.def)             Requested size: 455.2152pt x 470.76839pt.
  [49 <./img/seq-add-company.png>]
-<img/ui-zones.png, id=752, 2409.0pt x 1139.25626pt>
+<img/ui-zones.png, id=823, 2409.0pt x 1139.25626pt>
 File: img/ui-zones.png Graphic file (type png)
 <use img/ui-zones.png>
 Package pdftex.def Info: img/ui-zones.png  used on input line 276.
 (pdftex.def)             Requested size: 455.2152pt x 215.27885pt.
  [50 <./img/seq-assign-rh.png>]
-<img/ui-companies-1.png, id=760, 2409.0pt x 1130.2225pt>
+<img/ui-companies-1.png, id=830, 2409.0pt x 1130.2225pt>
 File: img/ui-companies-1.png Graphic file (type png)
 <use img/ui-companies-1.png>
 Package pdftex.def Info: img/ui-companies-1.png  used on input line 289.
 (pdftex.def)             Requested size: 455.2152pt x 213.5718pt.
-<img/ui-companies-2.png, id=761, 2409.0pt x 1137.24875pt>
+<img/ui-companies-2.png, id=831, 2409.0pt x 1137.24875pt>
 File: img/ui-companies-2.png Graphic file (type png)
 <use img/ui-companies-2.png>
 Package pdftex.def Info: img/ui-companies-2.png  used on input line 296.
 (pdftex.def)             Requested size: 455.2152pt x 214.8995pt.
  [51 <./img/ui-zones.png> <./img/ui-companies-1.png>]
-<img/ui-rh-assign.png, id=768, 2409.0pt x 1136.245pt>
+<img/ui-rh-assign.png, id=838, 2409.0pt x 1136.245pt>
 File: img/ui-rh-assign.png Graphic file (type png)
 <use img/ui-rh-assign.png>
 Package pdftex.def Info: img/ui-rh-assign.png  used on input line 309.
@@ -1379,7 +1379,7 @@ Underfull \hbox (badness 4193) in paragraph at lines 90--91
 []\T1/ptm/m/n/8 (+20) Page \T1/cmtt/m/n/8 /rh/candidates \T1/ptm/m/n/8 (+20) +
  []
 
-<img/uc-sprint3.png, id=779, 2409.0pt x 2025.5675pt>
+<img/uc-sprint3.png, id=849, 2409.0pt x 2025.5675pt>
 File: img/uc-sprint3.png Graphic file (type png)
 <use img/uc-sprint3.png>
 Package pdftex.def Info: img/uc-sprint3.png  used on input line 101.
@@ -1393,19 +1393,19 @@ Underfull \hbox (badness 10000) in paragraph at lines 201--203
  []
 
 [56] [57]
-<img/class-sprint3.png, id=814, 2409.0pt x 3367.58125pt>
+<img/class-sprint3.png, id=884, 2409.0pt x 3367.58125pt>
 File: img/class-sprint3.png Graphic file (type png)
 <use img/class-sprint3.png>
 Package pdftex.def Info: img/class-sprint3.png  used on input line 269.
 (pdftex.def)             Requested size: 455.2152pt x 636.3529pt.
  [58]
-<img/seq-create-offer.png, id=819, 2409.0pt x 2747.26375pt>
+<img/seq-create-offer.png, id=889, 2409.0pt x 2747.26375pt>
 File: img/seq-create-offer.png Graphic file (type png)
 <use img/seq-create-offer.png>
 Package pdftex.def Info: img/seq-create-offer.png  used on input line 281.
 (pdftex.def)             Requested size: 455.2152pt x 519.135pt.
  [59 <./img/class-sprint3.png>]
-<img/seq-apply.png, id=825, 2409.0pt x 3919.64375pt>
+<img/seq-apply.png, id=895, 2409.0pt x 3919.64375pt>
 File: img/seq-apply.png Graphic file (type png)
 <use img/seq-apply.png>
 Package pdftex.def Info: img/seq-apply.png  used on input line 290.
@@ -1415,7 +1415,7 @@ Overfull \vbox (8.29224pt too high) has occurred while \output is active []
 
 
 [62 <./img/seq-apply.png>]
-<img/seq-process-app.png, id=843, 2409.0pt x 4188.64874pt>
+<img/seq-process-app.png, id=913, 2409.0pt x 4188.64874pt>
 File: img/seq-process-app.png Graphic file (type png)
 <use img/seq-process-app.png>
 Package pdftex.def Info: img/seq-process-app.png  used on input line 299.
@@ -1425,29 +1425,29 @@ Overfull \vbox (8.28142pt too high) has occurred while \output is active []
 
 
 [64 <./img/seq-process-app.png>]
-<img/ui-rh-recruitments.png, id=854, 2409.0pt x 1131.22626pt>
+<img/ui-rh-recruitments.png, id=924, 2409.0pt x 1131.22626pt>
 File: img/ui-rh-recruitments.png Graphic file (type png)
 <use img/ui-rh-recruitments.png>
 Package pdftex.def Info: img/ui-rh-recruitments.png  used on input line 314.
 (pdftex.def)             Requested size: 455.2152pt x 213.76146pt.
-<img/ui-rh-recruitment-form.png, id=855, 2409.0pt x 998.73125pt>
+<img/ui-rh-recruitment-form.png, id=925, 2409.0pt x 998.73125pt>
 File: img/ui-rh-recruitment-form.png Graphic file (type png)
 <use img/ui-rh-recruitment-form.png>
 Package pdftex.def Info: img/ui-rh-recruitment-form.png  used on input line 321
 .
 (pdftex.def)             Requested size: 455.2152pt x 188.72462pt.
-<img/ui-jobs.png, id=856, 2409.0pt x 1132.23pt>
+<img/ui-jobs.png, id=926, 2409.0pt x 1132.23pt>
 File: img/ui-jobs.png Graphic file (type png)
 <use img/ui-jobs.png>
 Package pdftex.def Info: img/ui-jobs.png  used on input line 334.
 (pdftex.def)             Requested size: 455.2152pt x 213.95114pt.
  [65 <./img/ui-rh-recruitments.png> <./img/ui-rh-recruitment-form.png>]
-<img/ui-apply.png, id=863, 2409.0pt x 1132.23pt>
+<img/ui-apply.png, id=933, 2409.0pt x 1132.23pt>
 File: img/ui-apply.png Graphic file (type png)
 <use img/ui-apply.png>
 Package pdftex.def Info: img/ui-apply.png  used on input line 341.
 (pdftex.def)             Requested size: 455.2152pt x 213.95114pt.
-<img/ui-rh-candidates.png, id=864, 2409.0pt x 1098.1025pt>
+<img/ui-rh-candidates.png, id=934, 2409.0pt x 1098.1025pt>
 File: img/ui-rh-candidates.png Graphic file (type png)
 <use img/ui-rh-candidates.png>
 Package pdftex.def Info: img/ui-rh-candidates.png  used on input line 354.
@@ -1500,7 +1500,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 106--107
 []\T1/cmtt/m/n/8 export.xlsx\T1/ptm/m/n/8 (+20) ,
  []
 
-<img/uc-sprint4.jpg, id=876, 2409.0pt x 2091.815pt>
+<img/uc-sprint4.jpg, id=947, 2409.0pt x 2091.815pt>
 File: img/uc-sprint4.jpg Graphic file (type jpg)
 <use img/uc-sprint4.jpg>
 Package pdftex.def Info: img/uc-sprint4.jpg  used on input line 124.
@@ -1526,54 +1526,54 @@ Overfull \hbox (7.06548pt too wide) in paragraph at lines 279--281
 1/ptm/m/n/12 (-20) . 
  []
 
-<img/class-sprint4.jpg, id=907, 2409.0pt x 2078.76625pt>
+<img/class-sprint4.jpg, id=977, 2409.0pt x 2078.76625pt>
 File: img/class-sprint4.jpg Graphic file (type jpg)
 <use img/class-sprint4.jpg>
 Package pdftex.def Info: img/class-sprint4.jpg  used on input line 300.
 (pdftex.def)             Requested size: 455.2152pt x 392.81277pt.
 [72]
-<img/seq-online-interview.jpg, id=916, 2409.0pt x 2056.68375pt>
+<img/seq-online-interview.jpg, id=986, 2409.0pt x 2056.68375pt>
 File: img/seq-online-interview.jpg Graphic file (type jpg)
 <use img/seq-online-interview.jpg>
 Package pdftex.def Info: img/seq-online-interview.jpg  used on input line 312.
 (pdftex.def)             Requested size: 455.2152pt x 388.63997pt.
  [73 <./img/class-sprint4.jpg>]
-<img/seq-hire.jpg, id=921, 2409.0pt x 1886.04625pt>
+<img/seq-hire.jpg, id=992, 2409.0pt x 1886.04625pt>
 File: img/seq-hire.jpg Graphic file (type jpg)
 <use img/seq-hire.jpg>
 Package pdftex.def Info: img/seq-hire.jpg  used on input line 321.
 (pdftex.def)             Requested size: 455.2152pt x 356.39555pt.
  [74 <./img/seq-online-interview.jpg>]
-<img/seq-dashboard.jpg, id=928, 2409.0pt x 1917.1625pt>
+<img/seq-dashboard.jpg, id=998, 2409.0pt x 1917.1625pt>
 File: img/seq-dashboard.jpg Graphic file (type jpg)
 <use img/seq-dashboard.jpg>
 Package pdftex.def Info: img/seq-dashboard.jpg  used on input line 330.
 (pdftex.def)             Requested size: 455.2152pt x 362.27542pt.
 
 [75 <./img/seq-hire.jpg>]
-<img/ui-rh-decisions.png, id=934, 2409.0pt x 1133.23375pt>
+<img/ui-rh-decisions.png, id=1004, 2409.0pt x 1133.23375pt>
 File: img/ui-rh-decisions.png Graphic file (type png)
 <use img/ui-rh-decisions.png>
 Package pdftex.def Info: img/ui-rh-decisions.png  used on input line 347.
 (pdftex.def)             Requested size: 455.2152pt x 214.14081pt.
  [76 <./img/seq-dashboard.jpg>]
-<img/ui-interview-modal.png, id=940, 2409.0pt x 1134.2375pt>
+<img/ui-interview-modal.png, id=1010, 2409.0pt x 1134.2375pt>
 File: img/ui-interview-modal.png Graphic file (type png)
 <use img/ui-interview-modal.png>
 Package pdftex.def Info: img/ui-interview-modal.png  used on input line 354.
 (pdftex.def)             Requested size: 455.2152pt x 214.33049pt.
-<img/ui-calendar.png, id=941, 2409.0pt x 1139.25626pt>
+<img/ui-calendar.png, id=1011, 2409.0pt x 1139.25626pt>
 File: img/ui-calendar.png Graphic file (type png)
 <use img/ui-calendar.png>
 Package pdftex.def Info: img/ui-calendar.png  used on input line 367.
 (pdftex.def)             Requested size: 455.2152pt x 215.27885pt.
  [77 <./img/ui-rh-decisions.png> <./img/ui-interview-modal.png>]
-<img/ui-hire-modal.png, id=948, 2409.0pt x 1141.26375pt>
+<img/ui-hire-modal.png, id=1018, 2409.0pt x 1141.26375pt>
 File: img/ui-hire-modal.png Graphic file (type png)
 <use img/ui-hire-modal.png>
 Package pdftex.def Info: img/ui-hire-modal.png  used on input line 380.
 (pdftex.def)             Requested size: 455.2152pt x 215.65819pt.
-<img/ui-dashboard.png, id=949, 2409.0pt x 1136.245pt>
+<img/ui-dashboard.png, id=1019, 2409.0pt x 1136.245pt>
 File: img/ui-dashboard.png Graphic file (type png)
 <use img/ui-dashboard.png>
 Package pdftex.def Info: img/ui-dashboard.png  used on input line 394.
@@ -1585,13 +1585,134 @@ n et le lien de réunion de-puis \T1/cmtt/m/n/12 /jobs/applications\T1/ptm/m/n/1
 2 (-20) . 
  []
 
-<img/ui-candidate-interview.png, id=956, 2409.0pt x 1123.19624pt>
+<img/ui-candidate-interview.png, id=1026, 2409.0pt x 1123.19624pt>
 File: img/ui-candidate-interview.png Graphic file (type png)
 <use img/ui-candidate-interview.png>
 Package pdftex.def Info: img/ui-candidate-interview.png  used on input line 407
 .
 (pdftex.def)             Requested size: 455.2152pt x 212.24408pt.
 [79 <./img/ui-dashboard.png> <./img/ui-candidate-interview.png>] [80])
+(chapitre8.tex
+Chapitre 8.
+
+Underfull \hbox (badness 10000) in paragraph at lines 66--66
+[]\T1/ptm/m/n/8 (+20) Page can-di-dat
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 75--76
+[]\T1/ptm/m/n/8 (+20) Traiter
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 79--80
+[]\T1/cmtt/m/n/8 PATCH .../status \T1/ptm/m/n/8 (+20) +
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 86--87
+[]\T1/cmtt/m/n/8 DELETE
+ []
+
+
+Underfull \hbox (badness 2189) in paragraph at lines 91--92
+[]\T1/ptm/m/n/8 (+20) Le front ap-pelle le ser-vice via
+ []
+
+<img/uc-sprint5.jpg, id=1038, 2409.0pt x 1564.84625pt>
+File: img/uc-sprint5.jpg Graphic file (type jpg)
+<use img/uc-sprint5.jpg>
+Package pdftex.def Info: img/uc-sprint5.jpg  used on input line 104.
+(pdftex.def)             Requested size: 455.2152pt x 295.7002pt.
+[81
+
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 166--168
+[]\T1/ptm/m/n/10.95 (+20) Le RH ouvre \T1/cmtt/m/n/10.95 /rh/reclamations \T1/p
+tm/m/n/10.95 (+20) (ou Ad-min
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 172--175
+[]\T1/cmtt/m/n/10.95 PATCH /api/reclamation/reclamations/{id}/status
+ []
+
+[82 <./img/uc-sprint5.jpg>] [83]
+<img/class-sprint5.jpg, id=1060, 2409.0pt x 4863.16875pt>
+File: img/class-sprint5.jpg Graphic file (type jpg)
+<use img/class-sprint5.jpg>
+Package pdftex.def Info: img/class-sprint5.jpg  used on input line 247.
+(pdftex.def)             Requested size: 316.37897pt x 638.69005pt.
+ [84]
+<img/seq-create-reclamation.jpg, id=1068, 2409.0pt x 1328.965pt>
+File: img/seq-create-reclamation.jpg Graphic file (type jpg)
+<use img/seq-create-reclamation.jpg>
+Package pdftex.def Info: img/seq-create-reclamation.jpg  used on input line 259
+.
+(pdftex.def)             Requested size: 455.2152pt x 251.12704pt.
+ [85 <./img/class-sprint5.jpg>]
+<img/seq-process-reclamation.jpg, id=1074, 2409.0pt x 2314.6475pt>
+File: img/seq-process-reclamation.jpg Graphic file (type jpg)
+<use img/seq-process-reclamation.jpg>
+Package pdftex.def Info: img/seq-process-reclamation.jpg  used on input line 26
+8.
+(pdftex.def)             Requested size: 455.2152pt x 437.38594pt.
+ [86 <./img/seq-create-reclamation.jpg>]
+Overfull \hbox (4.09503pt too wide) in paragraph at lines 289--289
+[]\T1/cmtt/m/n/10.95 /api/reclamation/reclamations/my| 
+ []
+
+
+Overfull \hbox (15.41177pt too wide) in paragraph at lines 293--293
+[]\T1/cmtt/m/n/10.95 /api/reclamation/reclamations/{id}| 
+ []
+
+
+Overfull \hbox (15.41177pt too wide) in paragraph at lines 295--295
+[]\T1/cmtt/m/n/10.95 /api/reclamation/reclamations/{id}| 
+ []
+
+
+Underfull \hbox (badness 3579) in paragraph at lines 295--296
+[]\T1/ptm/m/n/10.95 (+20) Propriétaire (OPEN) /
+ []
+
+
+Overfull \hbox (55.02037pt too wide) in paragraph at lines 297--297
+[]\T1/cmtt/m/n/10.95 /api/reclamation/reclamations/{id}/status| 
+ []
+
+
+Overfull \hbox (15.41177pt too wide) in paragraph at lines 299--299
+[]\T1/cmtt/m/n/10.95 /api/reclamation/reclamations/{id}| 
+ []
+
+
+Underfull \hbox (badness 3579) in paragraph at lines 299--300
+[]\T1/ptm/m/n/10.95 (+20) Propriétaire (OPEN) /
+ []
+
+<img/ui-my-reclamations.png, id=1080, 2409.0pt x 1140.26pt>
+File: img/ui-my-reclamations.png Graphic file (type png)
+<use img/ui-my-reclamations.png>
+Package pdftex.def Info: img/ui-my-reclamations.png  used on input line 315.
+(pdftex.def)             Requested size: 455.2152pt x 215.46852pt.
+[87 <./img/seq-process-reclamation.jpg>]
+<img/ui-rh-reclamations.png, id=1086, 2409.0pt x 1133.23375pt>
+File: img/ui-rh-reclamations.png Graphic file (type png)
+<use img/ui-rh-reclamations.png>
+Package pdftex.def Info: img/ui-rh-reclamations.png  used on input line 328.
+(pdftex.def)             Requested size: 455.2152pt x 214.14081pt.
+ [88 <./img/ui-my-reclamations.png>]
+<img/ui-admin-reclamations.png, id=1092, 2409.0pt x 1134.2375pt>
+File: img/ui-admin-reclamations.png Graphic file (type png)
+<use img/ui-admin-reclamations.png>
+Package pdftex.def Info: img/ui-admin-reclamations.png  used on input line 340.
+
+(pdftex.def)             Requested size: 455.2152pt x 214.33049pt.
+
+[89 <./img/ui-rh-reclamations.png> <./img/ui-admin-reclamations.png>] [90])
 (main.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -1599,11 +1720,11 @@ L3 programming layer <2025-12-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 26893 strings out of 467871
- 498081 string characters out of 5417408
- 936959 words of memory out of 5000000
- 54452 multiletter control sequences out of 15000+600000
- 710513 words of font info for 420 fonts, out of 8000000 for 9000
+ 27054 strings out of 467871
+ 501032 string characters out of 5417408
+ 937826 words of memory out of 5000000
+ 54539 multiletter control sequences out of 15000+600000
+ 711096 words of font info for 429 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,13n,94p,1003b,739s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\lpatron\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ec
@@ -1615,9 +1736,9 @@ iKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/lpatron/AppData/Local/Programs
 /MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/lpatron/AppData/Local/Progr
 ams/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/lpatron/AppData/Local/Pro
 grams/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (91 pages, 34023450 bytes).
+Output written on main.pdf (102 pages, 37381256 bytes).
 PDF statistics:
- 1608 PDF objects out of 1728 (max. 8388607)
- 386 named destinations out of 1000 (max. 500000)
- 90368 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 1825 PDF objects out of 2073 (max. 8388607)
+ 444 named destinations out of 1000 (max. 500000)
+ 90571 words of extra memory for PDF output out of 106986 (max. 10000000)
 

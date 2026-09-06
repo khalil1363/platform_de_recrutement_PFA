@@ -12,6 +12,7 @@ import { RhQcmListComponent } from './rh/rh-qcm-list/rh-qcm-list.component';
 import { RhQcmFormComponent } from './rh/rh-qcm-form/rh-qcm-form.component';
 import { RhDashboardComponent } from './rh/rh-dashboard/rh-dashboard.component';
 import { RhCandidateUsersComponent } from './rh/rh-candidate-users/rh-candidate-users.component';
+import { RhReclamationsComponent } from './rh/rh-reclamations/rh-reclamations.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,7 @@ const routes: Routes = [
       { path: 'candidates', component: RhCandidatesComponent },
       { path: 'users', component: RhCandidateUsersComponent },
       { path: 'calendar', component: RhCalendarComponent },
+      { path: 'reclamations', component: RhReclamationsComponent },
       { path: 'profile', loadChildren: () => import('../profile/profile.module').then((m) => m.ProfileModule) }
     ]
   }
@@ -45,7 +47,8 @@ const routes: Routes = [
     RhQcmFormComponent,
     RhCandidatesComponent,
     RhCandidateUsersComponent,
-    RhCalendarComponent
+    RhCalendarComponent,
+    RhReclamationsComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
