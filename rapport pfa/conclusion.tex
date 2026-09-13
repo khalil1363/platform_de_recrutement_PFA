@@ -1,0 +1,54 @@
+% ============================================================
+% CONCLUSION GÉNÉRALE
+% ============================================================
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+\markboth{CONCLUSION GÉNÉRALE}{}
+\thispagestyle{plain}
+
+\begingroup
+\setstretch{1.22}
+\setlength{\parskip}{0.55em}
+
+Ce Projet de Fin d'Année avait pour objectif de concevoir et de réaliser
+une \textbf{plateforme intelligente de gestion du recrutement} pour le
+réseau multi-agences \textbf{DAAM}. Face à la dispersion des informations
+et au besoin de coordination entre Administrateur, RH et candidats, la
+solution proposée digitalise le parcours complet~: création des offres,
+candidatures, présélection, entretiens, embauche, pilotage RH, puis
+canal de \textbf{réclamations}.
+
+Sur le plan organisationnel, le projet a suivi une démarche
+\textbf{SCRUM}, découpée en sprints successifs. Cette organisation a
+permis de livrer progressivement des incréments validables~: socle
+d'authentification et d'administration, gestion des offres et zones,
+candidatures et QCM, entretiens et tableaux de bord, enfin microservice
+de réclamations.
+
+Sur le plan technique, l'architecture retenue combine un frontend
+\textbf{Angular} et un backend en \textbf{microservices Spring Boot},
+orchestrés par \textbf{Eureka} et exposés via une \textbf{API Gateway}.
+La sécurité repose sur \textbf{JWT} et un contrôle d'accès par rôles.
+Cette modularité facilite l'évolution du système sans remettre en cause
+l'ensemble de la plateforme.
+
+Enfin, l'\textbf{industrialisation DevOps} (Docker, Jenkins, SonarQube,
+Docker Hub) a permis d'automatiser la construction, l'analyse qualité et
+le déploiement des microservices \textbf{et du frontend Angular}. La
+plateforme n'est ainsi plus uniquement un prototype local~: elle dispose
+d'une chaîne de livraison reproductible, adaptée à un contexte
+professionnel.
+
+Plusieurs \textbf{perspectives} restent ouvertes~: enrichir les
+notifications in-app, introduire un fichier \texttt{docker-compose} pour
+démarrer l'ensemble de la stack, renforcer la couverture de tests, et
+éventuellement conteneuriser MySQL. Ces axes prolongeraient naturellement
+le travail réalisé dans le cadre de ce PFA.
+
+En résumé, le projet a permis de relier analyse des besoins, conception
+UML, développement microservices et industrialisation DevOps autour d'un
+besoin métier concret~: améliorer l'efficacité et la transparence du
+recrutement chez DAAM.
+
+\endgroup
+\clearpage

@@ -1,0 +1,281 @@
+% ============================================================
+% CHAPITRE 9 — Industrialisation DevOps
+% ============================================================
+\chapter{Industrialisation DevOps --- Docker, Jenkins et SonarQube}
+
+\section{Introduction}
+
+Après la réalisation fonctionnelle de la plateforme (microservices
+\texttt{EUREKA}, \texttt{GATEWAY}, \texttt{USER}, \texttt{RECRUITMENT},
+\texttt{RECLAMATION} et frontend Angular), ce chapitre décrit
+l'\textbf{industrialisation} de la chaîne de livraison. L'objectif est de
+passer d'une exécution manuelle locale à un cycle automatisé
+\textbf{CI/CD}~: construction, analyse qualité, publication d'images Docker
+et déploiement des conteneurs --- \textbf{backend et frontend inclus}.
+
+La chaîne mise en place s'appuie sur trois briques complémentaires~:
+\begin{itemize}
+  \item \textbf{Docker} pour empaqueter chaque microservice et le frontend
+        de façon reproductible~;
+  \item \textbf{Jenkins} pour orchestrer les pipelines CI (intégration
+        continue) et CD (déploiement)~;
+  \item \textbf{SonarQube} pour contrôler la qualité du code avant
+        publication de l'image.
+\end{itemize}
+
+Le code source est hébergé sur \textbf{GitHub}~; Jenkins clone le dépôt,
+exécute les étapes définies dans des \texttt{Jenkinsfile} versionnés sous
+\texttt{devops/pipelines/}, puis pousse les images vers
+\textbf{Docker Hub} (compte \texttt{lfray}).
+
+
+\section{Objectifs}
+
+\begin{itemize}
+  \item conteneuriser chaque microservice backend avec un
+        \texttt{Dockerfile} multi-étapes (Maven~17 puis JRE~17)~;
+  \item conteneuriser le \textbf{frontend Angular} (build Node puis
+        serveur \textbf{nginx})~;
+  \item automatiser, pour chaque composant~: \emph{checkout},
+        build (\emph{Maven} ou \emph{npm}), analyse \emph{SonarQube},
+        \emph{Quality Gate}, \emph{docker build} et \emph{docker push}~;
+  \item déployer chaque composant via un job CD~: \emph{docker pull} puis
+        \emph{docker run}~;
+  \item garantir la cohérence des environnements (profil Spring
+        \texttt{docker}, \texttt{environment.docker.ts} pour Angular).
+\end{itemize}
+
+
+\section{Conteneurisation Docker}
+
+\subsection{Principe du Dockerfile multi-étapes}
+
+Chaque microservice dispose d'un \texttt{Dockerfile} calqué sur le même
+modèle~:
+\begin{enumerate}
+  \item étape \textbf{build}~: image \texttt{maven:3.9.9-eclipse-temurin-17},
+        compilation et packaging du JAR (\texttt{mvn package -DskipTests})~;
+  \item étape \textbf{runtime}~: image légère
+        \texttt{eclipse-temurin:17-jre-jammy}, copie du JAR, utilisateur non
+        privilégié, exposition du port métier.
+\end{enumerate}
+
+Cette approche réduit la taille de l'image finale et sépare clairement les
+outils de compilation de l'environnement d'exécution.
+
+\subsection{Frontend Angular (Node + nginx)}
+
+Le frontend suit un schéma multi-étapes adapté au web~:
+\begin{enumerate}
+  \item étape \textbf{build}~: image \texttt{node:20-alpine},
+        \texttt{npm ci} puis \texttt{ng build --configuration=docker}
+        (fichier \texttt{environment.docker.ts} pointant l'API vers la
+        Gateway sur \texttt{http://localhost:8088})~;
+  \item étape \textbf{runtime}~: image \texttt{nginx:1.27-alpine} servant
+        les fichiers statiques du dossier \texttt{dist/frontend/browser},
+        avec une configuration SPA (\texttt{try\_files} vers
+        \texttt{index.html}).
+\end{enumerate}
+
+Les jobs Jenkins associés sont \texttt{ci-frontend} et
+\texttt{cd-frontend}~; l'interface est exposée sur
+\texttt{http://localhost:4200}.
+
+\subsection{Profil Spring \texttt{docker}}
+
+Un fichier \texttt{application-docker.properties} adapte la configuration
+lorsque \texttt{SPRING\_PROFILES\_ACTIVE=docker}~:
+\begin{itemize}
+  \item URL Eureka~: \texttt{http://host.docker.internal:8761/eureka}
+        (accès au registre depuis un conteneur sur Docker Desktop)~;
+  \item URL JDBC MySQL pointant vers \texttt{host.docker.internal:3306}
+        pour les services \texttt{USER}, \texttt{RECRUITMENT} et
+        \texttt{RECLAMATION}.
+\end{itemize}
+
+\subsection{Images produites}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Images Docker Hub de la plateforme DAAM}
+  \label{tab:docker-images}
+  \begin{tabular}{|l|l|c|}
+    \hline
+    \textbf{Service} & \textbf{Image} & \textbf{Port conteneur} \\
+    \hline
+    Eureka & \texttt{lfray/daam-eureka} & 8761 \\
+    Gateway & \texttt{lfray/daam-gateway} & 8080 \\
+    User & \texttt{lfray/daam-user} & 8089 \\
+    Recruitment & \texttt{lfray/daam-recruitment} & 8090 \\
+    Reclamation & \texttt{lfray/daam-reclamation} & 8091 \\
+    Frontend & \texttt{lfray/daam-frontend} & 80 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+La Gateway est exposée sur le port hôte \textbf{8088} (mapping
+\texttt{8088:8080}) afin d'éviter le conflit avec Jenkins, déjà écouté sur
+le port~8080. Le frontend est exposé sur le port hôte \textbf{4200}
+(mapping \texttt{4200:80}).
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/devops-docker-containers.png}
+  \caption{Docker Desktop --- conteneurs de la plateforme DAAM
+           (Jenkins, SonarQube et microservices déployés)}
+  \label{fig:devops-docker-containers}
+\end{figure}
+
+
+\section{Intégration continue avec Jenkins}
+
+\subsection{Organisation des pipelines}
+
+Pour chaque microservice, deux jobs Pipeline sont définis~:
+\begin{itemize}
+  \item \textbf{CI} (\texttt{ci-<service>})~: qualité + construction +
+        publication~;
+  \item \textbf{CD} (\texttt{cd-<service>})~: récupération de l'image et
+        démarrage du conteneur.
+\end{itemize}
+
+Les scripts sont versionnés dans le dépôt, par exemple~:
+\texttt{devops/pipelines/ci-eureka.Jenkinsfile} et
+\texttt{cd-eureka.Jenkinsfile}. Jenkins est configuré en mode
+\emph{Pipeline script from SCM} (branche \texttt{master}, clone peu
+profond).
+
+\subsection{Étapes du pipeline CI}
+
+Le pipeline CI suit le déroulé suivant~:
+\begin{enumerate}
+  \item \textbf{Checkout} GitHub (authentification par jeton)~;
+  \item \textbf{Build}~: \emph{Maven clean package} (backend) ou
+        \emph{npm ci / ng build} (frontend), exécuté dans un conteneur~;
+  \item \textbf{SonarQube} via \texttt{sonar-scanner-cli}~;
+  \item \textbf{Quality Gate} (\texttt{waitForQualityGate})~;
+  \item \textbf{Docker build} du composant~;
+  \item \textbf{Docker push} vers Docker Hub
+        (\texttt{lfray/daam-<composant>:latest}).
+\end{enumerate}
+
+Maven et Sonar s'exécutent eux-mêmes dans Docker afin d'éviter
+l'installation de JDK/Maven dans l'agent Jenkins. Le volume nommé
+\texttt{jenkins\_home} est monté explicitement, car un simple
+\texttt{-v \$PWD:/app} est incorrect lorsque Jenkins tourne déjà dans un
+conteneur (problème classique \emph{Docker-from-Docker} sous Docker
+Desktop).
+
+\subsection{Étapes du pipeline CD}
+
+Le pipeline CD est volontairement simple~:
+\begin{enumerate}
+  \item connexion Docker Hub~;
+  \item \texttt{docker pull} de l'image publiée par le CI~;
+  \item \texttt{docker rm -f} de l'ancien conteneur (s'il existe)~;
+  \item \texttt{docker run -d} avec le profil \texttt{docker} et le
+        mapping de ports~;
+  \item déconnexion Docker Hub.
+\end{enumerate}
+
+\subsection{Ordre de déploiement recommandé}
+
+\begin{enumerate}
+  \item CI puis CD d'\textbf{Eureka} (registre)~;
+  \item CI puis CD de la \textbf{Gateway} et des microservices métier
+        (\texttt{USER}, \texttt{RECRUITMENT}, \texttt{RECLAMATION}), une
+        fois Eureka disponible~;
+  \item CI puis CD du \textbf{frontend} (après Gateway, pour que l'API
+        soit joignable)~;
+  \item MySQL doit être accessible sur l'hôte (\texttt{localhost:3306})
+        pour les services persistants.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/devops-jenkins-pipelines.png}
+  \caption{Jenkins --- vue d'ensemble des pipelines CI/CD des microservices DAAM}
+  \label{fig:devops-jenkins-pipelines}
+\end{figure}
+
+
+\section{Contrôle qualité avec SonarQube}
+
+Chaque analyse CI crée (ou met à jour) un projet Sonar dédié
+(\texttt{daam-eureka}, \texttt{daam-gateway}, \texttt{daam-frontend},
+etc.). Le scanner analyse les sources Java (backend) ou TypeScript /
+HTML (frontend). Le Quality Gate \emph{Sonar way} doit être
+\textbf{Passed} avant d'autoriser le build et le push Docker.
+
+Jenkins communique avec SonarQube via l'URL
+\texttt{http://host.docker.internal:9000}. Un \textbf{webhook} Sonar
+vers Jenkins
+(\texttt{http://host.docker.internal:8080/sonarqube-webhook/})
+permet au stage \texttt{waitForQualityGate} de se débloquer dès que
+l'analyse serveur est terminée.
+
+\begin{figure}[H]
+  \centering
+  \reportfig{img/devops-sonar-projects.png}
+  \caption{SonarQube --- projets DAAM et résultats du Quality Gate}
+  \label{fig:devops-sonar-projects}
+\end{figure}
+
+
+\section{Environnement technique retenu}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Stack DevOps utilisée pour DAAM}
+  \label{tab:devops-stack}
+  \begin{tabular}{|l|p{8.5cm}|}
+    \hline
+    \textbf{Composant} & \textbf{Rôle} \\
+    \hline
+    GitHub & Gestion de versions et SCM des pipelines \\
+    Docker Desktop & Moteur de conteneurs (hôte Windows) \\
+    Jenkins (conteneur) & Orchestration CI/CD \\
+    SonarQube (conteneur) & Analyse statique et Quality Gate \\
+    Docker Hub & Registre d'images (\texttt{lfray}) \\
+    Maven 3.9 / JDK 17 & Compilation des microservices Java \\
+    Node.js 20 / Angular 18 & Build du frontend \\
+    nginx & Serveur web des fichiers Angular (image frontend) \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\section{Apports et limites}
+
+\subsection{Apports}
+\begin{itemize}
+  \item reproductibilité des builds (même Dockerfile, mêmes images)~;
+  \item détection précoce des défauts via SonarQube~;
+  \item déploiement homogène service par service~;
+  \item séparation claire CI (qualité + artefact) / CD (exécution).
+\end{itemize}
+
+\subsection{Limites actuelles}
+\begin{itemize}
+  \item pas encore de \texttt{docker-compose} unifié pour démarrer
+        toute la stack d'un seul ordre (déploiement job par job)~;
+  \item MySQL reste installé sur l'hôte (hors conteneur CI/CD)~;
+  \item couverture de tests encore faible (visible dans SonarQube).
+\end{itemize}
+
+
+\section{Conclusion}
+
+Ce chapitre a présenté la mise en place d'une chaîne DevOps adaptée à
+l'architecture de DAAM~: conteneurisation Docker, pipelines Jenkins CI/CD
+par composant (microservices \textbf{et} frontend Angular) et contrôle
+qualité SonarQube. L'ensemble peut ainsi être construit, analysé, publié
+puis déployé de façon reproductible.
+
+La \textbf{conclusion générale} du rapport synthétise l'ensemble du
+projet (besoins, conception, sprints et industrialisation) et ouvre
+quelques perspectives d'évolution.
+
+\clearpage
