@@ -26,6 +26,11 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+        // Maven/Sonar Docker may leave root-owned files; fix so git clean works
+        sh '''
+          docker run --rm -v jenkins_home:/var/jenkins_home alpine \
+            sh -c "chown -R 1000:1000 \"$PWD\" 2>/dev/null || true"
+        '''
         checkout([
           $class: 'GitSCM',
           branches: scm.branches,
@@ -40,11 +45,13 @@ pipeline {
 
     stage('Maven clean package') {
       steps {
-        // Mount jenkins_home volume (sibling containers cannot see $PWD via bind mount)
+        // uid 1000 = jenkins user — avoids root-owned target/ next checkout
         sh """
           docker run --rm \
+            -u 1000:1000 \
+            -e HOME=/tmp \
             -v jenkins_home:/var/jenkins_home \
-            -v maven-repo:/root/.m2 \
+            -v maven-repo:/tmp/.m2 \
             -w "\$PWD" \
             ${MAVEN_IMAGE} \
             mvn -B -f backend/eureka/pom.xml clean package -DskipTests
@@ -71,6 +78,10 @@ pipeline {
               -Dsonar.sourceEncoding=UTF-8 \
               -Dsonar.working.directory="\$PWD/.scannerwork"
           """
+          sh '''
+            docker run --rm -v jenkins_home:/var/jenkins_home alpine \
+              sh -c "chown -R 1000:1000 \"$PWD/.scannerwork\" \"$PWD/.sonar\" 2>/dev/null || true"
+          '''
         }
       }
     }
