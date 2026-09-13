@@ -1,4 +1,6 @@
-# Eureka DevOps (only)
+# Eureka DevOps
+
+See also `devops/SERVICES.md` for gateway, user, recruitment, reclamation.
 
 ## Files
 - `backend/eureka/Dockerfile`
