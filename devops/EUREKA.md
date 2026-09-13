@@ -19,3 +19,6 @@
 
 ## Image
 `lfray/daam-eureka:latest`
+
+## Note (Docker Desktop + Jenkins container)
+Maven/Sonar stages mount volume `jenkins_home:/var/jenkins_home` (not `-v $PWD:/app`), otherwise sibling containers see an empty workspace.

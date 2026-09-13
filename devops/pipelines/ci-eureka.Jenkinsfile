@@ -40,11 +40,12 @@ pipeline {
 
     stage('Maven clean package') {
       steps {
+        // Mount jenkins_home volume (sibling containers cannot see $PWD via bind mount)
         sh """
           docker run --rm \
-            -v "\$PWD":/app \
+            -v jenkins_home:/var/jenkins_home \
             -v maven-repo:/root/.m2 \
-            -w /app \
+            -w "\$PWD" \
             ${MAVEN_IMAGE} \
             mvn -B -f backend/eureka/pom.xml clean package -DskipTests
         """
@@ -56,8 +57,8 @@ pipeline {
         withSonarQubeEnv('SonarQube') {
           sh """
             docker run --rm --add-host=host.docker.internal:host-gateway \
-              -v "\$PWD":/usr/src \
-              -w /usr/src \
+              -v jenkins_home:/var/jenkins_home \
+              -w "\$PWD" \
               -e SONAR_HOST_URL="\$SONAR_HOST_URL" \
               -e SONAR_TOKEN="\$SONAR_AUTH_TOKEN" \
               sonarsource/sonar-scanner-cli:11 \
