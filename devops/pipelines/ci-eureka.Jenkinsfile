@@ -55,18 +55,21 @@ pipeline {
     stage('SonarQube') {
       steps {
         withSonarQubeEnv('SonarQube') {
+          // Keep .scannerwork in workspace so Jenkins finds report-task.txt for Quality Gate
           sh """
             docker run --rm --add-host=host.docker.internal:host-gateway \
               -v jenkins_home:/var/jenkins_home \
               -w "\$PWD" \
               -e SONAR_HOST_URL="\$SONAR_HOST_URL" \
               -e SONAR_TOKEN="\$SONAR_AUTH_TOKEN" \
+              -e SONAR_USER_HOME="\$PWD/.sonar" \
               sonarsource/sonar-scanner-cli:11 \
               -Dsonar.projectKey=daam-eureka \
               -Dsonar.projectName=DAAM-eureka \
               -Dsonar.sources=backend/eureka/src/main/java \
               -Dsonar.java.binaries=backend/eureka/target/classes \
-              -Dsonar.sourceEncoding=UTF-8
+              -Dsonar.sourceEncoding=UTF-8 \
+              -Dsonar.working.directory="\$PWD/.scannerwork"
           """
         }
       }
